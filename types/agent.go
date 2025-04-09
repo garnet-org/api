@@ -159,7 +159,8 @@ type Agent struct {
 
 // CreateAgent represents the request to create a new agent.
 type CreateAgent struct {
-	ProjectID string      `json:"project_id"`
+	// projectID is populated by decoding the JWT token.
+	projectID string
 	OS        string      `json:"os"`
 	Arch      string      `json:"arch"`
 	Hostname  string      `json:"hostname"`
@@ -172,6 +173,14 @@ type CreateAgent struct {
 	GithubContext     *AgentGithubContext     `json:"github_context,omitempty"`
 	KubernetesContext *AgentKubernetesContext `json:"kubernetes_context,omitempty"`
 	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
+}
+
+func (c *CreateAgent) SetProjectID(projectID string) {
+	c.projectID = projectID
+}
+
+func (c *CreateAgent) ProjectID() string {
+	return c.projectID
 }
 
 const (

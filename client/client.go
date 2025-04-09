@@ -36,6 +36,10 @@ func New(baseURL, token string) *Client {
 		AuthToken:  token,
 	}
 
+	if client.BaseURL == "" {
+		client.BaseURL = "https://api.garnet.ai"
+	}
+
 	// If a token is provided, assume it's a user token
 	if token != "" {
 		client.TokenType = TokenTypeUser
