@@ -8,79 +8,190 @@ import (
 )
 
 const (
+	// ErrInvalidEventKind is returned when the event kind is invalid.
 	ErrInvalidEventKind = errs.InvalidArgumentError("invalid event kind")
-	ErrIDcannotBeEmpty  = errs.InvalidArgumentError("id is required")
+
+	// ErrIDcannotBeEmpty is returned when the event ID is empty.
+	ErrIDcannotBeEmpty = errs.InvalidArgumentError("id is required")
 )
 
+// EventKind represents the type of event.
 type EventKind string
 
 const (
-	// Network Flow Events.
-	EventKindDropIP     EventKind = "drop_ip"
-	EventKindDropDomain EventKind = "drop_domain"
-	EventKindFlow       EventKind = "flow"
+	// EventKindDropIP is used for IP drop events.
+	EventKindDropIP EventKind = "dropip"
 
-	// File Access Detection Events.
-	EventKindCapabilitiesModification      EventKind = "capabilities_modification"
+	// EventKindDropDomain is used for domain drop events.
+	EventKindDropDomain EventKind = "dropdomain"
+
+	// EventKindFlow is used for network flow events.
+	EventKindFlow EventKind = "flow"
+
+	// EventKindCapabilitiesModification indicates a modification of Linux capabilities.
+	EventKindCapabilitiesModification EventKind = "capabilities_modification"
+
+	// EventKindCodeModificationThroughProcfs indicates code was modified through /proc filesystem.
 	EventKindCodeModificationThroughProcfs EventKind = "code_modification_through_procfs"
-	EventKindCorePatternAccess             EventKind = "core_pattern_access"
-	EventKindCPUFingerprint                EventKind = "cpu_fingerprint"
-	EventKindCredentialsFilesAccess        EventKind = "credentials_files_access"
-	EventKindFilesystemFingerprint         EventKind = "filesystem_fingerprint"
-	EventKindJavaDebugLibLoad              EventKind = "java_debug_lib_load"
-	EventKindJavaInstrumentLibLoad         EventKind = "java_instrument_lib_load"
-	EventKindMachineFingerprint            EventKind = "machine_fingerprint"
-	EventKindOSFingerprint                 EventKind = "os_fingerprint"
-	EventKindOSNetworkFingerprint          EventKind = "os_network_fingerprint"
-	EventKindOSStatusFingerprint           EventKind = "os_status_fingerprint"
+
+	// EventKindCorePatternAccess indicates access to the core pattern configuration.
+	EventKindCorePatternAccess EventKind = "core_pattern_access"
+
+	// EventKindCPUFingerprint indicates fingerprinting of CPU characteristics.
+	EventKindCPUFingerprint EventKind = "cpu_fingerprint"
+
+	// EventKindCredentialsFilesAccess indicates access to credential-related files.
+	EventKindCredentialsFilesAccess EventKind = "credentials_files_access"
+
+	// EventKindFilesystemFingerprint indicates fingerprinting of the filesystem.
+	EventKindFilesystemFingerprint EventKind = "filesystem_fingerprint"
+
+	// EventKindJavaDebugLibLoad indicates a Java debug library was loaded.
+	EventKindJavaDebugLibLoad EventKind = "java_debug_lib_load"
+
+	// EventKindJavaInstrumentLibLoad indicates a Java instrumentation library was loaded.
+	EventKindJavaInstrumentLibLoad EventKind = "java_instrument_lib_load"
+
+	// EventKindMachineFingerprint indicates fingerprinting of the machine.
+	EventKindMachineFingerprint EventKind = "machine_fingerprint"
+
+	// EventKindOSFingerprint indicates fingerprinting of the operating system.
+	EventKindOSFingerprint EventKind = "os_fingerprint"
+
+	// EventKindOSNetworkFingerprint indicates network-level fingerprinting of the OS.
+	EventKindOSNetworkFingerprint EventKind = "os_network_fingerprint"
+
+	// EventKindOSStatusFingerprint indicates OS status-based fingerprinting.
+	EventKindOSStatusFingerprint EventKind = "os_status_fingerprint"
+
+	// EventKindPackageRepoConfigModification indicates modification of package repository config.
 	EventKindPackageRepoConfigModification EventKind = "package_repo_config_modification"
-	EventKindPAMConfigModification         EventKind = "pam_config_modification"
-	EventKindSchedDebugAccess              EventKind = "sched_debug_access"
-	EventKindShellConfigModification       EventKind = "shell_config_modification"
-	EventKindSSLCertificateAccess          EventKind = "ssl_certificate_access"
-	EventKindSudoersModification           EventKind = "sudoers_modification"
-	EventKindSysrqAccess                   EventKind = "sysrq_access"
-	EventKindUnprivilegedBPFConfigAccess   EventKind = "unprivileged_bpf_config_access"
-	EventKindGlobalShlibModification       EventKind = "global_shlib_modification"
-	EventKindEnvironReadFromProcfs         EventKind = "environ_read_from_procfs"
-	EventKindBinarySelfDeletion            EventKind = "binary_self_deletion"
-	EventKindCryptoMinerFiles              EventKind = "crypto_miner_files"
-	EventKindAuthLogsTamper                EventKind = "auth_logs_tamper"
 
-	// Execution Detection Events.
+	// EventKindPAMConfigModification indicates modification of PAM configuration files.
+	EventKindPAMConfigModification EventKind = "pam_config_modification"
+
+	// EventKindSchedDebugAccess indicates access to scheduling debug information.
+	EventKindSchedDebugAccess EventKind = "sched_debug_access"
+
+	// EventKindShellConfigModification indicates modification of shell configuration files.
+	EventKindShellConfigModification EventKind = "shell_config_modification"
+
+	// EventKindSSLCertificateAccess indicates access to SSL certificates.
+	EventKindSSLCertificateAccess EventKind = "ssl_certificate_access"
+
+	// EventKindSudoersModification indicates unauthorized modification of sudoers file.
+	EventKindSudoersModification EventKind = "sudoers_modification"
+
+	// EventKindSysrqAccess indicates access to SysRq trigger interface.
+	EventKindSysrqAccess EventKind = "sysrq_access"
+
+	// EventKindUnprivilegedBPFConfigAccess indicates access to BPF config by an unprivileged user.
+	EventKindUnprivilegedBPFConfigAccess EventKind = "unprivileged_bpf_config_access"
+
+	// EventKindGlobalShlibModification indicates global shared library was modified.
+	EventKindGlobalShlibModification EventKind = "global_shlib_modification"
+
+	// EventKindEnvironReadFromProcfs indicates environment variables were read from procfs.
+	EventKindEnvironReadFromProcfs EventKind = "environ_read_from_procfs"
+
+	// EventKindBinarySelfDeletion indicates a binary deleted itself post-execution.
+	EventKindBinarySelfDeletion EventKind = "binary_self_deletion"
+
+	// EventKindCryptoMinerFiles indicates files related to crypto miners were detected.
+	EventKindCryptoMinerFiles EventKind = "crypto_miner_files"
+
+	// EventKindAuthLogsTamper indicates tampering with authentication logs.
+	EventKindAuthLogsTamper EventKind = "auth_logs_tamper"
+
+	// EventKindBinaryExecutedByLoader indicates a binary was executed by a custom loader.
 	EventKindBinaryExecutedByLoader EventKind = "binary_executed_by_loader"
-	EventKindCodeOnTheFly           EventKind = "code_on_the_fly"
-	EventKindDataEncoderExec        EventKind = "data_encoder_exec"
-	EventKindDenialOfServiceTools   EventKind = "denial_of_service_tools"
-	EventKindExecFromUnusualDir     EventKind = "exec_from_unusual_dir"
-	EventKindFileAttributeChange    EventKind = "file_attribute_change"
-	EventKindHiddenELFExec          EventKind = "hidden_elf_exec"
-	EventKindInterpreterShellSpawn  EventKind = "interpreter_shell_spawn"
-	EventKindNetFilecopyToolExec    EventKind = "net_filecopy_tool_exec"
-	EventKindNetMITMToolExec        EventKind = "net_mitm_tool_exec"
-	EventKindNetScanToolExec        EventKind = "net_scan_tool_exec"
-	EventKindNetSniffToolExec       EventKind = "net_sniff_tool_exec"
-	EventKindNetSuspiciousToolExec  EventKind = "net_suspicious_tool_exec"
-	EventKindNetSuspiciousToolShell EventKind = "net_suspicious_tool_shell"
-	EventKindPasswdUsage            EventKind = "passwd_usage"
-	EventKindRuncSuspiciousExec     EventKind = "runc_suspicious_exec"
-	EventKindWebserverExec          EventKind = "webserver_exec"
-	EventKindWebserverShellExec     EventKind = "webserver_shell_exec"
-	EventKindCryptoMinerExecution   EventKind = "crypto_miner_execution"
 
-	// Network Peer Detection Events.
-	EventKindAdultDomainAccess      EventKind = "adult_domain_access"
-	EventKindBadwareDomainAccess    EventKind = "badware_domain_access"
-	EventKindDynDNSDomainAccess     EventKind = "dyndns_domain_access"
-	EventKindFakeDomainAccess       EventKind = "fake_domain_access"
-	EventKindGamblingDomainAccess   EventKind = "gambling_domain_access"
-	EventKindPiracyDomainAccess     EventKind = "piracy_domain_access"
+	// EventKindCodeOnTheFly indicates dynamic or just-in-time code execution.
+	EventKindCodeOnTheFly EventKind = "code_on_the_fly"
+
+	// EventKindDataEncoderExec indicates execution of a data encoder binary.
+	EventKindDataEncoderExec EventKind = "data_encoder_exec"
+
+	// EventKindDenialOfServiceTools indicates use of DoS tools.
+	EventKindDenialOfServiceTools EventKind = "denial_of_service_tools"
+
+	// EventKindExecFromUnusualDir indicates execution from an unusual directory.
+	EventKindExecFromUnusualDir EventKind = "exec_from_unusual_dir"
+
+	// EventKindFileAttributeChange indicates unauthorized file attribute changes.
+	EventKindFileAttributeChange EventKind = "file_attribute_change"
+
+	// EventKindHiddenELFExec indicates execution of a hidden ELF binary.
+	EventKindHiddenELFExec EventKind = "hidden_elf_exec"
+
+	// EventKindInterpreterShellSpawn indicates spawning of a shell through an interpreter.
+	EventKindInterpreterShellSpawn EventKind = "interpreter_shell_spawn"
+
+	// EventKindNetFilecopyToolExec indicates execution of a network file copy tool.
+	EventKindNetFilecopyToolExec EventKind = "net_filecopy_tool_exec"
+
+	// EventKindNetMITMToolExec indicates execution of a man-in-the-middle tool.
+	EventKindNetMITMToolExec EventKind = "net_mitm_tool_exec"
+
+	// EventKindNetScanToolExec indicates execution of a network scanning tool.
+	EventKindNetScanToolExec EventKind = "net_scan_tool_exec"
+
+	// EventKindNetSniffToolExec indicates execution of a network sniffing tool.
+	EventKindNetSniffToolExec EventKind = "net_sniff_tool_exec"
+
+	// EventKindNetSuspiciousToolExec indicates execution of a suspicious network tool.
+	EventKindNetSuspiciousToolExec EventKind = "net_suspicious_tool_exec"
+
+	// EventKindNetSuspiciousToolShell indicates a suspicious network tool started a shell.
+	EventKindNetSuspiciousToolShell EventKind = "net_suspicious_tool_shell"
+
+	// EventKindPasswdUsage indicates suspicious use of the passwd binary.
+	EventKindPasswdUsage EventKind = "passwd_usage"
+
+	// EventKindRuncSuspiciousExec indicates suspicious execution within runc.
+	EventKindRuncSuspiciousExec EventKind = "runc_suspicious_exec"
+
+	// EventKindWebserverExec indicates execution of a binary via a webserver.
+	EventKindWebserverExec EventKind = "webserver_exec"
+
+	// EventKindWebserverShellExec indicates a shell was spawned by a webserver.
+	EventKindWebserverShellExec EventKind = "webserver_shell_exec"
+
+	// EventKindCryptoMinerExecution indicates a crypto miner was executed.
+	EventKindCryptoMinerExecution EventKind = "crypto_miner_execution"
+
+	// EventKindAdultDomainAccess indicates access to an adult content domain.
+	EventKindAdultDomainAccess EventKind = "adult_domain_access"
+
+	// EventKindBadwareDomainAccess indicates access to a known malicious domain.
+	EventKindBadwareDomainAccess EventKind = "badware_domain_access"
+
+	// EventKindDynDNSDomainAccess indicates access to a dynamic DNS domain.
+	EventKindDynDNSDomainAccess EventKind = "dyndns_domain_access"
+
+	// EventKindFakeDomainAccess indicates access to a fake or impersonating domain.
+	EventKindFakeDomainAccess EventKind = "fake_domain_access"
+
+	// EventKindGamblingDomainAccess indicates access to a gambling-related domain.
+	EventKindGamblingDomainAccess EventKind = "gambling_domain_access"
+
+	// EventKindPiracyDomainAccess indicates access to a piracy-related domain.
+	EventKindPiracyDomainAccess EventKind = "piracy_domain_access"
+
+	// EventKindPlaintextCommunication indicates unencrypted/plaintext network communication.
 	EventKindPlaintextCommunication EventKind = "plaintext_communication"
-	EventKindThreatDomainAccess     EventKind = "threat_domain_access"
-	EventKindTrackingDomainAccess   EventKind = "tracking_domain_access"
-	EventKindVPNLikeDomainAccess    EventKind = "vpnlike_domain_access"
+
+	// EventKindThreatDomainAccess indicates access to a threat-related domain.
+	EventKindThreatDomainAccess EventKind = "threat_domain_access"
+
+	// EventKindTrackingDomainAccess indicates access to a tracking or analytics domain.
+	EventKindTrackingDomainAccess EventKind = "tracking_domain_access"
+
+	// EventKindVPNLikeDomainAccess indicates access to a domain resembling a VPN or proxy.
+	EventKindVPNLikeDomainAccess EventKind = "vpnlike_domain_access"
 )
 
+// OK checks if the EventKind is valid.
 func (k EventKind) OK() bool {
 	for _, allowed := range [...]EventKind{
 		EventKindDropIP,
@@ -149,6 +260,7 @@ func (k EventKind) OK() bool {
 	return false
 }
 
+// Validate checks if the CreateOrUpdateEvent is valid.
 func (e *CreateOrUpdateEvent) Validate() error {
 	if e.ID == "" {
 		return ErrIDcannotBeEmpty
@@ -161,6 +273,7 @@ func (e *CreateOrUpdateEvent) Validate() error {
 	return nil
 }
 
+// Validate checks if the Event is valid.
 func (e *Event) Validate() error {
 	if e.ID == "" {
 		return ErrIDcannotBeEmpty
@@ -176,12 +289,23 @@ func (e *Event) Validate() error {
 // CreateOrUpdateEvent is used for creating or updating events.
 // It includes the agent ID but doesn't return the full agent details.
 type CreateOrUpdateEvent struct {
-	ID        string    `json:"id"`
-	AgentID   string    `json:"-"` // Internal field, not exposed in JSON
+	ID string `json:"id"`
+	// agentID is populated decoding JWT token.
+	agentID   string    `json:"-"`
 	Data      EventData `json:"data"`
 	Kind      EventKind `json:"kind"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// AgentID returns the ID of the agent that created or updated the event.
+func (e CreateOrUpdateEvent) AgentID() string {
+	return e.agentID
+}
+
+// SetAgentID sets the ID of the agent that created or updated the event.
+func (e *CreateOrUpdateEvent) SetAgentID(agentID string) {
+	e.agentID = agentID
 }
 
 // Event is something that happened in the system.
@@ -195,16 +319,33 @@ type Event struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// EventData is the data associated with an event.
 type EventData struct {
+	// Fields for the regular structure
 	Dropped     *DroppedIP `json:"dropped,omitempty"`
 	Flow        *Flow      `json:"flow,omitempty"`
 	FullInfo    *FullInfo  `json:"full_info,omitempty"`
 	Parent      *Process   `json:"parent,omitempty"`
 	Process     *Process   `json:"process,omitempty"`
-	Resolve     *string    `json:"resolve"`
+	Resolve     *string    `json:"resolve,omitempty"`
 	ResolveFlow *Flow      `json:"resolve_flow,omitempty"`
 	Note        *string    `json:"note,omitempty"`
 	Head        *EventHead `json:"head,omitempty"`
+
+	// Fields for the new nested structure
+	Body *EventBody `json:"body,omitempty"`
+
+	// For timestamp in new format
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+	UniqueID *string `json:"unique_id,omitempty"`
+}
+
+// EventBody represents the nested body structure in the new format.
+type EventBody struct {
+	Dropped  *DroppedIP `json:"dropped,omitempty"`
+	FullInfo *FullInfo  `json:"full_info,omitempty"`
+	Parent   *Process   `json:"parent,omitempty"`
+	Process  *Process   `json:"process,omitempty"`
 }
 
 // EventHead represents the metadata for an event.
@@ -220,22 +361,26 @@ type EventHead struct {
 	Importance    string `json:"importance"`
 }
 
+// DroppedIP represents an IP drop event.
 type DroppedIP struct {
-	Icmp        ICMP        `json:"icmp,omitempty"`
+	Icmp        *ICMP       `json:"icmp,omitempty"`
 	IPVersion   *int        `json:"ip_version,omitempty"`
 	Local       *Node       `json:"local,omitempty"`
 	Properties  *Properties `json:"properties,omitempty"`
 	Proto       *string     `json:"proto,omitempty"`
 	Remote      *Node       `json:"remote,omitempty"`
 	ServicePort *int        `json:"service_port,omitempty"`
+	Settings    *Settings   `json:"settings,omitempty"`
 }
 
+// FullInfo represents the full information of an event.
 type FullInfo struct {
 	Ancestry *[]Process                         `json:"ancestry,omitempty"`
 	Files    *map[string]map[string]interface{} `json:"files,omitempty"`
 	Flows    *[]FlowSimple                      `json:"flows,omitempty"`
 }
 
+// FlowSimple represents a network flow event.
 type FlowSimple struct {
 	Icmp        *ICMP     `json:"icmp,omitempty"`
 	IPVersion   *int      `json:"ip_version,omitempty"`
@@ -246,11 +391,13 @@ type FlowSimple struct {
 	Settings    *Settings `json:"settings,omitempty"`
 }
 
+// Flow represents a network flow event with additional properties.
 type Flow struct {
 	FlowSimple
 	Properties *Properties `json:"properties,omitempty"`
 }
 
+// Properties represents the properties of a flow.
 type Properties struct {
 	Egress     *bool `json:"egress,omitempty"`
 	Ended      *bool `json:"ended,omitempty"`
@@ -263,6 +410,7 @@ type Properties struct {
 	Terminator *bool `json:"terminator,omitempty"`
 }
 
+// Settings represents the settings for a flow.
 type Settings struct {
 	Direction   *string `json:"direction,omitempty"`
 	EndedBy     *string `json:"ended_by,omitempty"`
@@ -270,6 +418,7 @@ type Settings struct {
 	Status      *string `json:"status,omitempty"`
 }
 
+// Node represents a network node.
 type Node struct {
 	Address *string   `json:"address,omitempty"`
 	Name    *string   `json:"name,omitempty"`
@@ -277,26 +426,28 @@ type Node struct {
 	Port    *int      `json:"port,omitempty"`
 }
 
+// ICMP represents the Internet Control Message Protocol (ICMP) settings.
 type ICMP struct {
 	Code *string `json:"code,omitempty"`
 	Type *string `json:"type,omitempty"`
 }
 
+// Process represents the process information associated with an event.
 type Process struct {
-	Args       *string `json:"args,omitempty"`
-	Cmd        *string `json:"cmd,omitempty"`
-	Comm       *string `json:"comm,omitempty"`
-	Exe        *string `json:"exe,omitempty"`
-	Exit       *string `json:"exit,omitempty"`
-	Loader     *string `json:"loader,omitempty"`
-	PID        *int    `json:"pid,omitempty"`
-	PpID       *int    `json:"ppid,omitempty"`
-	PrevArgs   *string `json:"prev_args,omitempty"`
-	PrevExe    *string `json:"prev_exe,omitempty"`
-	PrevLoader *string `json:"prev_loader,omitempty"`
-	Retcode    *int    `json:"retcode,omitempty"`
-	Start      *string `json:"start,omitempty"`
-	UID        *int    `json:"uid,omitempty"`
+	Args       *string    `json:"args,omitempty"`
+	Cmd        *string    `json:"cmd,omitempty"`
+	Comm       *string    `json:"comm,omitempty"`
+	Exe        *string    `json:"exe,omitempty"`
+	Exit       *string    `json:"exit,omitempty"`
+	Loader     *string    `json:"loader,omitempty"`
+	PID        *int       `json:"pid,omitempty"`
+	PpID       *int       `json:"ppid,omitempty"`
+	PrevArgs   *string    `json:"prev_args,omitempty"`
+	PrevExe    *string    `json:"prev_exe,omitempty"`
+	PrevLoader *string    `json:"prev_loader,omitempty"`
+	Retcode    *int       `json:"retcode,omitempty"`
+	Start      *time.Time `json:"start,omitempty"`
+	UID        *int       `json:"uid,omitempty"`
 }
 
 // EventCreatedOrUpdated represents the response when an event is successfully created or updated.
@@ -304,4 +455,10 @@ type EventCreatedOrUpdated struct {
 	ID        string    `json:"id"`
 	Created   bool      `json:"created"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// EventWrapper is a wrapper struct for unmarshaling events in the new format.
+type EventWrapper struct {
+	Data EventData `json:"data"`
+	Type string    `json:"type"`
 }

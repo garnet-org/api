@@ -7,6 +7,7 @@ import (
 	"github.com/garnet-org/api/types"
 )
 
+// IngestEvent creates or updates an event.
 func (c *Client) IngestEvent(ctx context.Context, event types.CreateOrUpdateEvent) (types.EventCreatedOrUpdated, error) {
 	var out types.EventCreatedOrUpdated
 

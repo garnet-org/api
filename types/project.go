@@ -7,10 +7,17 @@ import (
 )
 
 const (
+	// ErrUnauthorizedProject is returned when a user does not have permission to access a project.
 	ErrUnauthorizedProject = errs.UnauthorizedError("permission denied")
-	ErrInvalidProjectName  = errs.InvalidArgumentError("invalid project name")
-	ErrProjectExists       = errs.ConflictError("project with this name already exists in this organization")
-	MaxProjectNameLength   = 128
+
+	// ErrInvalidProjectName is returned when the project name is invalid.
+	ErrInvalidProjectName = errs.InvalidArgumentError("invalid project name")
+
+	// ErrProjectExists is returned when a project with the same name already exists in the organization.
+	ErrProjectExists = errs.ConflictError("project with this name already exists in this organization")
+
+	// MaxProjectNameLength is the maximum length for a project name.
+	MaxProjectNameLength = 128
 )
 
 // Project represents a project in the system.
@@ -29,6 +36,7 @@ type CreateProject struct {
 	Description *string `json:"description,omitempty"`
 }
 
+// Validate checks if the CreateProject fields are valid.
 func (c *CreateProject) Validate() error {
 	if c.Name == "" {
 		return ErrInvalidProjectName
@@ -54,6 +62,7 @@ type UpdateProject struct {
 	Description *string `json:"description,omitempty"`
 }
 
+// Validate checks if the UpdateProject fields are valid.
 func (u *UpdateProject) Validate() error {
 	if u.Name == nil && u.Description == nil {
 		return errs.ErrInvalidArgument

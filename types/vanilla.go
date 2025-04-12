@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// AgentVanillaContext represents the context of a vanilla agent (plain linux for example).
 type AgentVanillaContext struct {
 	ID        string    `json:"id"`
 	Job       string    `json:"job"`
@@ -13,6 +14,7 @@ type AgentVanillaContext struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// Validate checks if the AgentVanillaContext has all required fields set.
 func (v *AgentVanillaContext) Validate() error {
 	var errs []string
 

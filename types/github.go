@@ -37,6 +37,7 @@ type AgentGithubContext struct {
 	UpdateAt          time.Time `json:"updated_at"`
 }
 
+// Validate checks if the AgentGithubContext has all required fields set.
 func (g *AgentGithubContext) Validate() error {
 	var errs []string
 

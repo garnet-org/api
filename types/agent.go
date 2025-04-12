@@ -11,21 +11,32 @@ import (
 	"github.com/garnet-org/api/types/errs"
 )
 
+// AgentKind represents the type of agent.
 type AgentKind string
 
 const (
-	AgentKindGithub     AgentKind = "github"
-	AgentKindKubernetes AgentKind = "kubernetes"
-	AgentKindVanilla    AgentKind = "vanilla"
+	// AgentKindGithub represents a GitHub agent.
+	AgentKindGithub AgentKind = "github"
 
+	// AgentKindKubernetes represents a Kubernetes agent.
+	AgentKindKubernetes AgentKind = "kubernetes"
+
+	// AgentKindVanilla represents a vanilla agent.
+	AgentKindVanilla AgentKind = "vanilla"
+
+	// ErrUnauthorizedAgent is returned when the user does not have permission to access the agent.
 	ErrUnauthorizedAgent = errs.UnauthorizedError("permission denied")
-	ErrAgentNotFound     = errs.NotFoundError("agent not found")
+
+	// ErrAgentNotFound is returned when the agent is not found.
+	ErrAgentNotFound = errs.NotFoundError("agent not found")
 )
 
+// String returns the string representation of the AgentKind.
 func (k AgentKind) String() string {
 	return string(k)
 }
 
+// IsValid checks if the AgentKind is valid.
 func (k AgentKind) IsValid() bool {
 	switch k {
 	case AgentKindGithub, AgentKindKubernetes, AgentKindVanilla:
@@ -79,7 +90,7 @@ func (l AgentLabels) Validate() error {
 	return ValidateLabels(map[string]string(l))
 }
 
-// The format is: label.key=value (e.g., label.environment=production).
+// Encode encodes the AgentLabels into URL query parameters.
 func (l *AgentLabels) Encode() url.Values {
 	values := url.Values{}
 
@@ -115,6 +126,7 @@ type AgentKubernetesContext struct {
 	Namespace string `json:"namespace"`
 }
 
+// Validate checks if the AgentKubernetesContext has all required fields set.
 func (c *AgentKubernetesContext) Validate() error {
 	if c == nil {
 		return errors.New("kubernetes context is required")
@@ -175,18 +187,20 @@ type CreateAgent struct {
 	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
 }
 
+// SetProjectID sets the project ID for the agent.
 func (c *CreateAgent) SetProjectID(projectID string) {
 	c.projectID = projectID
 }
 
+// ProjectID returns the project ID associated with the agent.
 func (c *CreateAgent) ProjectID() string {
 	return c.projectID
 }
 
-const (
-	ErrInvalidAgentType = errs.InvalidArgumentError("invalid agent kind")
-)
+// ErrInvalidAgentType is returned when the agent kind is invalid.
+const ErrInvalidAgentType = errs.InvalidArgumentError("invalid agent kind")
 
+// Validate checks if the CreateAgent has all required fields set.
 func (c *CreateAgent) Validate() error {
 	if !c.Kind.IsValid() {
 		return ErrInvalidAgentType
@@ -248,6 +262,7 @@ func (c *CreateAgent) Validate() error {
 	return nil
 }
 
+// AgentCreated represents the response after creating an agent.
 type AgentCreated struct {
 	ID            string               `json:"id"`
 	AgentToken    string               `json:"agent_token"`
@@ -268,6 +283,7 @@ type UpdateAgent struct {
 	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
 }
 
+// Validate checks if the UpdateAgent has all required fields set.
 func (a *UpdateAgent) Validate() error { //nolint:gocognit,gocyclo
 	if a.OS == nil && a.Arch == nil && a.Hostname == nil &&
 		a.Version == nil && a.IP == nil && a.MachineID == nil && a.Kind == nil {
@@ -357,6 +373,7 @@ func join(strs []string) string {
 	return result
 }
 
+// ListAgents represents the request to list agents.
 type ListAgents struct {
 	Labels    AgentLabels   `json:"labels,omitempty"`
 	Filters   *AgentFilters `json:"filters,omitempty"`
@@ -364,6 +381,7 @@ type ListAgents struct {
 	PageArgs
 }
 
+// Validate checks if the ListAgents has all required fields set.
 func (q *ListAgents) Validate() error {
 	// Validate filters if provided
 	if q.Filters != nil {
@@ -396,6 +414,7 @@ type AgentFilters struct {
 	Kind      *string `json:"kind,omitempty"`
 }
 
+// Encode encodes the AgentFilters into URL query parameters.
 func (f *AgentFilters) Encode() url.Values {
 	values := url.Values{}
 

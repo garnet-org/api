@@ -8,17 +8,25 @@ import (
 )
 
 var (
-	ErrWebhookNotFound           = errs.NotFoundError("webhook not found")
+	// ErrWebhookNotFound returns when a webhook is not found.
+	ErrWebhookNotFound = errs.NotFoundError("webhook not found")
+
+	// ErrUnauthorizedWebhookAccess returns when there is an unauthorized access to a webhook.
 	ErrUnauthorizedWebhookAccess = errs.UnauthorizedError("permission denied for webhook access")
-	ErrWebHookInvalidKind        = errs.InvalidArgumentError("invalid webhook kind")
+
+	// ErrWebHookInvalidKind returns when a webhook already exists.
+	ErrWebHookInvalidKind = errs.InvalidArgumentError("invalid webhook kind")
 )
 
+// WebhookKind represents the kind of webhook.
 type WebhookKind string
 
+// String returns the string representation of the WebhookKind.
 func (k WebhookKind) String() string {
 	return string(k)
 }
 
+// IsValid checks if the WebhookKind is valid.
 func (k WebhookKind) IsValid() bool {
 	switch k {
 	case WebhookKindSlack:
@@ -29,6 +37,7 @@ func (k WebhookKind) IsValid() bool {
 }
 
 const (
+	// WebhookKindSlack is the kind for Slack webhooks.
 	WebhookKindSlack WebhookKind = "slack"
 )
 
@@ -44,6 +53,7 @@ func isValidURL(testURL string) bool {
 	return err == nil && parsedURL.Scheme != "" && parsedURL.Host != ""
 }
 
+// Validate checks if the WebhookCreate fields are valid.
 func (w *WebhookCreate) Validate() error {
 	if !w.Kind.IsValid() {
 		return ErrWebHookInvalidKind
@@ -64,6 +74,7 @@ func (w *WebhookCreate) Validate() error {
 	return nil
 }
 
+// Webhook represents a webhook configuration.
 type Webhook struct {
 	ID        string `json:"id"`
 	ProjectID string `json:"-"`
@@ -71,21 +82,25 @@ type Webhook struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// WebhookCreated represents a webhook creation response.
 type WebhookCreated struct {
 	ID string `json:"id"`
 	WebhookCreate
 }
 
+// WebhookList represents a list of webhooks.
 type WebhookList struct {
 	PageArgs
 }
 
+// WebhookUpdate represents a webhook update request.
 type WebhookUpdate struct {
 	Name *string      `json:"name,omitempty"`
 	Kind *WebhookKind `json:"kind,omitempty"`
 	URL  *string      `json:"url,omitempty"`
 }
 
+// Validate checks if the WebhookUpdate fields are valid.
 func (w *WebhookUpdate) Validate() error {
 	if w.Name == nil && w.URL == nil && w.Kind == nil {
 		return errs.ErrInvalidArgument
@@ -110,6 +125,7 @@ func (w *WebhookUpdate) Validate() error {
 	return nil
 }
 
+// WebhookUpdated represents a webhook update response.
 type WebhookUpdated struct {
 	WebhookCreated
 	UpdatedAt time.Time `json:"updated_at"`

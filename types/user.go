@@ -9,13 +9,26 @@ import (
 )
 
 const (
-	ErrUserEmailRequired  = errs.InvalidArgumentError("email is required")
-	ErrUserEmailInvalid   = errs.InvalidArgumentError("email is invalid")
-	ErrUserNameRequired   = errs.InvalidArgumentError("name is required")
-	ErrUserEmailExists    = errs.InvalidArgumentError("email already exists")
+	// ErrUserEmailRequired is returned when the email is required but not provided.
+	ErrUserEmailRequired = errs.InvalidArgumentError("email is required")
+
+	// ErrUserEmailInvalid is returned when the email format is invalid.
+	ErrUserEmailInvalid = errs.InvalidArgumentError("email is invalid")
+
+	// ErrUserNameRequired is returned when the name is required but not provided.
+	ErrUserNameRequired = errs.InvalidArgumentError("name is required")
+
+	// ErrUserEmailExists is returned when the email already exists in the system.
+	ErrUserEmailExists = errs.InvalidArgumentError("email already exists")
+
+	// ErrUserGithubIDExists is returned when the GitHub ID already exists in the system.
 	ErrUserGithubIDExists = errs.InvalidArgumentError("github_id already exists")
+
+	// ErrUserGoogleIDExists is returned when the Google ID already exists in the system.
 	ErrUserGoogleIDExists = errs.InvalidArgumentError("google_id already exists")
-	ErrUserNotFound       = errs.NotFoundError("user not found")
+
+	// ErrUserNotFound is returned when the user is not found in the system.
+	ErrUserNotFound = errs.NotFoundError("user not found")
 )
 
 var emailRegex = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)

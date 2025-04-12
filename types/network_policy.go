@@ -11,30 +11,66 @@ import (
 
 // Network policy error constants.
 const (
-	ErrInvalidNetworkPolicyScope         = errs.InvalidArgumentError("invalid network policy scope")
-	ErrInvalidNetworkPolicyRepositoryID  = errs.InvalidArgumentError("invalid network policy repository id")
-	ErrInvalidNetworkPolicyWorkflowName  = errs.InvalidArgumentError("invalid network policy workflow name")
-	ErrInvalidNetworkPolicyRuleType      = errs.InvalidArgumentError("invalid network policy rule type")
-	ErrInvalidNetworkPolicyRuleValue     = errs.InvalidArgumentError("invalid network policy rule value")
-	ErrInvalidNetworkPolicyCIDRMode      = errs.InvalidArgumentError("invalid network policy CIDR mode")
-	ErrInvalidNetworkPolicyCIDRPolicy    = errs.InvalidArgumentError("invalid network policy CIDR policy")
-	ErrInvalidNetworkPolicyResolveMode   = errs.InvalidArgumentError("invalid network policy resolve mode")
+	// ErrInvalidNetworkPolicyScope is returned when the network policy scope is not one of the defined valid options.
+	ErrInvalidNetworkPolicyScope = errs.InvalidArgumentError("invalid network policy scope")
+
+	// ErrInvalidNetworkPolicyRepositoryID is returned when the repository ID is missing or invalid in a repo or workflow scoped policy.
+	ErrInvalidNetworkPolicyRepositoryID = errs.InvalidArgumentError("invalid network policy repository id")
+
+	// ErrInvalidNetworkPolicyWorkflowName is returned when the workflow name is missing or invalid for a workflow-scoped policy.
+	ErrInvalidNetworkPolicyWorkflowName = errs.InvalidArgumentError("invalid network policy workflow name")
+
+	// ErrInvalidNetworkPolicyRuleType is returned when the rule type is not one of the supported types (e.g., CIDR or domain).
+	ErrInvalidNetworkPolicyRuleType = errs.InvalidArgumentError("invalid network policy rule type")
+
+	// ErrInvalidNetworkPolicyRuleValue is returned when the rule value (CIDR or domain) is malformed or empty.
+	ErrInvalidNetworkPolicyRuleValue = errs.InvalidArgumentError("invalid network policy rule value")
+
+	// ErrInvalidNetworkPolicyCIDRMode is returned when the CIDR mode is not one of the allowed values.
+	ErrInvalidNetworkPolicyCIDRMode = errs.InvalidArgumentError("invalid network policy CIDR mode")
+
+	// ErrInvalidNetworkPolicyCIDRPolicy is returned when the CIDR policy is not a valid allow/deny value.
+	ErrInvalidNetworkPolicyCIDRPolicy = errs.InvalidArgumentError("invalid network policy CIDR policy")
+
+	// ErrInvalidNetworkPolicyResolveMode is returned when the DNS resolution mode is not valid.
+	ErrInvalidNetworkPolicyResolveMode = errs.InvalidArgumentError("invalid network policy resolve mode")
+
+	// ErrInvalidNetworkPolicyResolvePolicy is returned when the resolve policy is not valid.
 	ErrInvalidNetworkPolicyResolvePolicy = errs.InvalidArgumentError("invalid network policy resolve policy")
-	ErrInvalidNetworkPolicyID            = errs.InvalidArgumentError("invalid network policy ID")
-	ErrInvalidNetworkPolicyRuleID        = errs.InvalidArgumentError("invalid network policy rule ID")
-	ErrUnauthorizedNetworkPolicy         = errs.UnauthorizedError("permission denied")
-	ErrNetworkPolicyNotFound             = errs.NotFoundError("network policy not found")
-	ErrNetworkPolicyRuleNotFound         = errs.NotFoundError("network policy rule not found")
-	ErrNetworkPolicyAlreadyExists        = errs.ConflictError("network policy already exists")
-	ErrNetworkPolicyRuleAlreadyExists    = errs.ConflictError("network policy rule already exists")
+
+	// ErrInvalidNetworkPolicyID is returned when the provided policy ID is malformed or missing.
+	ErrInvalidNetworkPolicyID = errs.InvalidArgumentError("invalid network policy ID")
+
+	// ErrInvalidNetworkPolicyRuleID is returned when the rule ID is invalid or missing.
+	ErrInvalidNetworkPolicyRuleID = errs.InvalidArgumentError("invalid network policy rule ID")
+
+	// ErrUnauthorizedNetworkPolicy is returned when a user attempts to modify or view a policy without proper permissions.
+	ErrUnauthorizedNetworkPolicy = errs.UnauthorizedError("permission denied")
+
+	// ErrNetworkPolicyNotFound is returned when the specified network policy could not be found.
+	ErrNetworkPolicyNotFound = errs.NotFoundError("network policy not found")
+
+	// ErrNetworkPolicyRuleNotFound is returned when a rule with the specified ID could not be found.
+	ErrNetworkPolicyRuleNotFound = errs.NotFoundError("network policy rule not found")
+
+	// ErrNetworkPolicyAlreadyExists is returned when attempting to create a policy that already exists.
+	ErrNetworkPolicyAlreadyExists = errs.ConflictError("network policy already exists")
+
+	// ErrNetworkPolicyRuleAlreadyExists is returned when a rule already exists in the policy and duplicates are not allowed.
+	ErrNetworkPolicyRuleAlreadyExists = errs.ConflictError("network policy rule already exists")
 )
 
 // NetworkPolicyScope represents the possible scopes of a network policy.
 type NetworkPolicyScope string
 
 const (
-	NetworkPolicyScopeGlobal   NetworkPolicyScope = "global"
-	NetworkPolicyScopeRepo     NetworkPolicyScope = "repo"
+	// NetworkPolicyScopeGlobal represents a network policy that applies globally.
+	NetworkPolicyScopeGlobal NetworkPolicyScope = "global"
+
+	// NetworkPolicyScopeRepo represents a network policy that applies to a specific repository.
+	NetworkPolicyScopeRepo NetworkPolicyScope = "repo"
+
+	// NetworkPolicyScopeWorkflow represents a network policy that applies to a specific workflow.
 	NetworkPolicyScopeWorkflow NetworkPolicyScope = "workflow"
 )
 
@@ -56,8 +92,13 @@ func (s NetworkPolicyScope) IsValid() bool {
 type NetworkPolicyCIDRMode string
 
 const (
+	// NetworkPolicyCIDRModeIPv4 represents a network policy that applies to IPv4 addresses.
 	NetworkPolicyCIDRModeIPv4 NetworkPolicyCIDRMode = "ipv4"
+
+	// NetworkPolicyCIDRModeIPv6 represents a network policy that applies to IPv6 addresses.
 	NetworkPolicyCIDRModeIPv6 NetworkPolicyCIDRMode = "ipv6"
+
+	// NetworkPolicyCIDRModeBoth represents a network policy that applies to both IPv4 and IPv6 addresses.
 	NetworkPolicyCIDRModeBoth NetworkPolicyCIDRMode = "both"
 )
 
@@ -79,8 +120,11 @@ func (m NetworkPolicyCIDRMode) IsValid() bool {
 type NetworkPolicyType string
 
 const (
+	// NetworkPolicyTypeAllow represents a network policy that allows traffic.
 	NetworkPolicyTypeAllow NetworkPolicyType = "allow"
-	NetworkPolicyTypeDeny  NetworkPolicyType = "deny"
+
+	// NetworkPolicyTypeDeny represents a network policy that denies traffic.
+	NetworkPolicyTypeDeny NetworkPolicyType = "deny"
 )
 
 // String returns the string representation of the NetworkPolicyType.
@@ -101,8 +145,13 @@ func (p NetworkPolicyType) IsValid() bool {
 type NetworkPolicyResolveMode string
 
 const (
-	NetworkPolicyResolveModsBypass     NetworkPolicyResolveMode = "bypass"
-	NetworkPolicyResolveModeStrict     NetworkPolicyResolveMode = "strict"
+	// NetworkPolicyResolveModsBypass represents a network policy that bypasses DNS resolution.
+	NetworkPolicyResolveModsBypass NetworkPolicyResolveMode = "bypass"
+
+	// NetworkPolicyResolveModeStrict represents a network policy that strictly enforces DNS resolution.
+	NetworkPolicyResolveModeStrict NetworkPolicyResolveMode = "strict"
+
+	// NetworkPolicyResolveModePermissive represents a network policy that allows permissive DNS resolution.
 	NetworkPolicyResolveModePermissive NetworkPolicyResolveMode = "permissive"
 )
 
@@ -124,7 +173,10 @@ func (m NetworkPolicyResolveMode) IsValid() bool {
 type NetworkPolicyRuleType string
 
 const (
-	NetworkPolicyRuleTypeCIDR   NetworkPolicyRuleType = "cidr"
+	// NetworkPolicyRuleTypeCIDR represents a rule that applies to CIDR ranges.
+	NetworkPolicyRuleTypeCIDR NetworkPolicyRuleType = "cidr"
+
+	// NetworkPolicyRuleTypeDomain represents a rule that applies to domain names.
 	NetworkPolicyRuleTypeDomain NetworkPolicyRuleType = "domain"
 )
 
@@ -166,12 +218,13 @@ func (r *NetworkPolicyRule) Validate() error {
 	}
 
 	// Validate rule value based on type
-	if r.Type == NetworkPolicyRuleTypeCIDR {
+	switch r.Type {
+	case NetworkPolicyRuleTypeCIDR:
 		_, _, err := net.ParseCIDR(r.Value)
 		if err != nil {
 			return ErrInvalidNetworkPolicyRuleValue
 		}
-	} else if r.Type == NetworkPolicyRuleTypeDomain {
+	case NetworkPolicyRuleTypeDomain:
 		if r.Value == "" {
 			return ErrInvalidNetworkPolicyRuleValue
 		}

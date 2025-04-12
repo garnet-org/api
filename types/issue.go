@@ -1,3 +1,4 @@
+// Package types contains all the required clients for marshal/unmarshal requests and responses from/to jibril-server.
 package types
 
 import (
@@ -28,39 +29,81 @@ const (
 type IssueActionType string
 
 const (
+	// IssueActionTypeAllow allows the issue.
 	IssueActionTypeAllow IssueActionType = "allow"
+
+	// IssueActionTypeBlock blocks the issue.
 	IssueActionTypeBlock IssueActionType = "block"
 )
 
 const (
-	ErrInvalidIssueState            = errs.InvalidArgumentError("invalid issue state")
-	ErrInvalidIssuePriority         = errs.InvalidArgumentError("invalid issue priority")
-	ErrInvalidIssueClass            = errs.InvalidArgumentError("invalid issue class")
-	ErrInvalidIssueDescription      = errs.InvalidArgumentError("invalid issue description")
-	ErrInvalidIssueEventIDs         = errs.InvalidArgumentError("invalid issue event IDs")
-	ErrInvalidIssueIgnoreFor        = errs.InvalidArgumentError("invalid issue ignore_for")
-	ErrInvalidIssueReason           = errs.InvalidArgumentError("invalid issue reason")
-	ErrInvalidIssueActionType       = errs.InvalidArgumentError("invalid issue action type")
-	ErrInvalidIssueActionScope      = errs.InvalidArgumentError("invalid issue action scope")
+	// ErrInvalidIssueState is returned when the issue state is not one of the valid options.
+	ErrInvalidIssueState = errs.InvalidArgumentError("invalid issue state")
+
+	// ErrInvalidIssuePriority is returned when the issue priority is invalid or missing.
+	ErrInvalidIssuePriority = errs.InvalidArgumentError("invalid issue priority")
+
+	// ErrInvalidIssueClass is returned when the issue class is not recognized or supported.
+	ErrInvalidIssueClass = errs.InvalidArgumentError("invalid issue class")
+
+	// ErrInvalidIssueDescription is returned when the issue description is empty or malformed.
+	ErrInvalidIssueDescription = errs.InvalidArgumentError("invalid issue description")
+
+	// ErrInvalidIssueEventIDs is returned when the event IDs provided for the issue are invalid.
+	ErrInvalidIssueEventIDs = errs.InvalidArgumentError("invalid issue event IDs")
+
+	// ErrInvalidIssueIgnoreFor is returned when the ignore duration or format is invalid.
+	ErrInvalidIssueIgnoreFor = errs.InvalidArgumentError("invalid issue ignore_for")
+
+	// ErrInvalidIssueReason is returned when the issue reason is missing or invalid.
+	ErrInvalidIssueReason = errs.InvalidArgumentError("invalid issue reason")
+
+	// ErrInvalidIssueActionType is returned when the action type provided is invalid.
+	ErrInvalidIssueActionType = errs.InvalidArgumentError("invalid issue action type")
+
+	// ErrInvalidIssueActionScope is returned when the action scope is not valid or recognized.
+	ErrInvalidIssueActionScope = errs.InvalidArgumentError("invalid issue action scope")
+
+	// ErrIssueHasNoNetworkDestination is returned when the issue does not include a network destination.
 	ErrIssueHasNoNetworkDestination = errs.InvalidArgumentError("issue has no network destination")
-	ErrInvalidIssueID               = errs.InvalidArgumentError("invalid issue ID")
-	ErrInvalidEventID               = errs.InvalidArgumentError("invalid event ID")
-	ErrUnauthorizedEvents           = errs.UnauthorizedError("permission denied")
-	ErrUnauthorizedIssue            = errs.UnauthorizedError("permission denied")
-	ErrInvalidAgentKind             = errs.InvalidArgumentError("invalid agent kind")
-	ErrMissingRepositoryID          = errs.InvalidArgumentError("missing repository ID in agent context")
-	ErrMissingWorkflow              = errs.InvalidArgumentError("missing workflow in agent context")
-	ErrNoAssociatedEvents           = errs.InvalidArgumentError("issue has no associated events")
-	ErrMissingGitHubContext         = errs.InvalidArgumentError("agent does not have GitHub context")
+
+	// ErrInvalidIssueID is returned when the issue ID is missing or not in a valid format.
+	ErrInvalidIssueID = errs.InvalidArgumentError("invalid issue ID")
+
+	// ErrInvalidEventID is returned when the event ID provided is invalid or does not exist.
+	ErrInvalidEventID = errs.InvalidArgumentError("invalid event ID")
+
+	// ErrUnauthorizedEvents is returned when the user does not have permission to access or modify events.
+	ErrUnauthorizedEvents = errs.UnauthorizedError("permission denied")
+
+	// ErrUnauthorizedIssue is returned when the user does not have permission to access or modify the issue.
+	ErrUnauthorizedIssue = errs.UnauthorizedError("permission denied")
+
+	// ErrInvalidAgentKind is returned when the agent kind is invalid or unsupported.
+	ErrInvalidAgentKind = errs.InvalidArgumentError("invalid agent kind")
+
+	// ErrMissingRepositoryID is returned when the repository ID is not found in the agent context.
+	ErrMissingRepositoryID = errs.InvalidArgumentError("missing repository ID in agent context")
+
+	// ErrMissingWorkflow is returned when the workflow is not present in the agent context.
+	ErrMissingWorkflow = errs.InvalidArgumentError("missing workflow in agent context")
+
+	// ErrNoAssociatedEvents is returned when an issue does not have any linked events.
+	ErrNoAssociatedEvents = errs.InvalidArgumentError("issue has no associated events")
+
+	// ErrMissingGitHubContext is returned when the agent does not have GitHub context available.
+	ErrMissingGitHubContext = errs.InvalidArgumentError("agent does not have GitHub context")
 )
 
 // IssueState represents the possible states of an issue.
 type IssueState string
 
+// String returns the string representation of the IssueState.
 func (s IssueState) String() string {
 	return string(s)
 }
 
+// IsValid checks if the IssueState is valid.
 func (s IssueState) IsValid() bool {
 	switch s {
 	case IssueStateAllowed, IssueStateBlocked:
@@ -72,10 +115,12 @@ func (s IssueState) IsValid() bool {
 // IssuePriority represents the possible priority levels of an issue.
 type IssuePriority string
 
+// String returns the string representation of the IssuePriority.
 func (p IssuePriority) String() string {
 	return string(p)
 }
 
+// IsValid checks if the IssuePriority is valid.
 func (p IssuePriority) IsValid() bool {
 	switch p {
 	case IssuePriorityLow, IssuePriorityMedium, IssuePriorityHigh, IssuePriorityCritical:
@@ -87,10 +132,12 @@ func (p IssuePriority) IsValid() bool {
 // IssueClass represents the possible classes of an issue.
 type IssueClass string
 
+// String returns the string representation of the IssueClass.
 func (c IssueClass) String() string {
 	return string(c)
 }
 
+// IsValid checks if the IssueClass is valid.
 func (c IssueClass) IsValid() bool {
 	switch c {
 	case IssueClassNetworkExfiltration, IssueClassCryptoMiner:
@@ -148,7 +195,7 @@ func (l *IssueLabels) Scan(value interface{}) error {
 	}
 }
 
-// The format is: label.key=value (e.g., label.severity=high).
+// Encode encodes the IssueLabels into URL query parameters.
 func (l *IssueLabels) Encode() url.Values {
 	values := url.Values{}
 
@@ -189,6 +236,7 @@ type IssueFilters struct {
 	WorkflowName *string        `json:"workflow_name,omitempty"`
 }
 
+// Validate checks if the IssueFilters has all required fields set.
 func (f *IssueFilters) Validate() error {
 	if f == nil {
 		return nil
@@ -232,6 +280,7 @@ func (f *IssueFilters) Validate() error {
 	return nil
 }
 
+// Encode encodes the IssueFilters into URL query parameters.
 func (f *IssueFilters) Encode() url.Values {
 	values := url.Values{}
 
@@ -344,6 +393,7 @@ type Issue struct {
 }
 
 // ExtractNetworkDestination extracts network destination information from the events linked to an issue.
+//nolint:gocognit,gocyclo
 func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, error) {
 	if len(i.Events) == 0 {
 		return "", "", ErrIssueHasNoNetworkDestination
@@ -355,7 +405,12 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 		case EventKindDropIP:
 			// Extract remote IP from dropped event
 			if hasValidDroppedAddress(event) {
-				return formatCIDRAddress(*event.Data.Dropped.Remote.Address)
+				// Check which structure has the data
+				if event.Data.Dropped != nil && event.Data.Dropped.Remote != nil && event.Data.Dropped.Remote.Address != nil {
+					return formatCIDRAddress(*event.Data.Dropped.Remote.Address)
+				} else if event.Data.Body != nil && event.Data.Body.Dropped != nil && event.Data.Body.Dropped.Remote != nil && event.Data.Body.Dropped.Remote.Address != nil {
+					return formatCIDRAddress(*event.Data.Body.Dropped.Remote.Address)
+				}
 			}
 
 		case EventKindDropDomain:
@@ -363,20 +418,13 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 			// For drop_domain events, the domain is expected to be in the Remote.Name field
 			if event.Data.Dropped != nil && event.Data.Dropped.Remote != nil && event.Data.Dropped.Remote.Name != nil {
 				return NetworkPolicyRuleTypeDomain, *event.Data.Dropped.Remote.Name, nil
+			} else if event.Data.Body != nil && event.Data.Body.Dropped != nil && event.Data.Body.Dropped.Remote != nil && event.Data.Body.Dropped.Remote.Name != nil {
+				return NetworkPolicyRuleTypeDomain, *event.Data.Body.Dropped.Remote.Name, nil
 			}
 
 		case EventKindFlow:
-			// Flow events have the remote address in the Flow field
-			if event.Data.Flow != nil && event.Data.Flow.Remote != nil {
-				// Try to extract IP address first
-				if event.Data.Flow.Remote.Address != nil {
-					return formatCIDRAddress(*event.Data.Flow.Remote.Address)
-				}
-				// Then try domain name
-				if event.Data.Flow.Remote.Name != nil {
-					return NetworkPolicyRuleTypeDomain, *event.Data.Flow.Remote.Name, nil
-				}
-			}
+			// Flow events no longer generate issues, but included to satisfy exhaustive check
+			continue
 
 		case EventKindAdultDomainAccess, EventKindThreatDomainAccess,
 			EventKindBadwareDomainAccess, EventKindDynDNSDomainAccess,
@@ -385,7 +433,18 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 			EventKindTrackingDomainAccess, EventKindVPNLikeDomainAccess:
 			// Extract domain from Flow data for various domain access events
 			if hasValidFlowDomain(event) {
-				return NetworkPolicyRuleTypeDomain, *event.Data.Flow.Remote.Name, nil
+				// Check original structure first
+				if event.Data.Flow != nil && event.Data.Flow.Remote != nil && event.Data.Flow.Remote.Name != nil {
+					return NetworkPolicyRuleTypeDomain, *event.Data.Flow.Remote.Name, nil
+				}
+				// Check body structure
+				if event.Data.Body != nil && event.Data.Body.FullInfo != nil &&
+					event.Data.Body.FullInfo.Flows != nil && len(*event.Data.Body.FullInfo.Flows) > 0 {
+					firstFlow := (*event.Data.Body.FullInfo.Flows)[0]
+					if firstFlow.Remote != nil && firstFlow.Remote.Name != nil && *firstFlow.Remote.Name != "" {
+						return NetworkPolicyRuleTypeDomain, *firstFlow.Remote.Name, nil
+					}
+				}
 			}
 
 		// The following event types don't contain network destination information
@@ -423,16 +482,46 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 
 // hasValidDroppedAddress checks if an event has valid remote address data in the Dropped field.
 func hasValidDroppedAddress(event Event) bool {
-	return event.Data.Dropped != nil &&
+	// Check in regular structure
+	if event.Data.Dropped != nil &&
 		event.Data.Dropped.Remote != nil &&
-		event.Data.Dropped.Remote.Address != nil
+		event.Data.Dropped.Remote.Address != nil {
+		return true
+	}
+	
+	// Check in new nested body structure
+	if event.Data.Body != nil &&
+		event.Data.Body.Dropped != nil &&
+		event.Data.Body.Dropped.Remote != nil &&
+		event.Data.Body.Dropped.Remote.Address != nil {
+		return true
+	}
+	
+	return false
 }
 
 // hasValidFlowDomain checks if an event has valid domain name data in the Flow field.
 func hasValidFlowDomain(event Event) bool {
-	return event.Data.Flow != nil &&
+	// Check in regular structure
+	if event.Data.Flow != nil &&
 		event.Data.Flow.Remote != nil &&
-		event.Data.Flow.Remote.Name != nil
+		event.Data.Flow.Remote.Name != nil {
+		return true
+	}
+	
+	// Check in new nested body structure
+	if event.Data.Body != nil &&
+		event.Data.Body.FullInfo != nil &&
+		event.Data.Body.FullInfo.Flows != nil &&
+		len(*event.Data.Body.FullInfo.Flows) > 0 {
+		// Check the first flow for domain info
+		firstFlow := (*event.Data.Body.FullInfo.Flows)[0]
+		if firstFlow.Remote != nil && firstFlow.Remote.Name != nil && *firstFlow.Remote.Name != "" {
+			return true
+		}
+	}
+	
+	return false
 }
 
 // formatCIDRAddress ensures an IP address is properly formatted as a CIDR.
@@ -454,6 +543,7 @@ type CreateIssue struct {
 	EventIDs    []string      `json:"event_ids"`
 }
 
+// Validate ensures the CreateIssue request is valid.
 func (c *CreateIssue) Validate() error {
 	// Check issue state
 	if !c.State.IsValid() {
@@ -510,8 +600,8 @@ type UpdateIssue struct {
 	NetworkPolicyRuleID *string             `json:"network_policy_rule_id,omitempty"` // Network policy rule ID
 }
 
-//nolint:gocyclo // This validation function naturally has many checks
-func (u *UpdateIssue) Validate() error {
+// Validate ensures the UpdateIssue request is valid.
+func (u *UpdateIssue) Validate() error { //nolint:gocyclo
 	// Check if any fields are specified
 	if u.Class == nil && u.Description == nil && u.State == nil &&
 		u.Priority == nil && u.Labels == nil && u.Ignored == nil &&

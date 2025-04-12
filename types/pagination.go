@@ -5,11 +5,13 @@ import (
 	"strconv"
 )
 
+// Page is a generic type for paginated results.
 type Page[T any] struct {
 	Items    []T      `json:"items"`
 	PageInfo PageInfo `json:"pageInfo"`
 }
 
+// PageInfo contains pagination information.
 type PageInfo struct {
 	HasNextPage bool    `json:"hasNextPage"`
 	EndCursor   *Cursor `json:"endCursor"`
@@ -17,8 +19,10 @@ type PageInfo struct {
 	StartCursor *Cursor `json:"startCursor"`
 }
 
+// Cursor is a string type used for pagination.
 type Cursor string
 
+// PageArgs contains arguments for pagination.
 type PageArgs struct {
 	First  *uint   `json:"first,omitempty"`
 	After  *Cursor `json:"after,omitempty"`

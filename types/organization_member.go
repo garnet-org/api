@@ -7,8 +7,11 @@ import (
 )
 
 const (
+	// ErrUnauthorizedOrganizationMember is returned when a user does not have permission to access an organization member.
 	ErrUnauthorizedOrganizationMember = errs.UnauthorizedError("permission denied")
-	ErrOrganizationMemberNotFound     = errs.NotFoundError("organization member not found")
+
+	// ErrOrganizationMemberNotFound is returned when an organization member is not found.
+	ErrOrganizationMemberNotFound = errs.NotFoundError("organization member not found")
 )
 
 // OrganizationMember represents a user's membership in an organization.

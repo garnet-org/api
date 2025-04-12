@@ -8,36 +8,68 @@ import (
 )
 
 const (
-	ErrRoleNameRequired   = errs.InvalidArgumentError("role name is required")
-	ErrRoleNotFound       = errs.NotFoundError("role not found")
-	ErrMemberNotFound     = errs.NotFoundError("member not found")
-	ErrInvalidPermission  = errs.InvalidArgumentError("invalid permission")
-	ErrInvalidResource    = errs.InvalidArgumentError("invalid resource")
-	ErrRoleIDRequired     = errs.InvalidArgumentError("role_id is required")
-	ErrUserIDRequired     = errs.InvalidArgumentError("user_id is required")
+	// ErrRoleNameRequired is returned when the role name is not provided.
+	ErrRoleNameRequired = errs.InvalidArgumentError("role name is required")
+
+	// ErrRoleNotFound is returned when the role is not found.
+	ErrRoleNotFound = errs.NotFoundError("role not found")
+
+	// ErrMemberNotFound is returned when the member is not found.
+	ErrMemberNotFound = errs.NotFoundError("member not found")
+
+	// ErrInvalidPermission is returned when the permission is invalid.
+	ErrInvalidPermission = errs.InvalidArgumentError("invalid permission")
+
+	// ErrInvalidResource is returned when the resource is invalid.
+	ErrInvalidResource = errs.InvalidArgumentError("invalid resource")
+
+	// ErrRoleIDRequired is returned when the role ID is not provided.
+	ErrRoleIDRequired = errs.InvalidArgumentError("role_id is required")
+
+	// ErrUserIDRequired is returned when the user ID is not provided.
+	ErrUserIDRequired = errs.InvalidArgumentError("user_id is required")
+
+	// ErrMissingUpdateField is returned when no fields are provided for update.
 	ErrMissingUpdateField = errs.InvalidArgumentError("at least one field to update is required")
-	ErrUnauthorizedRole   = errs.UnauthorizedError("permission denied")
+
+	// ErrUnauthorizedRole is returned when the user does not have permission for the role.
+	ErrUnauthorizedRole = errs.UnauthorizedError("permission denied")
 )
 
 // Permission defines a permission string type.
 type Permission string
 
 const (
-	// Operation permissions.
+	// PermCreate is a permission to create a resource.
 	PermCreate Permission = "create"
-	PermRead   Permission = "read"
+
+	// PermRead is a permission to read a resource.
+	PermRead Permission = "read"
+
+	// PermUpdate is a permission to update a resource.
 	PermUpdate Permission = "update"
+
+	// PermDelete is a permission to delete a resource.
 	PermDelete Permission = "delete"
-	PermList   Permission = "list"
+
+	// PermList is a permission to list resources.
+	PermList Permission = "list"
 )
 
 // Resource defines a resource type that can be protected.
 type Resource string
 
 const (
-	ResourceAgent         Resource = "agent"
-	ResourceIssue         Resource = "issue"
-	ResourceEvent         Resource = "event"
+	// ResourceAgent is a resource type for agents.
+	ResourceAgent Resource = "agent"
+
+	// ResourceIssue is a resource type for projects.
+	ResourceIssue Resource = "issue"
+
+	// ResourceEvent is a resource type for events.
+	ResourceEvent Resource = "event"
+
+	// ResourceNetworkPolicy is a resource type for network policies.
 	ResourceNetworkPolicy Resource = "network_policy"
 )
 

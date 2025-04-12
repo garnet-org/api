@@ -7,10 +7,14 @@ import (
 )
 
 const (
-	ErrUnauthorizedOrganization = errs.UnauthorizedError("permission denied")
-	ErrInvalidOrganizationName  = errs.InvalidArgumentError("invalid organization name")
-	ErrOrganizationSlugExists   = errs.ConflictError("organization with this slug already exists")
-	MaxOrganizationNameLength   = 128
+	// ErrInvalidOrganizationName is returned when the organization name is invalid.
+	ErrInvalidOrganizationName = errs.InvalidArgumentError("invalid organization name")
+
+	// ErrOrganizationSlugExists is returned when the organization slug already exists.
+	ErrOrganizationSlugExists = errs.ConflictError("organization with this slug already exists")
+
+	// MaxOrganizationNameLength is the maximum length for an organization name.
+	MaxOrganizationNameLength = 128
 )
 
 // Organization represents an organization in the system.
@@ -27,6 +31,7 @@ type CreateOrganization struct {
 	Name string `json:"name"`
 }
 
+// Validate checks if the CreateOrganization fields are valid.
 func (c *CreateOrganization) Validate() error {
 	if c.Name == "" {
 		return ErrInvalidOrganizationName
@@ -51,6 +56,7 @@ type UpdateOrganization struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// Validate checks if the UpdateOrganization fields are valid.
 func (u *UpdateOrganization) Validate() error {
 	if u.Name == nil {
 		return errs.ErrInvalidArgument

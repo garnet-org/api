@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"slices"
+
 	"github.com/garnet-org/api/types/errs"
 )
 
@@ -20,9 +22,10 @@ const (
 type ProjectSettingKey string
 
 const (
+	// ProjectSettingKeyWebhookEnabledIssueClasses is the key for webhook enabled issue classes.
 	ProjectSettingKeyWebhookEnabledIssueClasses ProjectSettingKey = "webhook_enabled_issue_classes"
 
-	// Constraints.
+	// MaxProjectSettingKeyLength is the maximum length for a project setting key.
 	MaxProjectSettingKeyLength = 255 // Same as the database column size
 )
 
@@ -57,6 +60,7 @@ type ProjectSettingCreate struct {
 	Value json.RawMessage `json:"value"`
 }
 
+// Validate checks if the ProjectSettingCreate has all required fields set.
 func (c *ProjectSettingCreate) Validate() error {
 	if c.Key == "" {
 		return ErrInvalidProjectSettingKey
@@ -82,6 +86,7 @@ type ProjectSettingUpdate struct {
 	Value json.RawMessage `json:"value"`
 }
 
+// Validate checks if the ProjectSettingUpdate has all required fields set.
 func (u *ProjectSettingUpdate) Validate() error {
 	if len(u.Value) == 0 {
 		return ErrInvalidProjectSettingValue
@@ -116,6 +121,7 @@ type WebhookEnabledIssueClasses struct {
 	Classes []IssueClass `json:"classes"`
 }
 
+// Validate checks if the WebhookEnabledIssueClasses has valid classes.
 func (w *WebhookEnabledIssueClasses) Validate() error {
 	// nil Classes is valid - indicates all classes are enabled (default)
 
@@ -144,11 +150,5 @@ func (w *WebhookEnabledIssueClasses) IsIssueClassEnabled(class IssueClass) bool 
 	}
 
 	// Check if the class is in the list
-	for _, c := range w.Classes {
-		if c == class {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(w.Classes, class)
 }

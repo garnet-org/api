@@ -1,3 +1,4 @@
+// Package client provides a generic HTTP client for interacting with the Jibril API.
 package client
 
 import (
@@ -12,6 +13,7 @@ import (
 	"strings"
 )
 
+// Client is a generic HTTP client for interacting with the Jibril API.
 type Client struct {
 	BaseClient *http.Client
 	BaseURL    string
@@ -20,15 +22,24 @@ type Client struct {
 	Debug      bool
 }
 
+// TokenType represents the type of authentication token used.
 type TokenType int
 
 const (
+	// TokenTypeNone indicates no authentication token is set.
 	TokenTypeNone TokenType = iota
+
+	// TokenTypeUser indicates a user authentication token.
 	TokenTypeUser
+
+	// TokenTypeAgent indicates an agent authentication token.
 	TokenTypeAgent
+
+	// TokenTypeProject indicates a project authentication token.
 	TokenTypeProject
 )
 
+// New creates a new client with the specified base URL and authentication token.
 func New(baseURL, token string) *Client {
 	client := &Client{
 		BaseClient: http.DefaultClient,
@@ -136,7 +147,12 @@ func (c *Client) do(ctx context.Context, out any, method, path string, body any)
 	if err != nil {
 		return fmt.Errorf("send request: %w", err)
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("failed to close response body: %v\n", err)
+		}
+	}()
 
 	if resp.StatusCode >= 400 {
 		b, err := io.ReadAll(resp.Body)

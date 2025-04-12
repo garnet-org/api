@@ -2,13 +2,20 @@
 package errs
 
 const (
+	// ErrInvalidArgument is returned when an invalid argument is provided.
 	ErrInvalidArgument = InvalidArgumentError("invalid argument")
-	ErrInternalServer  = InternalServerError("internal server error")
+
+	// ErrInternalServer is returned when an internal server error occurs.
+	ErrInternalServer = InternalServerError("internal server error")
 )
 
+// InvalidArgumentError is returned when an invalid argument is provided.
 type InvalidArgumentError string
 
+// Error implements the error interface for InvalidArgumentError.
 func (e InvalidArgumentError) Error() string { return string(e) }
+
+// Is checks if the error is of type InvalidArgumentError.
 func (e InvalidArgumentError) Is(target error) bool {
 	if target == ErrInvalidArgument {
 		return true // All InvalidArgumentError types should match ErrInvalidArgument
@@ -19,9 +26,13 @@ func (e InvalidArgumentError) Is(target error) bool {
 	return false
 }
 
+// InternalServerError is returned when an internal server error occurs.
 type InternalServerError string
 
+// Error implements the error interface for InternalServerError.
 func (e InternalServerError) Error() string { return string(e) }
+
+// Is checks if the error is of type InternalServerError.
 func (e InternalServerError) Is(target error) bool {
 	if target == ErrInternalServer {
 		return true // All InternalServerError types should match ErrInternalServer
@@ -32,11 +43,16 @@ func (e InternalServerError) Is(target error) bool {
 	return false
 }
 
+// ErrNotFound is returned when a resource is not found.
 const ErrNotFound = NotFoundError("not found")
 
+// NotFoundError represents an error indicating that a resource was not found.
 type NotFoundError string
 
+// Error implements the error interface for NotFoundError.
 func (e NotFoundError) Error() string { return string(e) }
+
+// Is checks if the error is of type NotFoundError.
 func (e NotFoundError) Is(target error) bool {
 	if target, ok := target.(NotFoundError); ok {
 		return e == target
@@ -44,11 +60,16 @@ func (e NotFoundError) Is(target error) bool {
 	return false
 }
 
+// ErrUnauthorized is returned when a user is not authorized to perform an action.
 const ErrUnauthorized = UnauthorizedError("unauthorized")
 
+// UnauthorizedError represents an error indicating that the user is not authorized to perform a certain action.
 type UnauthorizedError string
 
+// Error implements the error interface for UnauthorizedError.
 func (e UnauthorizedError) Error() string { return string(e) }
+
+// Is checks if the error is of type UnauthorizedError.
 func (e UnauthorizedError) Is(target error) bool {
 	if target == ErrUnauthorized {
 		return true // All UnauthorizedError types should match ErrUnauthorized
@@ -59,11 +80,16 @@ func (e UnauthorizedError) Is(target error) bool {
 	return false
 }
 
+// ErrInvalidAgentID is returned when an agent ID is invalid.
 const ErrInvalidAgentID = InvalidAgentIDError("invalid agent ID")
 
+// InvalidAgentIDError represents an error indicating that the agent ID is invalid.
 type InvalidAgentIDError string
 
+// Error implements the error interface for InvalidAgentIDError.
 func (e InvalidAgentIDError) Error() string { return string(e) }
+
+// Is checks if the error is of type InvalidAgentIDError.
 func (e InvalidAgentIDError) Is(target error) bool {
 	if target, ok := target.(InvalidAgentIDError); ok {
 		return e == target
@@ -71,11 +97,16 @@ func (e InvalidAgentIDError) Is(target error) bool {
 	return false
 }
 
+// ErrConflict is returned when a resource already exists.
 const ErrConflict = ConflictError("resource already exists")
 
+// ConflictError represents an error indicating that a resource already exists.
 type ConflictError string
 
+// ConflictError represents an error indicating that a resource already exists.
 func (e ConflictError) Error() string { return string(e) }
+
+// Is checks if the error is of type ConflictError.
 func (e ConflictError) Is(target error) bool {
 	if target == ErrConflict {
 		return true // All ConflictError types should match ErrConflict
@@ -86,11 +117,17 @@ func (e ConflictError) Is(target error) bool {
 	return false
 }
 
+// ErrPermissionDenied is returned when a user does not have permission to perform an action.
 const ErrPermissionDenied = PermissionDeniedError("permission denied")
 
+// PermissionDeniedError represents an error indicating that the user does not have permission to perform a certain action.
 type PermissionDeniedError string
 
+// Error implements the error interface for PermissionDeniedError.
+// It returns the error message as a string.
 func (e PermissionDeniedError) Error() string { return string(e) }
+
+// Is checks if the error is of type PermissionDeniedError.
 func (e PermissionDeniedError) Is(target error) bool {
 	if target == ErrPermissionDenied {
 		return true // All PermissionDeniedError types should match ErrPermissionDenied
