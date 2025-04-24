@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"net/url"
 	"strconv"
 )
@@ -74,4 +75,60 @@ func DecodePageArgs(v url.Values) PageArgs {
 		Last:   last,
 		Before: before,
 	}
+}
+
+// Order is a type for sorting order.
+type Order string
+
+const (
+	// OrderAsc is ascending order.
+	OrderAsc Order = "asc"
+
+	// OrderDesc is descending order.
+	OrderDesc Order = "desc"
+)
+
+func (o Order) String() string {
+	return string(o)
+}
+
+// Validate checks if the order struct is valid.
+func (o Order) Validate() error {
+	switch o {
+	case OrderAsc, OrderDesc:
+		return nil
+	default:
+		return fmt.Errorf("invalid order: %s", o)
+	}
+}
+
+// Sort is a type for sorting results.
+type Sort struct {
+	// Field is the field to sort by.
+	Field string `json:"field"`
+
+	// Order is the order to sort by.
+	Order Order `json:"order"`
+}
+
+// DecodeSort extracts Sort from URL query parameters.
+// It returns nil if something is wrong or missing.
+func DecodeSort(v url.Values) *Sort {
+	field := v.Get("sort.field")
+	order := v.Get("sort.order")
+
+	if field == "" {
+		return nil
+	}
+
+	s := &Sort{
+		Field: field,
+		Order: OrderDesc,
+	}
+
+	if order != "" {
+		s.Order = Order(order)
+	}
+
+	return s
 }

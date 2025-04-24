@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -280,45 +281,6 @@ func (f *IssueFilters) Validate() error {
 	return nil
 }
 
-// Encode encodes the IssueFilters into URL query parameters.
-func (f *IssueFilters) Encode() url.Values {
-	values := url.Values{}
-
-	if f == nil {
-		return values
-	}
-
-	if f.Class != nil {
-		values.Set("filter.class", f.Class.String())
-	}
-
-	if f.State != nil {
-		values.Set("filter.state", f.State.String())
-	}
-
-	if f.Priority != nil {
-		values.Set("filter.priority", f.Priority.String())
-	}
-
-	if f.AgentKind != nil {
-		values.Set("filter.agent_kind", f.AgentKind.String())
-	}
-
-	if f.RepositoryID != nil {
-		values.Set("filter.repository_id", *f.RepositoryID)
-	}
-
-	if f.Repository != nil {
-		values.Set("filter.repository", *f.Repository)
-	}
-
-	if f.WorkflowName != nil {
-		values.Set("filter.workflow_name", *f.WorkflowName)
-	}
-
-	return values
-}
-
 // DecodeIssueFilters extracts IssueFilters from URL query parameters.
 func DecodeIssueFilters(values url.Values) *IssueFilters {
 	filters := &IssueFilters{}
@@ -393,6 +355,7 @@ type Issue struct {
 }
 
 // ExtractNetworkDestination extracts network destination information from the events linked to an issue.
+//
 //nolint:gocognit,gocyclo
 func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, error) {
 	if len(i.Events) == 0 {
@@ -488,7 +451,7 @@ func hasValidDroppedAddress(event Event) bool {
 		event.Data.Dropped.Remote.Address != nil {
 		return true
 	}
-	
+
 	// Check in new nested body structure
 	if event.Data.Body != nil &&
 		event.Data.Body.Dropped != nil &&
@@ -496,7 +459,7 @@ func hasValidDroppedAddress(event Event) bool {
 		event.Data.Body.Dropped.Remote.Address != nil {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -508,7 +471,7 @@ func hasValidFlowDomain(event Event) bool {
 		event.Data.Flow.Remote.Name != nil {
 		return true
 	}
-	
+
 	// Check in new nested body structure
 	if event.Data.Body != nil &&
 		event.Data.Body.FullInfo != nil &&
@@ -520,7 +483,7 @@ func hasValidFlowDomain(event Event) bool {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -723,8 +686,9 @@ type ListIssues struct {
 	ProjectID      string        `json:"-"` // Set internally from context
 	Labels         IssueLabels   `json:"labels,omitempty"`
 	Filters        *IssueFilters `json:"filters,omitempty"`
-	PageArgs       PageArgs      `json:"pageArgs,omitempty"`
+	PageArgs       PageArgs      `json:"pageArgs"`
 	IncludeIgnored bool          `json:"include_ignored,omitempty"` // Whether to include ignored issues, default is false
+	Sort           *Sort         `json:"sort,omitempty"`
 }
 
 // Validate ensures the ListIssues request is valid.
@@ -743,5 +707,18 @@ func (l *ListIssues) Validate() error {
 		}
 	}
 
+	// Validate sorting if provided
+	if l.Sort != nil {
+		if !slices.Contains(allowedSortFields, l.Sort.Field) {
+			return fmt.Errorf("invalid sort field: %s, allowed fields are: %v", l.Sort.Field, allowedSortFields)
+		}
+
+		if err := l.Sort.Order.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
+
+var allowedSortFields = []string{"created_at"}
