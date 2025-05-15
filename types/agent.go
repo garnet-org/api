@@ -184,6 +184,7 @@ type Agent struct {
 	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
 	NetworkPolicy     *MergedNetworkPolicy    `json:"network_policy,omitempty"`
 	Active            bool                    `json:"active"`
+	LastSeen          time.Time               `json:"last_seen"`
 	CreatedAt         time.Time               `json:"created_at"`
 	UpdatedAt         time.Time               `json:"updated_at"`
 }

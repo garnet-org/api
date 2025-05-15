@@ -735,6 +735,49 @@ paths:
                 error: "permission denied"
         "500":
           description: Internal server error
+          
+  /api/v1/agents/{id}/heartbeat:
+    post:
+      security:
+        - AgentTokenAuth: []
+      summary: Send agent heartbeat
+      description: |
+        Updates the agent's last_seen timestamp to track agent activity.
+        This endpoint is intended for agent self-reporting and requires agent token authentication.
+        The agent can only update its own status.
+      operationId: agentHeartbeat
+      parameters:
+        - name: id
+          in: path
+          description: ID of agent to update heartbeat for
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Heartbeat update successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+        "401":
+          description: Unauthorized (missing agent token or token doesn't match agent ID)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedAgent"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
 
   /api/v1/agents:
     post:
@@ -3898,7 +3941,11 @@ components:
           description: Kubernetes-specific context (present when kind is kubernetes)
         active:
           type: boolean
-          description: Whether the agent is currently active
+          description: Whether the agent is currently active (dynamically calculated based on last_seen timestamp)
+        last_seen:
+          type: string
+          format: date-time
+          description: When the agent was last seen (updated via heartbeat)
         created_at:
           type: string
           format: date-time
