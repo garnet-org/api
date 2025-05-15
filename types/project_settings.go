@@ -25,6 +25,9 @@ const (
 	// ProjectSettingKeyWebhookEnabledIssueClasses is the key for webhook enabled issue classes.
 	ProjectSettingKeyWebhookEnabledIssueClasses ProjectSettingKey = "webhook_enabled_issue_classes"
 
+	// ProjectSettingKeyEnabledGithubCommentPR is the key for enabled GitHub comment PR.
+	ProjectSettingKeyEnabledGithubCommentPR ProjectSettingKey = "enabled_github_comment_pr"
+
 	// MaxProjectSettingKeyLength is the maximum length for a project setting key.
 	MaxProjectSettingKeyLength = 255 // Same as the database column size
 )
@@ -37,7 +40,7 @@ func (k ProjectSettingKey) String() string {
 // IsValid checks if the ProjectSettingKey is valid.
 func (k ProjectSettingKey) IsValid() bool {
 	switch k {
-	case ProjectSettingKeyWebhookEnabledIssueClasses:
+	case ProjectSettingKeyWebhookEnabledIssueClasses, ProjectSettingKeyEnabledGithubCommentPR:
 		return true
 	default:
 		return false
