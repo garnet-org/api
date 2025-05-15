@@ -122,23 +122,42 @@ func DecodeAgentLabels(values url.Values) AgentLabels {
 
 // AgentKubernetesContext represents Kubernetes-specific context.
 type AgentKubernetesContext struct {
-	Cluster   string `json:"cluster"`
-	Namespace string `json:"namespace"`
+	ID        string    `json:"id"`
+	Cluster   string    `json:"cluster"`
+	Namespace string    `json:"namespace"`
+	Node      string    `json:"node"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Validate checks if the AgentKubernetesContext has all required fields set.
+// Validate checks if the AgentKubernetesContext has all required fields set
+// and validates that fields conform to Kubernetes naming conventions.
 func (c *AgentKubernetesContext) Validate() error {
 	if c == nil {
 		return errors.New("kubernetes context is required")
 	}
 
 	var errs []string
+	
+	// Validate cluster name
 	if c.Cluster == "" {
 		errs = append(errs, "cluster is required")
+	} else if err := ValidateK8sClusterName(c.Cluster); err != nil {
+		errs = append(errs, fmt.Sprintf("invalid cluster name: %v", err))
 	}
 
-	if c.Namespace == "" {
-		errs = append(errs, "namespace is required")
+	// Validate node name
+	if c.Node == "" {
+		errs = append(errs, "node is required")
+	} else if err := ValidateK8sNodeName(c.Node); err != nil {
+		errs = append(errs, fmt.Sprintf("invalid node name: %v", err))
+	}
+
+	// Validate namespace (optional)
+	if c.Namespace != "" {
+		if err := ValidateK8sNamespace(c.Namespace); err != nil {
+			errs = append(errs, fmt.Sprintf("invalid namespace: %v", err))
+		}
 	}
 
 	if len(errs) > 0 {

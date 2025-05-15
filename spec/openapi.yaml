@@ -4854,14 +4854,28 @@ components:
       description: Kubernetes-specific context for agents running in Kubernetes environments
       required:
         - cluster
-        - namespace
+        - node
       properties:
+        id:
+          type: string
+          description: Unique identifier for the Kubernetes context
         cluster:
           type: string
           description: Name of the Kubernetes cluster
         namespace:
           type: string
-          description: Kubernetes namespace where the agent is running
+          description: Kubernetes namespace where the agent is running (optional)
+        node:
+          type: string
+          description: Kubernetes node where the agent is running
+        created_at:
+          type: string
+          format: date-time
+          description: When the context was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the context was last updated
 
     AgentKind:
       type: string
