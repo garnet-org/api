@@ -1714,6 +1714,144 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
+          
+  /api/v1/network_policies/k8s/merged:
+    get:
+      security:
+        - BearerAuth: []
+      summary: Get merged network policy for a Kubernetes context
+      operationId: getMergedNetworkPolicyForK8s
+      parameters:
+        - name: cluster_name
+          in: query
+          description: Kubernetes cluster name to get network policy for
+          required: false
+          schema:
+            type: string
+        - name: node_name
+          in: query
+          description: Kubernetes node name to get network policy for
+          required: false
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Response format (set to "jibril" for Jibril format)
+          required: false
+          schema:
+            type: string
+            enum: ["jibril"]
+      responses:
+        "200":
+          description: Merged network policy for Kubernetes context
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MergedK8sNetworkPolicy"
+                  - $ref: "#/components/schemas/JibrilFormatNetworkPolicy"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          
+  /api/v1/network_policies/k8s/cluster/{cluster_name}:
+    get:
+      security:
+        - BearerAuth: []
+      summary: Get network policy for a specific Kubernetes cluster
+      operationId: getClusterNetworkPolicy
+      parameters:
+        - name: cluster_name
+          in: path
+          description: Kubernetes cluster name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cluster network policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClusterNetworkPolicy"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Network policy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          
+  /api/v1/network_policies/k8s/cluster/{cluster_name}/node/{node_name}:
+    get:
+      security:
+        - BearerAuth: []
+      summary: Get network policy for a specific Kubernetes node
+      operationId: getNodeNetworkPolicy
+      parameters:
+        - name: cluster_name
+          in: path
+          description: Kubernetes cluster name
+          required: true
+          schema:
+            type: string
+        - name: node_name
+          in: path
+          description: Kubernetes node name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Node network policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeNetworkPolicy"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Network policy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
 
   /api/v1/network_policies/{policy_id}/rules:
     post:
@@ -3063,7 +3201,7 @@ paths:
                   - $ref: "#/components/schemas/MergedNetworkPolicy"
                   - $ref: "#/components/schemas/JibrilFormatNetworkPolicy"
         "400":
-          description: Invalid input
+          description: Invalid parameters
           content:
             application/json:
               schema:
@@ -3076,6 +3214,192 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+  
+  /api/v1/projects/{project_id}/network_policies/k8s/merged:
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: Get merged network policy for a Kubernetes context in a specific project
+      description: |
+        Retrieves the merged network policy for a Kubernetes context in the specified project.
+        This endpoint uses the project_id from the path parameter instead of inferring it from the token.
+        
+        Functionally equivalent to /api/v1/network_policies/k8s/merged but with explicit project ID in the path.
+        
+        Required permissions: `read` on network_policy resource.
+      operationId: getMergedNetworkPolicyForK8sByPath
+      parameters:
+        - name: project_id
+          in: path
+          description: Project ID to get network policy for
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cluster_name
+          in: query
+          description: Kubernetes cluster name to get network policy for
+          required: false
+          schema:
+            type: string
+        - name: node_name
+          in: query
+          description: Kubernetes node name to get network policy for
+          required: false
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Response format
+          required: false
+          schema:
+            type: string
+            enum: ["jibril"]
+      responses:
+        "200":
+          description: Merged network policy for Kubernetes context
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MergedK8sNetworkPolicy"
+                  - $ref: "#/components/schemas/JibrilFormatNetworkPolicy"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+                
+  /api/v1/projects/{project_id}/network_policies/k8s/cluster/{cluster_name}:
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: Get network policy for a specific Kubernetes cluster in a project
+      description: |
+        Retrieves the network policy for a specific Kubernetes cluster in the specified project.
+        This endpoint uses the project_id from the path parameter instead of inferring it from the token.
+        
+        Functionally equivalent to /api/v1/network_policies/k8s/cluster/{cluster_name} but with explicit project ID in the path.
+        
+        Required permissions: `read` on network_policy resource.
+      operationId: getClusterNetworkPolicyByPath
+      parameters:
+        - name: project_id
+          in: path
+          description: Project ID to get network policy for
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cluster_name
+          in: path
+          description: Kubernetes cluster name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cluster network policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClusterNetworkPolicy"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Network policy or project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+                
+  /api/v1/projects/{project_id}/network_policies/k8s/cluster/{cluster_name}/node/{node_name}:
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: Get network policy for a specific Kubernetes node in a project
+      description: |
+        Retrieves the network policy for a specific Kubernetes node in the specified project.
+        This endpoint uses the project_id from the path parameter instead of inferring it from the token.
+        
+        Functionally equivalent to /api/v1/network_policies/k8s/cluster/{cluster_name}/node/{node_name} but with explicit project ID in the path.
+        
+        Required permissions: `read` on network_policy resource.
+      operationId: getNodeNetworkPolicyByPath
+      parameters:
+        - name: project_id
+          in: path
+          description: Project ID to get network policy for
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cluster_name
+          in: path
+          description: Kubernetes cluster name
+          required: true
+          schema:
+            type: string
+        - name: node_name
+          in: path
+          description: Kubernetes node name
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Node network policy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeNetworkPolicy"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Network policy or project not found
           content:
             application/json:
               schema:
@@ -4455,7 +4779,9 @@ components:
         - global
         - repo
         - workflow
-      description: Scope level of the network policy
+        - cluster
+        - node
+      description: Scope level of the network policy. Global scope applies to all contexts, repo scope applies to specific repositories, workflow scope applies to specific CI/CD workflows, cluster scope applies to specific Kubernetes clusters, and node scope applies to specific Kubernetes nodes.
 
     NetworkPolicyType:
       type: string
@@ -4674,6 +5000,51 @@ components:
           nullable: true
         workflow_policy:
           $ref: "#/components/schemas/NetworkPolicy"
+          nullable: true
+        
+    ClusterNetworkPolicy:
+      type: object
+      description: Network policy for a Kubernetes cluster
+      allOf:
+        - $ref: "#/components/schemas/NetworkPolicy"
+        - type: object
+          properties:
+            cluster_name:
+              type: string
+              description: Name of the Kubernetes cluster
+              
+    NodeNetworkPolicy:
+      type: object
+      description: Network policy for a Kubernetes node
+      allOf:
+        - $ref: "#/components/schemas/NetworkPolicy"
+        - type: object
+          properties:
+            cluster_name:
+              type: string
+              description: Name of the Kubernetes cluster
+            node_name:
+              type: string
+              description: Name of the Kubernetes node
+              
+    MergedK8sNetworkPolicy:
+      type: object
+      description: Merged network policy for Kubernetes contexts
+      properties:
+        config:
+          $ref: "#/components/schemas/NetworkPolicyConfig"
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/NetworkPolicyRule"
+        global_policy:
+          $ref: "#/components/schemas/NetworkPolicy"
+          nullable: true
+        cluster_policy:
+          $ref: "#/components/schemas/ClusterNetworkPolicy"
+          nullable: true
+        node_policy:
+          $ref: "#/components/schemas/NodeNetworkPolicy"
           nullable: true
           
     JibrilFormatNetworkPolicy:
