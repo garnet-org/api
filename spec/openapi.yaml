@@ -736,7 +736,7 @@ paths:
         "500":
           description: Internal server error
           
-  /api/v1/agents/{id}/heartbeat:
+  /api/v1/agent_heartbeat:
     post:
       security:
         - AgentTokenAuth: []
@@ -744,15 +744,8 @@ paths:
       description: |
         Updates the agent's last_seen timestamp to track agent activity.
         This endpoint is intended for agent self-reporting and requires agent token authentication.
-        The agent can only update its own status.
+        The agent ID is extracted from the agent token.
       operationId: agentHeartbeat
-      parameters:
-        - name: id
-          in: path
-          description: ID of agent to update heartbeat for
-          required: true
-          schema:
-            type: string
       responses:
         "200":
           description: Heartbeat update successful
@@ -765,7 +758,7 @@ paths:
                     type: string
                     example: "ok"
         "401":
-          description: Unauthorized (missing agent token or token doesn't match agent ID)
+          description: Unauthorized (missing or invalid agent token)
           content:
             application/json:
               schema:

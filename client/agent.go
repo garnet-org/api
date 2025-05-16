@@ -34,9 +34,10 @@ func (c *Client) UpdateAgent(ctx context.Context, agentID string, agent types.Up
 	return c.do(ctx, nil, http.MethodPatch, "/api/v1/agents/"+agentID, agent)
 }
 
-// AgentHeartbeat sends a heartbeat for the specified agent to update its last_seen timestamp.
-func (c *Client) AgentHeartbeat(ctx context.Context, agentID string) error {
-	return c.do(ctx, nil, http.MethodPost, "/api/v1/agents/"+agentID+"/heartbeat", nil)
+// AgentHeartbeat sends a heartbeat to update the agent's last_seen timestamp.
+// The agent ID is extracted from the agent token.
+func (c *Client) AgentHeartbeat(ctx context.Context) error {
+	return c.do(ctx, nil, http.MethodPost, "/api/v1/agent_heartbeat", nil)
 }
 
 // Agents retrieves a list of agents with optional filters and pagination.
