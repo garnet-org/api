@@ -70,7 +70,11 @@ const (
 type NetworkPolicyScope string
 
 const (
-	// NetworkPolicyScopeGlobal represents a network policy that applies globally.
+	// NetworkPolicyScopeSystemGlobal represents a system-wide network policy that applies across all projects.
+	// This scope is managed only by system administrators and cannot be modified by regular users.
+	NetworkPolicyScopeSystemGlobal NetworkPolicyScope = "system_global"
+
+	// NetworkPolicyScopeGlobal represents a network policy that applies globally within a project.
 	NetworkPolicyScopeGlobal NetworkPolicyScope = "global"
 
 	// NetworkPolicyScopeRepo represents a network policy that applies to a specific repository.
@@ -96,7 +100,7 @@ func (s NetworkPolicyScope) String() string {
 // IsValid checks if the NetworkPolicyScope is valid.
 func (s NetworkPolicyScope) IsValid() bool {
 	switch s {
-	case NetworkPolicyScopeGlobal, NetworkPolicyScopeRepo, NetworkPolicyScopeWorkflow,
+	case NetworkPolicyScopeSystemGlobal, NetworkPolicyScopeGlobal, NetworkPolicyScopeRepo, NetworkPolicyScopeWorkflow,
 		NetworkPolicyScopeCluster, NetworkPolicyScopeNode:
 		return true
 	}
@@ -310,7 +314,14 @@ type NetworkPolicy struct {
 	DeletedAt *time.Time          `json:"deleted_at,omitempty"`
 }
 
-// GlobalNetworkPolicy represents a network policy with global scope.
+// SystemGlobalNetworkPolicy represents a network policy with system global scope.
+// This policy applies across all projects and can only be managed by system administrators.
+type SystemGlobalNetworkPolicy struct {
+	NetworkPolicy
+	// Note: ProjectID is not set for system global policies (remains empty)
+}
+
+// GlobalNetworkPolicy represents a network policy with global scope within a project.
 type GlobalNetworkPolicy struct {
 	NetworkPolicy
 }
@@ -343,17 +354,18 @@ type NodeNetworkPolicy struct {
 
 // MergedNetworkPolicy represents a network policy that combines all applicable policies.
 type MergedNetworkPolicy struct {
-	Config         NetworkPolicyConfig    `json:"config"`
-	Rules          []NetworkPolicyRule    `json:"rules"`
-	GlobalPolicy   *NetworkPolicy         `json:"global_policy,omitempty"`
-	
+	Config              NetworkPolicyConfig       `json:"config"`
+	Rules               []NetworkPolicyRule       `json:"rules"`
+	SystemGlobalPolicy  *SystemGlobalNetworkPolicy `json:"system_global_policy,omitempty"`
+	GlobalPolicy        *NetworkPolicy            `json:"global_policy,omitempty"`
+
 	// GitHub context policies
-	RepoPolicy     *RepoNetworkPolicy     `json:"repo_policy,omitempty"`
-	WorkflowPolicy *WorkflowNetworkPolicy `json:"workflow_policy,omitempty"`
-	
+	RepoPolicy          *RepoNetworkPolicy        `json:"repo_policy,omitempty"`
+	WorkflowPolicy      *WorkflowNetworkPolicy    `json:"workflow_policy,omitempty"`
+
 	// Kubernetes context policies
-	ClusterPolicy  *ClusterNetworkPolicy  `json:"cluster_policy,omitempty"`
-	NodePolicy     *NodeNetworkPolicy     `json:"node_policy,omitempty"`
+	ClusterPolicy       *ClusterNetworkPolicy     `json:"cluster_policy,omitempty"`
+	NodePolicy          *NodeNetworkPolicy        `json:"node_policy,omitempty"`
 }
 
 // ToJibrilFormat converts a MergedNetworkPolicy to the Jibril agent compatible format.
@@ -415,15 +427,15 @@ type CreateNetworkPolicy struct {
 	Scope        NetworkPolicyScope        `json:"scope"`
 	Config       NetworkPolicyConfig       `json:"config"`
 	Rules        []CreateNetworkPolicyRule `json:"rules,omitempty"`
-	
+
 	// GitHub context fields
 	RepositoryID string                    `json:"repository_id,omitempty"`
 	WorkflowName string                    `json:"workflow_name,omitempty"`
-	
+
 	// Kubernetes context fields
 	ClusterName  string                    `json:"cluster_name,omitempty"`
 	NodeName     string                    `json:"node_name,omitempty"`
-	
+
 	ProjectID    string                    `json:"-"` // Populated by the service layer, not exposed in API
 }
 
@@ -436,6 +448,8 @@ func (c *CreateNetworkPolicy) Validate() error {
 
 	// Validate required fields based on scope
 	switch c.Scope {
+	case NetworkPolicyScopeSystemGlobal:
+		// System global policy doesn't require any additional fields
 	case NetworkPolicyScopeGlobal:
 		// Global policy doesn't require any additional fields
 	case NetworkPolicyScopeRepo:
@@ -597,11 +611,14 @@ func applyPolicy(merged *MergedNetworkPolicy, policy *NetworkPolicy) {
 
 // GetMergedNetworkPolicy constructs a merged policy from the provided GitHub context policies.
 // This is used for agents with GitHub context.
-func GetMergedNetworkPolicy(global *GlobalNetworkPolicy, repo *RepoNetworkPolicy, workflow *WorkflowNetworkPolicy) *MergedNetworkPolicy {
+func GetMergedNetworkPolicy(systemGlobal *SystemGlobalNetworkPolicy, global *GlobalNetworkPolicy, repo *RepoNetworkPolicy, workflow *WorkflowNetworkPolicy) *MergedNetworkPolicy {
 	// Start with a default config
 	merged := initialMergedNetworkPolicy()
 
 	// Store policy references
+	if systemGlobal != nil {
+		merged.SystemGlobalPolicy = systemGlobal
+	}
 	if global != nil {
 		merged.GlobalPolicy = &global.NetworkPolicy
 	}
@@ -614,16 +631,22 @@ func GetMergedNetworkPolicy(global *GlobalNetworkPolicy, repo *RepoNetworkPolicy
 
 	// Apply the configs and rules in order from lowest to highest precedence
 	// 1. Start with defaults (already set above)
-	// 2. Add global policy
-	// 3. Add repo policy if available
-	// 4. Add workflow policy if available
+	// 2. Add system global policy (baseline for all projects)
+	// 3. Add project global policy
+	// 4. Add repo policy if available
+	// 5. Add workflow policy if available
 
-	// Apply global policy
+	// Apply system global policy (baseline)
+	if systemGlobal != nil {
+		applyPolicy(merged, &systemGlobal.NetworkPolicy)
+	}
+
+	// Apply project global policy (overrides system global)
 	if global != nil {
 		applyPolicy(merged, &global.NetworkPolicy)
 	}
 
-	// Apply repo policy (overrides global)
+	// Apply repo policy (overrides project global)
 	if repo != nil {
 		applyPolicy(merged, &repo.NetworkPolicy)
 	}
@@ -638,11 +661,14 @@ func GetMergedNetworkPolicy(global *GlobalNetworkPolicy, repo *RepoNetworkPolicy
 
 // GetMergedNetworkPolicyForK8s constructs a merged policy from the provided Kubernetes context policies.
 // This is used for agents with Kubernetes context.
-func GetMergedNetworkPolicyForK8s(global *GlobalNetworkPolicy, cluster *ClusterNetworkPolicy, node *NodeNetworkPolicy) *MergedNetworkPolicy {
+func GetMergedNetworkPolicyForK8s(systemGlobal *SystemGlobalNetworkPolicy, global *GlobalNetworkPolicy, cluster *ClusterNetworkPolicy, node *NodeNetworkPolicy) *MergedNetworkPolicy {
 	// Start with a default config
 	merged := initialMergedNetworkPolicy()
 
 	// Store policy references
+	if systemGlobal != nil {
+		merged.SystemGlobalPolicy = systemGlobal
+	}
 	if global != nil {
 		merged.GlobalPolicy = &global.NetworkPolicy
 	}
@@ -655,16 +681,22 @@ func GetMergedNetworkPolicyForK8s(global *GlobalNetworkPolicy, cluster *ClusterN
 
 	// Apply the configs and rules in order from lowest to highest precedence
 	// 1. Start with defaults (already set above)
-	// 2. Add global policy
-	// 3. Add cluster policy if available
-	// 4. Add node policy if available
+	// 2. Add system global policy (baseline for all projects)
+	// 3. Add project global policy
+	// 4. Add cluster policy if available
+	// 5. Add node policy if available
 
-	// Apply global policy
+	// Apply system global policy (baseline)
+	if systemGlobal != nil {
+		applyPolicy(merged, &systemGlobal.NetworkPolicy)
+	}
+
+	// Apply project global policy (overrides system global)
 	if global != nil {
 		applyPolicy(merged, &global.NetworkPolicy)
 	}
 
-	// Apply cluster policy (overrides global)
+	// Apply cluster policy (overrides project global)
 	if cluster != nil {
 		applyPolicy(merged, &cluster.NetworkPolicy)
 	}
