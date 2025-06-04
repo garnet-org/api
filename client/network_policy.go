@@ -8,6 +8,13 @@ import (
 	"github.com/garnet-org/api/types"
 )
 
+const (
+	// API endpoint paths.
+	pathNetworkPoliciesMerged     = "/api/v1/network_policies/merged"
+	pathNetworkPoliciesK8sMerged  = "/api/v1/network_policies/k8s/merged"
+)
+
+
 // CreateNetworkPolicy creates a new network policy.
 func (c *Client) CreateNetworkPolicy(ctx context.Context, policy types.CreateNetworkPolicy) (types.NetworkPolicyCreated, error) {
 	var out types.NetworkPolicyCreated
@@ -55,7 +62,7 @@ func (c *Client) MergedNetworkPolicy(ctx context.Context, repositoryID, workflow
 		q.Set("workflow_name", workflowName)
 	}
 
-	path := "/api/v1/network_policies/merged"
+	path := pathNetworkPoliciesMerged
 	if len(q) > 0 {
 		path += "?" + q.Encode()
 	}
@@ -63,26 +70,6 @@ func (c *Client) MergedNetworkPolicy(ctx context.Context, repositoryID, workflow
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }
 
-// MergedNetworkPolicyJibrilFormat retrieves a merged network policy in Jibril-compatible format.
-func (c *Client) MergedNetworkPolicyJibrilFormat(ctx context.Context, repositoryID, workflowName string) (map[string]interface{}, error) {
-	var out map[string]interface{}
-
-	q := url.Values{}
-	if repositoryID != "" {
-		q.Set("repository_id", repositoryID)
-	}
-	if workflowName != "" {
-		q.Set("workflow_name", workflowName)
-	}
-	q.Set("format", "jibril")
-
-	path := "/api/v1/network_policies/merged"
-	if len(q) > 0 {
-		path += "?" + q.Encode()
-	}
-
-	return out, c.do(ctx, &out, http.MethodGet, path, nil)
-}
 
 // CreateNetworkPolicyRule creates a new rule for a network policy.
 func (c *Client) CreateNetworkPolicyRule(ctx context.Context, policyID string, rule types.CreateNetworkPolicyRule) (types.NetworkPolicyRuleCreated, error) {
@@ -136,7 +123,7 @@ func (c *Client) MergedNetworkPolicyForK8s(ctx context.Context, clusterName, nod
 		q.Set("node_name", nodeName)
 	}
 
-	path := "/api/v1/network_policies/k8s/merged"
+	path := pathNetworkPoliciesK8sMerged
 	if len(q) > 0 {
 		path += "?" + q.Encode()
 	}
@@ -144,10 +131,9 @@ func (c *Client) MergedNetworkPolicyForK8s(ctx context.Context, clusterName, nod
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }
 
-// MergedNetworkPolicyForK8sJibrilFormat retrieves a merged network policy for a Kubernetes context in Jibril-compatible format.
-func (c *Client) MergedNetworkPolicyForK8sJibrilFormat(ctx context.Context, clusterName, nodeName string) (map[string]interface{}, error) {
-	var out map[string]interface{}
 
+// MergedNetworkPolicyForK8sYAML retrieves a merged network policy for a Kubernetes context as pre-formatted YAML.
+func (c *Client) MergedNetworkPolicyForK8sYAML(ctx context.Context, clusterName, nodeName string) ([]byte, error) {
 	q := url.Values{}
 	if clusterName != "" {
 		q.Set("cluster_name", clusterName)
@@ -155,12 +141,104 @@ func (c *Client) MergedNetworkPolicyForK8sJibrilFormat(ctx context.Context, clus
 	if nodeName != "" {
 		q.Set("node_name", nodeName)
 	}
-	q.Set("format", "jibril")
+	q.Set("format", "yaml")
 
 	path := "/api/v1/network_policies/k8s/merged"
 	if len(q) > 0 {
 		path += "?" + q.Encode()
 	}
 
+	return c.doRaw(ctx, path)
+}
+
+// MergedNetworkPolicyGithub retrieves a merged network policy for GitHub context.
+func (c *Client) MergedNetworkPolicyGithub(ctx context.Context, repositoryID, workflowName string, format types.PolicyFormat) (interface{}, error) {
+	q := url.Values{}
+	if repositoryID != "" {
+		q.Set("repository_id", repositoryID)
+	}
+	if workflowName != "" {
+		q.Set("workflow_name", workflowName)
+	}
+	if format != types.PolicyFormatJSON {
+		q.Set("format", string(format))
+	}
+
+	path := pathNetworkPoliciesMerged
+	if len(q) > 0 {
+		path += "?" + q.Encode()
+	}
+
+	if format == types.PolicyFormatYAML {
+		return c.doRaw(ctx, path)
+	}
+
+	var out types.MergedNetworkPolicy
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
+}
+
+// MergedNetworkPolicyK8s retrieves a merged network policy for Kubernetes context.
+func (c *Client) MergedNetworkPolicyK8s(ctx context.Context, clusterName, nodeName string, format types.PolicyFormat) (interface{}, error) {
+	q := url.Values{}
+	if clusterName != "" {
+		q.Set("cluster_name", clusterName)
+	}
+	if nodeName != "" {
+		q.Set("node_name", nodeName)
+	}
+	if format != types.PolicyFormatJSON {
+		q.Set("format", string(format))
+	}
+
+	path := "/api/v1/network_policies/k8s/merged"
+	if len(q) > 0 {
+		path += "?" + q.Encode()
+	}
+
+	if format == types.PolicyFormatYAML {
+		return c.doRaw(ctx, path)
+	}
+
+	var out types.MergedNetworkPolicy
+	return out, c.do(ctx, &out, http.MethodGet, path, nil)
+}
+
+
+// MergedNetworkPolicyGithubJSON retrieves a merged network policy for GitHub context as JSON.
+func (c *Client) MergedNetworkPolicyGithubJSON(ctx context.Context, repositoryID, workflowName string) (types.MergedNetworkPolicy, error) {
+	var out types.MergedNetworkPolicy
+
+	q := url.Values{}
+	if repositoryID != "" {
+		q.Set("repository_id", repositoryID)
+	}
+	if workflowName != "" {
+		q.Set("workflow_name", workflowName)
+	}
+
+	path := "/api/v1/network_policies/merged"
+	if len(q) > 0 {
+		path += "?" + q.Encode()
+	}
+
+	return out, c.do(ctx, &out, http.MethodGet, path, nil)
+}
+
+// MergedNetworkPolicyGithubYAML retrieves a merged network policy for GitHub context as YAML.
+func (c *Client) MergedNetworkPolicyGithubYAML(ctx context.Context, repositoryID, workflowName string) ([]byte, error) {
+	q := url.Values{}
+	if repositoryID != "" {
+		q.Set("repository_id", repositoryID)
+	}
+	if workflowName != "" {
+		q.Set("workflow_name", workflowName)
+	}
+	q.Set("format", string(types.PolicyFormatYAML))
+
+	path := "/api/v1/network_policies/merged"
+	if len(q) > 0 {
+		path += "?" + q.Encode()
+	}
+
+	return c.doRaw(ctx, path)
 }

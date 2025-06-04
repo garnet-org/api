@@ -9,6 +9,16 @@ import (
 	"github.com/garnet-org/api/types/errs"
 )
 
+// PolicyFormat represents the output format for merged network policies.
+type PolicyFormat string
+
+const (
+	// PolicyFormatJSON returns JSON format (default).
+	PolicyFormatJSON PolicyFormat = ""
+	// PolicyFormatYAML returns pre-formatted YAML bytes.
+	PolicyFormatYAML PolicyFormat = "yaml"
+)
+
 // Network policy error constants.
 const (
 	// ErrInvalidNetworkPolicyScope is returned when the network policy scope is not one of the defined valid options.
@@ -368,59 +378,6 @@ type MergedNetworkPolicy struct {
 	NodePolicy          *NodeNetworkPolicy        `json:"node_policy,omitempty"`
 }
 
-// ToJibrilFormat converts a MergedNetworkPolicy to the Jibril agent compatible format.
-func (m *MergedNetworkPolicy) ToJibrilFormat() map[string]interface{} {
-	// Convert policy rules to Jibril format
-	rules := make([]map[string]interface{}, 0, len(m.Rules))
-	for _, rule := range m.Rules {
-		ruleMap := map[string]interface{}{
-			"policy": rule.Action.String(),
-		}
-
-		// Add the appropriate field based on rule type
-		switch rule.Type {
-		case NetworkPolicyRuleTypeCIDR:
-			ruleMap["cidr"] = rule.Value
-		case NetworkPolicyRuleTypeDomain:
-			ruleMap["domain"] = rule.Value
-		}
-
-		rules = append(rules, ruleMap)
-	}
-
-	// Map CIDR Mode and Resolve Mode to Jibril format
-	cidrMode := "both"
-	resolveMode := "bypass"
-
-	switch m.Config.CIDRMode {
-	case NetworkPolicyCIDRModeBoth:
-		cidrMode = "both"
-	case NetworkPolicyCIDRModeIPv4:
-		cidrMode = "alert"
-	case NetworkPolicyCIDRModeIPv6:
-		cidrMode = "enforce"
-	}
-
-	switch m.Config.ResolveMode {
-	case NetworkPolicyResolveModsBypass:
-		resolveMode = "bypass"
-	case NetworkPolicyResolveModeStrict:
-		resolveMode = "enforce"
-	case NetworkPolicyResolveModePermissive:
-		resolveMode = "alert"
-	}
-
-	// Build the Jibril format configuration
-	return map[string]interface{}{
-		"network_policy": map[string]interface{}{
-			"cidr_mode":      cidrMode,
-			"cidr_policy":    m.Config.CIDRPolicy.String(),
-			"resolve_mode":   resolveMode,
-			"resolve_policy": m.Config.ResolvePolicy.String(),
-			"rules":          rules,
-		},
-	}
-}
 
 // CreateNetworkPolicy represents the request to create a new network policy.
 type CreateNetworkPolicy struct {

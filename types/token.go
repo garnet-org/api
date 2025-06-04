@@ -3,6 +3,8 @@ package types
 import (
 	"time"
 
+	"slices"
+
 	"github.com/garnet-org/api/types/errs"
 )
 
@@ -57,14 +59,7 @@ func (c *CreateToken) Validate() error {
 	// Let's validate if permissions are provided
 	if len(c.Permissions) > 0 {
 		for _, p := range c.Permissions {
-			valid := false
-			for _, validPerm := range AllPermissions() {
-				if p == validPerm {
-					valid = true
-					break
-				}
-			}
-			if !valid {
+			if !slices.Contains(AllPermissions(), p) {
 				return ErrInvalidPermission
 			}
 		}

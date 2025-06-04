@@ -174,6 +174,69 @@ func (c *Client) do(ctx context.Context, out any, method, path string, body any)
 	return nil
 }
 
+// doRaw performs a GET HTTP request and returns the raw response body bytes.
+func (c *Client) doRaw(ctx context.Context, path string) ([]byte, error) {
+	var bodyReader io.Reader
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.endpoint(path), bodyReader)
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
+
+	// Set auth headers based on token type
+	if c.AuthToken != "" {
+		switch c.TokenType {
+		case TokenTypeUser:
+			// Check if it's already a bearer token
+			if strings.HasPrefix(c.AuthToken, "Bearer ") {
+				req.Header.Set("Authorization", c.AuthToken)
+			} else {
+				req.Header.Set("Authorization", "Bearer "+c.AuthToken)
+			}
+		case TokenTypeAgent:
+			req.Header.Set("X-Agent-Token", c.AuthToken)
+		case TokenTypeProject:
+			req.Header.Set("X-Project-Token", c.AuthToken)
+		case TokenTypeNone:
+			// No headers added for TokenTypeNone
+		}
+	}
+
+	if c.Debug {
+		rawReq, err := httputil.DumpRequestOut(req, true)
+		if err == nil {
+			fmt.Println(string(rawReq))
+		}
+	}
+
+	resp, err := c.BaseClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("send request: %w", err)
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("failed to close response body: %v\n", err)
+		}
+	}()
+
+	if resp.StatusCode >= 400 {
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("read error response body: %w", err)
+		}
+
+		return nil, fmt.Errorf("unexpected status code %d: %s", resp.StatusCode, string(b))
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %w", err)
+	}
+
+	return bodyBytes, nil
+}
+
 func (c *Client) endpoint(path string) string {
 	return strings.TrimRight(c.BaseURL, "/") + "/" + strings.TrimLeft(path, "/")
 }

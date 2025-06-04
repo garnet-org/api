@@ -637,6 +637,11 @@ paths:
       security:
         - BearerAuth: []
       summary: Get agent by ID
+      description: |
+        Retrieve an agent by its ID. Note: Network policies are not included in the agent response.
+        To get network policies for an agent, use the dedicated network policy endpoints:
+        - GET /api/v1/network_policies/merged for GitHub contexts
+        - GET /api/v1/network_policies/k8s/merged for Kubernetes contexts
       operationId: getAgentById
       parameters:
         - name: id
@@ -777,6 +782,10 @@ paths:
       security:
         - BearerAuth: []
       summary: Create a new agent
+      description: |
+        Create a new agent and generate an authentication token for it. Note: Network policies are not 
+        included in the creation response. To get network policies for the agent, use the dedicated 
+        network policy endpoints after creation.
       operationId: createAgent
       requestBody:
         description: Agent object that needs to be created
@@ -839,6 +848,9 @@ paths:
       security:
         - BearerAuth: []
       summary: Query agents returning list of agents
+      description: |
+        Query and retrieve a paginated list of agents. Network policies are not included in the 
+        agent list response for performance reasons.
       operationId: listAgents
       parameters:
         - name: filters
@@ -4271,9 +4283,6 @@ components:
           type: string
           format: date-time
           description: When the agent was last updated
-          $ref: "#/components/schemas/AgentKubernetesContext"
-        network_policy:
-          $ref: "#/components/schemas/MergedNetworkPolicy"
 
     CreateAgent:
       type: object
@@ -4369,9 +4378,6 @@ components:
         agent_token:
           type: string
           description: JWT token to be used for agent authentication. This token should be passed in the X-Agent-Token header for authenticated agent operations like event ingestion.
-        network_policy:
-          $ref: "#/components/schemas/MergedNetworkPolicy"
-          description: Merged network policy for this agent based on its context.
 
     Page:
       type: object
