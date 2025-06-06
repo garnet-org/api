@@ -14,6 +14,13 @@ func (c *Client) IngestEvent(ctx context.Context, event types.CreateOrUpdateEven
 	return out, c.do(ctx, &out, http.MethodPut, "/api/v1/events", event)
 }
 
+// IngestEventV2 creates or updates an event using ashkaal format.
+func (c *Client) IngestEventV2(ctx context.Context, event types.CreateOrUpdateEventV2) (types.EventV2CreatedOrUpdated, error) {
+	var out types.EventV2CreatedOrUpdated
+
+	return out, c.do(ctx, &out, http.MethodPut, "/api/v1/events_v2", event)
+}
+
 // Event retrieves an event by ID.
 func (c *Client) Event(ctx context.Context, eventID string) (types.Event, error) {
 	var result types.Event

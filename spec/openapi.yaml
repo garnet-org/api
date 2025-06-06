@@ -632,6 +632,51 @@ paths:
         "500":
           description: Internal server error
 
+  /api/v1/events_v2:
+    put:
+      security:
+        - AgentTokenAuth: []
+      summary: Send the v2 event to the server using ashkaal format
+      description: |
+        Ingests an event to the server using ashkaal format (v2). Requires agent authentication using the X-Agent-Token header.
+        The agent ID is automatically extracted from the token and associated with the event.
+        V2 events use the ashkaal ongoing format for enhanced event data structure.
+      operationId: ingestEventV2
+      requestBody:
+        description: V2 Event object using ashkaal format that needs to be ingested
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrUpdateEventV2"
+      responses:
+        "201":
+          description: V2 Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventV2CreatedOrUpdated"
+        "202":
+          description: V2 Event updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventV2CreatedOrUpdated"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Missing or invalid agent token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedEvents"
+        "500":
+          description: Internal server error
+
   /api/v1/agents/{id}:
     get:
       security:
@@ -3863,6 +3908,224 @@ components:
           type: string
           format: date-time
           description: The timestamp when the event was created or updated
+
+    EventV2CreatedOrUpdated:
+      type: object
+      description: Response returned when a v2 event (ashkaal format) is successfully created or updated
+      properties:
+        id:
+          type: string
+          description: The ID of the created or updated v2 event
+        created:
+          type: boolean
+          description: Whether the v2 event was newly created (true) or updated (false)
+        updated_at:
+          type: string
+          format: date-time
+          description: The timestamp when the v2 event was created or updated
+
+    CreateOrUpdateEventV2:
+      type: object
+      description: |
+        V2 Event data using ashkaal format for creating or updating events.
+        Uses the ashkaal ongoing Base structure for enhanced event data.
+        The agent_id field is automatically set from the authentication token.
+      required:
+        - id
+        - kind
+        - data
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the v2 event
+        kind:
+          $ref: "#/components/schemas/AshkaalKind"
+          description: Type of ashkaal event (flows, detections, infos, netpolicy)
+        data:
+          $ref: "#/components/schemas/AshkaalBase"
+          description: Ashkaal ongoing Base structure containing event metadata and background data
+        createdAt:
+          type: string
+          format: date-time
+          description: When the v2 event was initially created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the v2 event was last updated
+
+    EventV2:
+      type: object
+      description: |
+        Complete v2 event data returned in API responses using ashkaal format.
+        Includes full agent information with context instead of just an agent ID.
+      required:
+        - id
+        - agent
+        - kind
+        - data
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the v2 event
+        agent:
+          $ref: "#/components/schemas/Agent"
+          description: Complete agent information including context
+        kind:
+          $ref: "#/components/schemas/AshkaalKind"
+          description: Type of ashkaal event (flows, detections, infos, netpolicy)
+        data:
+          $ref: "#/components/schemas/AshkaalBase"
+          description: Ashkaal ongoing Base structure containing event metadata and background data
+        createdAt:
+          type: string
+          format: date-time
+          description: When the v2 event was initially created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the v2 event was last updated
+
+    AshkaalKind:
+      type: string
+      description: Type of ashkaal event from the jibril-ashkaal package
+      enum:
+        - flows
+        - detections
+        - infos
+        - netpolicy
+      example: flows
+
+    AshkaalBase:
+      type: object
+      description: |
+        Ashkaal ongoing Base structure containing detection event data.
+        This follows the ashkaal package specification for event data.
+      required:
+        - uuid
+        - timestamp
+      properties:
+        uuid:
+          type: string
+          description: The unique ID of the detection
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp of the detection in RFC3339 format
+          example: "2023-01-01T12:00:00Z"
+        note:
+          type: string
+          description: A note about the detection
+          example: "Suspicious network activity detected"
+        metadata:
+          $ref: "#/components/schemas/AshkaalMetadata"
+          description: The detection metadata (similar to previous Head structure)
+        background:
+          $ref: "#/components/schemas/AshkaalBackground"
+          description: The detection context (similar to previous Body structure)
+
+    AshkaalMetadata:
+      type: object
+      description: Detection event metadata from ashkaal package
+      properties:
+        kind:
+          type: string
+          description: Detection event class name
+          example: "flow"
+        name:
+          type: string
+          description: Detection recipe name
+          example: "dropip"
+        format:
+          type: string
+          description: Detection event format
+          example: "ashkaal"
+        version:
+          type: string
+          description: Detection event format version
+          example: "1.0"
+        description:
+          type: string
+          description: Detection event description
+          example: "Blocked IP connection"
+        importance:
+          type: string
+          description: Detection event importance
+          example: "critical"
+        documentation:
+          type: string
+          description: Detection event documentation URL
+          example: "https://docs.example.com/dropip"
+        tactic:
+          type: string
+          description: Detection event MITRE tactic
+          example: "Exfiltration"
+        technique:
+          type: string
+          description: Detection event MITRE technique
+          example: "T1041"
+        subtechnique:
+          type: string
+          description: Detection event MITRE subtechnique
+          example: "T1041.001"
+
+    AshkaalBackground:
+      type: object
+      description: Detection context information from ashkaal package
+      properties:
+        files:
+          type: object
+          description: File access information (simplified representation)
+          additionalProperties: true
+        flows:
+          type: object
+          description: Network flow information (simplified representation)
+          additionalProperties: true
+        ancestry:
+          type: array
+          description: Process ancestry information
+          items:
+            $ref: "#/components/schemas/AshkaalProcess"
+
+    AshkaalProcess:
+      type: object
+      description: Process information from ashkaal package
+      properties:
+        start:
+          type: string
+          format: date-time
+          description: The start time of the process
+        exit:
+          type: string
+          format: date-time
+          description: The exit time of the process
+        retcode:
+          type: integer
+          description: The return code of the process
+        uid:
+          type: integer
+          description: The user ID of the process
+        pid:
+          type: integer
+          description: The process ID
+        ppid:
+          type: integer
+          description: The parent process ID
+        comm:
+          type: string
+          description: The command name
+        cmd:
+          type: string
+          description: The command
+        exe:
+          type: string
+          description: The executable name
+        args:
+          type: string
+          description: The arguments
+        loader:
+          type: string
+          description: The loader name
 
     CreateOrUpdateEvent:
       type: object
