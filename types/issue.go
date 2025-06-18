@@ -356,6 +356,7 @@ type Issue struct {
 
 // ExtractNetworkDestination extracts network destination information from the events linked to an issue.
 //
+//nolint:gocognit,gocyclo
 func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, error) {
 	if len(i.Events) == 0 {
 		return "", "", ErrIssueHasNoNetworkDestination
@@ -363,63 +364,77 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 
 	// Examine events to extract network destination
 	for _, event := range i.Events {
-		// For V2 events, check metadata name instead of Kind
-		if event.Data.Metadata == nil {
-			continue
-		}
-		
-		switch event.Data.Metadata.Name {
-		case MetadataNameDropIP:
-			// Extract remote IP from V2 event flows
-			if ip := ExtractIPFromV2Event(event); ip != "" {
-				return formatCIDRAddress(ip)
+		switch event.Kind {
+		case EventKindDropIP:
+			// Extract remote IP from dropped event
+			if hasValidDroppedAddress(event) {
+				// Check which structure has the data
+				if event.Data.Dropped != nil && event.Data.Dropped.Remote != nil && event.Data.Dropped.Remote.Address != nil {
+					return formatCIDRAddress(*event.Data.Dropped.Remote.Address)
+				} else if event.Data.Body != nil && event.Data.Body.Dropped != nil && event.Data.Body.Dropped.Remote != nil && event.Data.Body.Dropped.Remote.Address != nil {
+					return formatCIDRAddress(*event.Data.Body.Dropped.Remote.Address)
+				}
 			}
 
-		case MetadataNameDropDomain:
-			// Extract domain information from V2 event flows
-			if domain := ExtractDomainFromV2Event(event); domain != "" {
-				return NetworkPolicyRuleTypeDomain, domain, nil
+		case EventKindDropDomain:
+			// Extract domain information from dropped event
+			// For drop_domain events, the domain is expected to be in the Remote.Name field
+			if event.Data.Dropped != nil && event.Data.Dropped.Remote != nil && event.Data.Dropped.Remote.Name != nil {
+				return NetworkPolicyRuleTypeDomain, *event.Data.Dropped.Remote.Name, nil
+			} else if event.Data.Body != nil && event.Data.Body.Dropped != nil && event.Data.Body.Dropped.Remote != nil && event.Data.Body.Dropped.Remote.Name != nil {
+				return NetworkPolicyRuleTypeDomain, *event.Data.Body.Dropped.Remote.Name, nil
 			}
 
-		case MetadataNameFlow:
+		case EventKindFlow:
 			// Flow events no longer generate issues, but included to satisfy exhaustive check
 			continue
 
-		case MetadataNameAdultDomainAccess, MetadataNameThreatDomainAccess,
-			MetadataNameBadwareDomainAccess, MetadataNameDynDNSDomainAccess,
-			MetadataNameFakeDomainAccess, MetadataNameGamblingDomainAccess,
-			MetadataNamePiracyDomainAccess, MetadataNamePlaintextComm,
-			MetadataNameTrackingDomainAccess, MetadataNameVPNLikeDomainAccess:
-			// Extract domain from V2 flow data for various domain access events
-			if domain := ExtractDomainFromV2Event(event); domain != "" {
-				return NetworkPolicyRuleTypeDomain, domain, nil
+		case EventKindAdultDomainAccess, EventKindThreatDomainAccess,
+			EventKindBadwareDomainAccess, EventKindDynDNSDomainAccess,
+			EventKindFakeDomainAccess, EventKindGamblingDomainAccess,
+			EventKindPiracyDomainAccess, EventKindPlaintextCommunication,
+			EventKindTrackingDomainAccess, EventKindVPNLikeDomainAccess:
+			// Extract domain from Flow data for various domain access events
+			if hasValidFlowDomain(event) {
+				// Check original structure first
+				if event.Data.Flow != nil && event.Data.Flow.Remote != nil && event.Data.Flow.Remote.Name != nil {
+					return NetworkPolicyRuleTypeDomain, *event.Data.Flow.Remote.Name, nil
+				}
+				// Check body structure
+				if event.Data.Body != nil && event.Data.Body.FullInfo != nil &&
+					event.Data.Body.FullInfo.Flows != nil && len(*event.Data.Body.FullInfo.Flows) > 0 {
+					firstFlow := (*event.Data.Body.FullInfo.Flows)[0]
+					if firstFlow.Remote != nil && firstFlow.Remote.Name != nil && *firstFlow.Remote.Name != "" {
+						return NetworkPolicyRuleTypeDomain, *firstFlow.Remote.Name, nil
+					}
+				}
 			}
 
 		// The following event types don't contain network destination information
 		// but are added to satisfy the exhaustive check
-		case MetadataNameCapabilitiesModification,
-			MetadataNameCodeModificationThroughProcfs, MetadataNameCorePatternAccess,
-			MetadataNameCPUFingerprint, MetadataNameCredentialsFilesAccess,
-			MetadataNameFilesystemFingerprint, MetadataNameJavaDebugLibLoad,
-			MetadataNameJavaInstrumentLibLoad, MetadataNameMachineFingerprint,
-			MetadataNameOSFingerprint, MetadataNameOSNetworkFingerprint,
-			MetadataNameOSStatusFingerprint, MetadataNamePackageRepoConfigModification,
-			MetadataNamePAMConfigModification, MetadataNameSchedDebugAccess,
-			MetadataNameShellConfigModification, MetadataNameSSLCertificateAccess,
-			MetadataNameSudoersModification, MetadataNameSysrqAccess,
-			MetadataNameUnprivilegedBPFConfigAccess, MetadataNameGlobalShlibModification,
-			MetadataNameEnvironReadFromProcfs, MetadataNameBinarySelfDeletion,
-			MetadataNameCryptoMinerFiles, MetadataNameAuthLogsTamper,
-			MetadataNameBinaryExecutedByLoader, MetadataNameCodeOnTheFly,
-			MetadataNameDataEncoderExec, MetadataNameDenialOfServiceTools,
-			MetadataNameExecFromUnusualDir, MetadataNameFileAttributeChange,
-			MetadataNameHiddenELFExec, MetadataNameInterpreterShellSpawn,
-			MetadataNameNetFilecopyToolExec, MetadataNameNetMITMToolExec,
-			MetadataNameNetScanToolExec, MetadataNameNetSniffToolExec,
-			MetadataNameNetSuspiciousToolExec, MetadataNameNetSuspiciousToolShell,
-			MetadataNamePasswdUsage, MetadataNameRuncSuspiciousExec,
-			MetadataNameWebserverExec, MetadataNameWebserverShellExec,
-			MetadataNameCryptoMinerExecution:
+		case EventKindCapabilitiesModification,
+			EventKindCodeModificationThroughProcfs, EventKindCorePatternAccess,
+			EventKindCPUFingerprint, EventKindCredentialsFilesAccess,
+			EventKindFilesystemFingerprint, EventKindJavaDebugLibLoad,
+			EventKindJavaInstrumentLibLoad, EventKindMachineFingerprint,
+			EventKindOSFingerprint, EventKindOSNetworkFingerprint,
+			EventKindOSStatusFingerprint, EventKindPackageRepoConfigModification,
+			EventKindPAMConfigModification, EventKindSchedDebugAccess,
+			EventKindShellConfigModification, EventKindSSLCertificateAccess,
+			EventKindSudoersModification, EventKindSysrqAccess,
+			EventKindUnprivilegedBPFConfigAccess, EventKindGlobalShlibModification,
+			EventKindEnvironReadFromProcfs, EventKindBinarySelfDeletion,
+			EventKindCryptoMinerFiles, EventKindAuthLogsTamper,
+			EventKindBinaryExecutedByLoader, EventKindCodeOnTheFly,
+			EventKindDataEncoderExec, EventKindDenialOfServiceTools,
+			EventKindExecFromUnusualDir, EventKindFileAttributeChange,
+			EventKindHiddenELFExec, EventKindInterpreterShellSpawn,
+			EventKindNetFilecopyToolExec, EventKindNetMITMToolExec,
+			EventKindNetScanToolExec, EventKindNetSniffToolExec,
+			EventKindNetSuspiciousToolExec, EventKindNetSuspiciousToolShell,
+			EventKindPasswdUsage, EventKindRuncSuspiciousExec,
+			EventKindWebserverExec, EventKindWebserverShellExec,
+			EventKindCryptoMinerExecution:
 			// These events don't provide network destination information for policy rules
 			continue
 		}
@@ -428,62 +443,49 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 	return "", "", ErrIssueHasNoNetworkDestination
 }
 
-// ExtractIPFromV2Event extracts IP address from V2 event's Background.Flows structure.
-func ExtractIPFromV2Event(event Event) string {
-	if event.Data.Background == nil || event.Data.Background.Flows == nil {
-		return ""
+// hasValidDroppedAddress checks if an event has valid remote address data in the Dropped field.
+func hasValidDroppedAddress(event Event) bool {
+	// Check in regular structure
+	if event.Data.Dropped != nil &&
+		event.Data.Dropped.Remote != nil &&
+		event.Data.Dropped.Remote.Address != nil {
+		return true
 	}
 
-	flows := event.Data.Background.Flows
-	if len(flows.Protocols) == 0 {
-		return ""
+	// Check in new nested body structure
+	if event.Data.Body != nil &&
+		event.Data.Body.Dropped != nil &&
+		event.Data.Body.Dropped.Remote != nil &&
+		event.Data.Body.Dropped.Remote.Address != nil {
+		return true
 	}
 
-	// Look through protocols for IP addresses
-	for _, protocol := range flows.Protocols {
-		if len(protocol.Pairs) == 0 {
-			continue
-		}
-
-		for _, pair := range protocol.Pairs {
-			// Check remote node for IP address
-			if pair.Nodes.Remote.Address != "" {
-				return pair.Nodes.Remote.Address
-			}
-		}
-	}
-
-	return ""
+	return false
 }
 
-// ExtractDomainFromV2Event extracts domain name from V2 event's Background.Flows structure.
-func ExtractDomainFromV2Event(event Event) string {
-	if event.Data.Background == nil || event.Data.Background.Flows == nil {
-		return ""
+// hasValidFlowDomain checks if an event has valid domain name data in the Flow field.
+func hasValidFlowDomain(event Event) bool {
+	// Check in regular structure
+	if event.Data.Flow != nil &&
+		event.Data.Flow.Remote != nil &&
+		event.Data.Flow.Remote.Name != nil {
+		return true
 	}
 
-	flows := event.Data.Background.Flows
-	if len(flows.Protocols) == 0 {
-		return ""
-	}
-
-	// Look through protocols for domain names
-	for _, protocol := range flows.Protocols {
-		if len(protocol.Pairs) == 0 {
-			continue
-		}
-
-		for _, pair := range protocol.Pairs {
-			// Check remote node for domain name
-			if pair.Nodes.Remote.Name != "" {
-				return pair.Nodes.Remote.Name
-			}
+	// Check in new nested body structure
+	if event.Data.Body != nil &&
+		event.Data.Body.FullInfo != nil &&
+		event.Data.Body.FullInfo.Flows != nil &&
+		len(*event.Data.Body.FullInfo.Flows) > 0 {
+		// Check the first flow for domain info
+		firstFlow := (*event.Data.Body.FullInfo.Flows)[0]
+		if firstFlow.Remote != nil && firstFlow.Remote.Name != nil && *firstFlow.Remote.Name != "" {
+			return true
 		}
 	}
 
-	return ""
+	return false
 }
-
 
 // formatCIDRAddress ensures an IP address is properly formatted as a CIDR.
 func formatCIDRAddress(ipAddress string) (NetworkPolicyRuleType, string, error) {
