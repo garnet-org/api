@@ -268,10 +268,19 @@ func (c *CreateAgent) Validate() error {
 	// Validate context based on Kind
 	switch c.Kind {
 	case AgentKindGithub:
+		if c.GithubContext == nil {
+			return errors.New("github context is required for github agents")
+		}
 		return c.GithubContext.Validate()
 	case AgentKindKubernetes:
+		if c.KubernetesContext == nil {
+			return errors.New("kubernetes context is required for kubernetes agents")
+		}
 		return c.KubernetesContext.Validate()
 	case AgentKindVanilla:
+		if c.VanillaContext == nil {
+			return errors.New("vanilla context is required for vanilla agents")
+		}
 		return c.VanillaContext.Validate()
 	}
 

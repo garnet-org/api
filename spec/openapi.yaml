@@ -589,48 +589,89 @@ paths:
                 $ref: "#/components/schemas/Error"
 
   /api/v1/events:
-    put:
-      security:
-        - AgentTokenAuth: []
-      summary: Send the event to the server, this can result in update or create.
+    get:
+      summary: List events
       description: |
-        Ingests an event to the server. Requires agent authentication using the X-Agent-Token header.
-        The agent ID in the event must match the agent ID associated with the token.
-      operationId: ingestEvent
-      requestBody:
-        description: Event object that needs to be ingested
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrUpdateEvent"
+        Retrieves a paginated list of V2 events for the authenticated user's project.
+        Supports filtering by agent ID, ashkaal kind, and metadata names, as well as cursor-based pagination and sorting.
+        All events are now stored and returned in V2 format using ashkaal structure.
+      operationId: listEvents
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      parameters:
+        - name: filter.agent_id
+          in: query
+          description: Filter events by agent ID
+          required: false
+          schema:
+            type: string
+        - name: filter.kind
+          in: query
+          description: Filter events by ashkaal kind
+          required: false
+          schema:
+            $ref: "#/components/schemas/AshkaalKind"
+        - name: filter.metadata.name
+          in: query
+          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/MetadataName"
+        - $ref: '#/components/parameters/CursorAfter'
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/First'
+        - $ref: '#/components/parameters/Last'
+        - name: sort.field
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum:
+              - created_at
+        - name: sort.order
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
       responses:
-        "201":
-          description: Event created successfully
+        "200":
+          description: Successfully retrieved list of events
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EventCreatedOrUpdated"
-        "202":
-          description: Event updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EventCreatedOrUpdated"
+                $ref: '#/components/schemas/EventV2Page'
         "400":
-          description: Invalid input
+          description: Invalid request parameters
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "401":
-          description: Missing or invalid agent token
+          description: Unauthorized - authentication required
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnauthorizedEvents"
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/UnauthorizedEvents'
         "500":
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /api/v1/events_v2:
     put:
@@ -2308,6 +2349,103 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /api/v1/projects/{project_id}/events:
+    get:
+      summary: List events for a specific project
+      description: |
+        Retrieves a paginated list of V2 events for the specified project.
+        Supports filtering by agent ID, ashkaal kind, and metadata names, as well as cursor-based pagination and sorting.
+        This endpoint is primarily intended for use by the web UI.
+        All events are now stored and returned in V2 format using ashkaal structure.
+      operationId: listProjectEvents
+      security:
+        - UserTokenAuth: []
+      parameters:
+        - name: project_id
+          in: path
+          description: ID of the project
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: filter.agent_id
+          in: query
+          description: Filter events by agent ID
+          required: false
+          schema:
+            type: string
+        - name: filter.kind
+          in: query
+          description: Filter events by ashkaal kind
+          required: false
+          schema:
+            $ref: "#/components/schemas/AshkaalKind"
+        - name: filter.metadata.name
+          in: query
+          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/MetadataName"
+        - $ref: '#/components/parameters/CursorAfter'
+        - $ref: '#/components/parameters/CursorBefore'
+        - $ref: '#/components/parameters/First'
+        - $ref: '#/components/parameters/Last'
+        - name: sort.field
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum:
+              - created_at
+        - name: sort.order
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+      responses:
+        "200":
+          description: Successfully retrieved list of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventV2Page'
+        "400":
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized - authentication required
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/UnauthorizedEvents'
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /api/v1/projects/{project_id}/issues/{id}:
     get:
       security:
@@ -3976,11 +4114,11 @@ components:
         data:
           $ref: "#/components/schemas/AshkaalBase"
           description: Ashkaal ongoing Base structure containing event metadata and background data
-        createdAt:
+        created_at:
           type: string
           format: date-time
           description: When the v2 event was initially created
-        updatedAt:
+        updated_at:
           type: string
           format: date-time
           description: When the v2 event was last updated
@@ -3994,6 +4132,69 @@ components:
         - infos
         - netpolicy
       example: flows
+
+    MetadataName:
+      type: string
+      description: Event metadata name used for filtering and identification
+      enum:
+        - dropip
+        - dropdomain
+        - flow
+        - adult_domain_access
+        - threat_domain_access
+        - badware_domain_access
+        - dyndns_domain_access
+        - fake_domain_access
+        - gambling_domain_access
+        - piracy_domain_access
+        - plaintext_communication
+        - tracking_domain_access
+        - vpnlike_domain_access
+        - capabilities_modification
+        - code_modification_through_procfs
+        - core_pattern_access
+        - cpu_fingerprint
+        - credentials_files_access
+        - filesystem_fingerprint
+        - java_debug_lib_load
+        - java_instrument_lib_load
+        - machine_fingerprint
+        - os_fingerprint
+        - os_network_fingerprint
+        - os_status_fingerprint
+        - package_repo_config_modification
+        - pam_config_modification
+        - sched_debug_access
+        - shell_config_modification
+        - ssl_certificate_access
+        - sudoers_modification
+        - sysrq_access
+        - unprivileged_bpf_config_access
+        - global_shlib_modification
+        - environ_read_from_procfs
+        - binary_self_deletion
+        - crypto_miner_files
+        - auth_logs_tamper
+        - binary_executed_by_loader
+        - code_on_the_fly
+        - data_encoder_exec
+        - denial_of_service_tools
+        - exec_from_unusual_dir
+        - file_attribute_change
+        - hidden_elf_exec
+        - interpreter_shell_spawn
+        - net_filecopy_tool_exec
+        - net_mitm_tool_exec
+        - net_scan_tool_exec
+        - net_sniff_tool_exec
+        - net_suspicious_tool_exec
+        - net_suspicious_tool_shell
+        - passwd_usage
+        - runc_suspicious_exec
+        - webserver_exec
+        - webserver_shell_exec
+        - crypto_miner_execution
+      example: dropip
 
     AshkaalBase:
       type: object
@@ -5716,6 +5917,24 @@ components:
             end_cursor:
               type: string
               description: The cursor pointing to the last item in the current page
+
+    EventV2Page:
+      type: object
+      description: |
+        A paginated list of v2 events with cursor-based navigation.
+        Contains events returned from the list events endpoints.
+      required:
+        - items
+        - pageInfo
+      properties:
+        items:
+          type: array
+          description: The list of v2 events matching the query
+          items:
+            $ref: '#/components/schemas/EventV2'
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+          description: Information about the pagination status
     
     WebhookEnabledIssueClasses:
       type: object

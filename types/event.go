@@ -4,6 +4,8 @@ package types
 import (
 	"time"
 
+	"github.com/garnet-org/jibril-ashkaal/pkg/kind"
+	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 	"github.com/garnet-org/api/types/errs"
 )
 
@@ -260,63 +262,35 @@ func (k EventKind) OK() bool {
 	return false
 }
 
-// Validate checks if the CreateOrUpdateEvent is valid.
-func (e *CreateOrUpdateEvent) Validate() error {
-	if e.ID == "" {
-		return ErrIDcannotBeEmpty
-	}
-
-	if !e.Kind.OK() {
-		return ErrInvalidEventKind
-	}
-
-	return nil
-}
-
 // Validate checks if the Event is valid.
 func (e *Event) Validate() error {
 	if e.ID == "" {
 		return ErrIDcannotBeEmpty
 	}
 
-	if !e.Kind.OK() {
+	// Use V2 ashkaal kind validation
+	switch e.Kind {
+	case kind.KindFlows, kind.KindDetections, kind.KindInfos, kind.KindNetPolicy:
+		// Valid kinds
+	case kind.KindNone, kind.KindEmpty:
+		return ErrInvalidEventKind
+	default:
 		return ErrInvalidEventKind
 	}
 
 	return nil
 }
 
-// CreateOrUpdateEvent is used for creating or updating events.
-// It includes the agent ID but doesn't return the full agent details.
-type CreateOrUpdateEvent struct {
-	ID string `json:"id"`
-	// agentID is populated decoding JWT token.
-	agentID   string    `json:"-"`
-	Data      EventData `json:"data"`
-	Kind      EventKind `json:"kind"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-// AgentID returns the ID of the agent that created or updated the event.
-func (e CreateOrUpdateEvent) AgentID() string {
-	return e.agentID
-}
-
-// SetAgentID sets the ID of the agent that created or updated the event.
-func (e *CreateOrUpdateEvent) SetAgentID(agentID string) {
-	e.agentID = agentID
-}
-
 // Event is something that happened in the system.
 // This is used for retrieving events and includes the full agent details.
+// Now uses V2 ashkaal format.
 type Event struct {
-	ID        string    `json:"id"`
-	Agent     Agent     `json:"agent"`
-	Data      EventData `json:"data"`
-	Kind      EventKind `json:"kind"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        string       `json:"id"`
+	Agent     Agent        `json:"agent"`
+	Data      ongoing.Base `json:"data"`
+	Kind      kind.Kind    `json:"kind"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
 }
 
 // EventData is the data associated with an event.
@@ -337,7 +311,7 @@ type EventData struct {
 
 	// For timestamp in new format
 	Timestamp *time.Time `json:"timestamp,omitempty"`
-	UniqueID *string `json:"unique_id,omitempty"`
+	UniqueID  *string    `json:"unique_id,omitempty"`
 }
 
 // EventBody represents the nested body structure in the new format.
@@ -450,12 +424,6 @@ type Process struct {
 	UID        *int       `json:"uid,omitempty"`
 }
 
-// EventCreatedOrUpdated represents the response when an event is successfully created or updated.
-type EventCreatedOrUpdated struct {
-	ID        string    `json:"id"`
-	Created   bool      `json:"created"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
 
 // EventWrapper is a wrapper struct for unmarshaling events in the new format.
 type EventWrapper struct {
