@@ -32,6 +32,21 @@ const (
 	// ErrTooManyMetadataNames is returned when too many metadata names are provided.
 	ErrTooManyMetadataNames = errs.InvalidArgumentError("too many metadata names, maximum 20 allowed")
 
+	// ErrEventNotFound is returned when the event is not found.
+	ErrEventNotFound = errs.NotFoundError("event not found")
+
+	// ErrInvalidEventActionType is returned when the action type provided is invalid.
+	ErrInvalidEventActionType = errs.InvalidArgumentError("invalid event action type")
+
+	// ErrInvalidEventActionScope is returned when the action scope is not valid or recognized.
+	ErrInvalidEventActionScope = errs.InvalidArgumentError("invalid event action scope")
+
+	// ErrInvalidEventReason is returned when the event reason is missing or invalid.
+	ErrInvalidEventReason = errs.InvalidArgumentError("invalid event reason")
+
+	// ErrEventHasNoNetworkDestination is returned when the event does not include a network destination.
+	ErrEventHasNoNetworkDestination = errs.InvalidArgumentError("event has no network destination")
+
 	// MaxMetadataNameLength is the maximum allowed length for metadata names.
 	MaxMetadataNameLength = 64
 
@@ -530,4 +545,61 @@ func DecodeEventFilters(values url.Values) *ListEventsFilters {
 	}
 
 	return filters
+}
+
+// EventActionType represents the type of action performed on an event.
+type EventActionType string
+
+const (
+	// EventActionTypeBlock blocks the event destination.
+	EventActionTypeBlock EventActionType = "block"
+)
+
+// String returns the string representation of the EventActionType.
+func (t EventActionType) String() string {
+	return string(t)
+}
+
+// IsValid checks if the EventActionType is valid.
+func (t EventActionType) IsValid() bool {
+	return t == EventActionTypeBlock
+}
+
+// EventAction represents an action to be performed on an event.
+type EventAction struct {
+	ActionType       EventActionType       `json:"action_type"` // block
+	Scope            NetworkPolicyScope    `json:"scope"`       // global, repo, workflow, cluster, or node  
+	Reason           string                `json:"reason"`      // User-provided reason for the action
+	UserID           *string               `json:"-"`           // ID of the user who performed the action
+	DestinationType  NetworkPolicyRuleType `json:"-"`           // Domain or CIDR
+	DestinationValue string                `json:"-"`           // The actual domain or IP CIDR
+}
+
+// Validate ensures the EventAction is valid.
+func (a *EventAction) Validate() error {
+	// Check action type
+	if !a.ActionType.IsValid() {
+		return ErrInvalidEventActionType
+	}
+
+	// Check scope
+	if !a.Scope.IsValid() {
+		return ErrInvalidEventActionScope
+	}
+
+	// Reason is required
+	if a.Reason == "" {
+		return ErrInvalidEventReason
+	}
+
+	return nil
+}
+
+// EventActionPerformed represents the result of performing an action on an event.
+type EventActionPerformed struct {
+	EventID           string            `json:"event_id"`
+	ActionType        EventActionType   `json:"action_type"`
+	NetworkPolicyID   string            `json:"network_policy_id"`
+	NetworkPolicyRule NetworkPolicyRule `json:"network_policy_rule"`
+	CreatedAt         time.Time         `json:"created_at"`
 }

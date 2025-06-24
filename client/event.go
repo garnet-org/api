@@ -75,3 +75,17 @@ func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Pag
 
 	return out, c.do(ctx, &out, http.MethodGet, url, nil)
 }
+
+// BlockEvent blocks an event by creating a network policy rule in the specified scope.
+func (c *Client) BlockEvent(ctx context.Context, scope types.NetworkPolicyScope, eventID string, reason string) (types.EventActionPerformed, error) {
+	var out types.EventActionPerformed
+
+	action := types.EventAction{
+		ActionType: types.EventActionTypeBlock,
+		Scope:      scope,
+		Reason:     reason,
+	}
+
+	url := "/api/v1/events/" + eventID + "/actions/block"
+	return out, c.do(ctx, &out, http.MethodPost, url, action)
+}

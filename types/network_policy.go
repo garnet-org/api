@@ -484,9 +484,10 @@ type NetworkPolicyUpdated struct {
 // CreateNetworkPolicyRule represents the request to create a new network policy rule.
 // The PolicyID is populated by the service layer.
 type CreateNetworkPolicyRule struct {
-	Type   NetworkPolicyRuleType `json:"type"`
-	Value  string                `json:"value"`
-	Action NetworkPolicyType     `json:"action"`
+	Type    NetworkPolicyRuleType `json:"type"`
+	Value   string                `json:"value"`
+	Action  NetworkPolicyType     `json:"action"`
+	EventID string                `json:"event_id,omitempty"`
 }
 
 // Validate ensures the CreateNetworkPolicyRule request is valid.

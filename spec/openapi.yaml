@@ -718,6 +718,65 @@ paths:
         "500":
           description: Internal server error
 
+  # Event Action endpoints
+  /api/v1/events/{event_id}/actions/block:
+    post:
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      summary: Perform block action on event
+      description: |
+        Blocks network traffic described in the event by creating an appropriate network policy rule
+        at the specified scope level. The event must contain network destination information (IP or domain).
+        The scope determines the level at which the blocking rule is applied based on the agent context.
+      operationId: blockEvent
+      parameters:
+        - name: event_id
+          in: path
+          description: ID of the event to block
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventAction"
+      responses:
+        "200":
+          description: Action performed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventActionPerformed"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/agents/{id}:
     get:
       security:
@@ -5234,6 +5293,52 @@ components:
         created_at:
           type: string
           format: date-time
+
+    # Event action schemas
+    EventActionType:
+      type: string
+      enum:
+        - block
+      description: Type of action to perform on an event
+
+    EventAction:
+      type: object
+      required:
+        - action_type
+        - scope
+        - reason
+      properties:
+        action_type:
+          $ref: "#/components/schemas/EventActionType"
+          description: Type of action to perform
+        scope:
+          $ref: "#/components/schemas/NetworkPolicyScope"
+          description: Scope level at which to apply the network policy rule
+        reason:
+          type: string
+          description: User-provided reason for the action
+
+    EventActionPerformed:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: ID of the event the action was performed on
+        action_type:
+          $ref: "#/components/schemas/EventActionType"
+          description: Type of action that was performed
+        network_policy_id:
+          type: string
+          format: uuid
+          description: ID of the network policy that was created or updated
+        network_policy_rule:
+          $ref: "#/components/schemas/NetworkPolicyRule"
+          description: The network policy rule that was created or updated
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the action was performed
 
     # Network policy schemas
     NetworkPolicyScope:
