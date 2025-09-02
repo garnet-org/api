@@ -375,7 +375,7 @@ func (e *CreateOrUpdateFileAccessEventV2) Validate() error {
 		return ErrIDcannotBeEmptyV2
 	}
 
-	if e.Data.File.File == "" {
+	if e.Data.File.Path == "" {
 		return errs.InvalidArgumentError("file access event must have a file path")
 	}
 
