@@ -42,9 +42,9 @@ type User struct {
 	OrganizationID string     `json:"organization_id"`
 	Email          string     `json:"email"`
 	Name           string     `json:"name"`
-	GithubID       string     `json:"github_id,omitempty"`
-	GoogleID       string     `json:"google_id,omitempty"` // Deprecated: use Auth0Sub
-	Auth0Sub       string     `json:"auth0_sub,omitempty"`  // Auth0 subject identifier
+	GithubID       *string    `json:"github_id,omitempty"`
+	GoogleID       *string    `json:"google_id,omitempty"` // Deprecated: use Auth0Sub
+	Auth0Sub       *string    `json:"auth0_sub,omitempty"`  // Auth0 subject identifier
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 	DeletedAt      *time.Time `json:"-"`
