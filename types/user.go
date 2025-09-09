@@ -90,8 +90,9 @@ func (c *CreateUser) Validate() error {
 
 // UpdateUser represents the input for updating a user.
 type UpdateUser struct {
-	Email *string `json:"email,omitempty"`
-	Name  *string `json:"name,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Name     *string `json:"name,omitempty"`
+	Auth0Sub *string `json:"auth0_sub,omitempty"`
 }
 
 // UserUpdated represents the result of a successful user update.
