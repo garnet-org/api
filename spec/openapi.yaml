@@ -8,7 +8,7 @@ info:
     
     The API supports multiple authentication methods:
     
-    - **User Authentication**: Using Google OAuth for secure user login
+    - **User Authentication**: Using Auth0 OAuth 2.0 for secure user login
     - **Project Token Authentication**: For programmatic access to project resources
     - **Agent Token Authentication**: Limited to agent operations only
     
@@ -285,55 +285,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectSettingNotFound'
 
-  /api/v1/auth/google/login:
+  /api/v1/auth/login:
     get:
-      summary: Initiate Google OAuth login flow
+      summary: Initiate Auth0 OAuth login flow
       description: |
-        Redirects the user to Google's authentication page to begin the OAuth 2.0 authentication flow.
-        This endpoint starts the process of authenticating a user via their Google account.
+        Redirects the user to Auth0's authentication page to begin the OAuth 2.0 authentication flow.
+        This endpoint starts the process of authenticating a user via Auth0, which supports multiple
+        identity providers including social logins, enterprise connections, and username/password.
         
         The flow works as follows:
-        1. User accesses this endpoint
+        1. User accesses this endpoint with a redirect_uri parameter
         2. Server generates a state token for CSRF protection
-        3. User is redirected to Google's authentication page
-        4. After authentication with Google, user is redirected to the callback endpoint
+        3. User is redirected to Auth0's universal login page
+        4. After authentication with Auth0, user is redirected to the callback endpoint
         
         No authentication is required to access this endpoint.
-      operationId: googleLoginInit
+      operationId: auth0LoginInit
       security: []
+      parameters:
+        - name: redirect_uri
+          in: query
+          description: URL to redirect the user after successful authentication
+          required: true
+          schema:
+            type: string
+            example: "http://localhost:3000/dashboard"
       responses:
         "302":
           description: |
-            Redirect to Google's authentication page.
-            The response includes a Location header with the Google authorization URL.
+            Redirect to Auth0's authentication page.
+            The response includes a Location header with the Auth0 authorization URL.
           headers:
             Location:
               schema:
                 type: string
-              description: URL to Google's authentication page
+              description: URL to Auth0's universal login page
+        "400":
+          description: Invalid redirect URI provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
-  /api/v1/auth/google/callback:
+  /api/v1/auth/callback:
     get:
-      summary: Handle Google OAuth callback
+      summary: Handle Auth0 OAuth callback
       description: |
-        Handles the callback from Google OAuth 2.0 authentication flow.
-        This endpoint receives the authorization code from Google, exchanges it for an access token,
+        Handles the callback from Auth0 OAuth 2.0 authentication flow.
+        This endpoint receives the authorization code from Auth0, exchanges it for tokens,
         retrieves the user's profile information, and creates or authenticates the user in the system.
         
         The flow continues as follows:
-        1. Google redirects the user to this endpoint with a code and state parameter
+        1. Auth0 redirects the user to this endpoint with a code and state parameter
         2. Server validates the state parameter to prevent CSRF attacks
-        3. Server exchanges the code for an access token
-        4. Server retrieves user information from Google
-        5. Server authenticates the user and returns a JWT token
+        3. Server exchanges the code for access and ID tokens
+        4. Server validates the ID token and extracts user information
+        5. Server creates or updates the user record (supporting migration from other auth methods)
+        6. Server redirects to the original redirect_uri with authentication token
         
         No authentication is required to access this endpoint.
-      operationId: googleCallback
+      operationId: auth0Callback
       security: []
       parameters:
         - name: code
           in: query
-          description: Authorization code provided by Google
+          description: Authorization code provided by Auth0
           required: true
           schema:
             type: string
@@ -344,32 +360,68 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          description: Authentication successful, returns a JWT token and project ID for API access
-          content:
-            application/json:
+        "302":
+          description: |
+            Authentication successful, redirects to the application with token and project ID.
+            The redirect URL includes the JWT token and project ID as query parameters.
+          headers:
+            Location:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    description: JWT token for API authentication
-                  project_id:
-                    type: string
-                    description: ID of the user's default project for immediate access
-                    format: uuid
+                type: string
+              description: Redirect URL with authentication token and project ID
         "400":
-          description: Bad request, invalid parameters
+          description: Bad request, invalid parameters or state token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
         "401":
-          description: Unauthorized, failed to authenticate with Google
+          description: Unauthorized, failed to authenticate with Auth0
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error during authentication process
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/auth/logout:
+    get:
+      summary: Logout from Auth0
+      description: |
+        Initiates the logout process by redirecting the user to Auth0's logout endpoint.
+        This will clear the Auth0 session and optionally redirect the user back to a specified URL.
+        
+        The logout flow:
+        1. User accesses this endpoint with an optional returnTo parameter
+        2. Server redirects to Auth0's logout endpoint
+        3. Auth0 clears the user's session
+        4. Auth0 redirects to the returnTo URL (if provided and allowed)
+        
+        No authentication is required to access this endpoint.
+      operationId: auth0Logout
+      security: []
+      parameters:
+        - name: returnTo
+          in: query
+          description: URL to redirect the user after logout (must be in allowed URLs)
+          required: false
+          schema:
+            type: string
+            example: "http://localhost:3000"
+      responses:
+        "302":
+          description: |
+            Redirect to Auth0's logout endpoint.
+            The response includes a Location header with the Auth0 logout URL.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL to Auth0's logout endpoint
 
   /api/v1/tokens:
     post:
@@ -3803,13 +3855,13 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT Bearer token for user authorization
+      description: JWT Bearer token obtained through Auth0 authentication for user authorization
       
     UserTokenAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT Bearer token for user authorization with role-based permissions
+      description: JWT Bearer token obtained through Auth0 authentication with role-based permissions
       
     AgentTokenAuth:
       type: apiKey
