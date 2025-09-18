@@ -45,6 +45,16 @@ func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Pag
 		for _, name := range params.Filters.MetadataNames {
 			query.Add("filter.metadata.name", name)
 		}
+		// Kubernetes context filters
+		if params.Filters.Cluster != nil {
+			query.Set("filter.cluster", *params.Filters.Cluster)
+		}
+		if params.Filters.Namespace != nil {
+			query.Set("filter.namespace", *params.Filters.Namespace)
+		}
+		if params.Filters.Node != nil {
+			query.Set("filter.node", *params.Filters.Node)
+		}
 	}
 
 	// Add pagination parameters

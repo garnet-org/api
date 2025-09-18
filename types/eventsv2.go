@@ -479,6 +479,10 @@ type ListEventsFilters struct {
 	Kind          *string  `json:"kind"`
 	AgentID       *string  `json:"agentID"`
 	MetadataNames []string `json:"metadataNames"`
+	// Kubernetes context filters
+	Cluster       *string  `json:"cluster"`
+	Namespace     *string  `json:"namespace"`
+	Node          *string  `json:"node"`
 }
 
 // Validate checks if the ListEventsFilters are valid.
@@ -514,7 +518,8 @@ func (f *ListEventsFilters) Validate() error {
 
 // IsEmpty checks if the filters are empty.
 func (f *ListEventsFilters) IsEmpty() bool {
-	return f.Kind == nil && f.AgentID == nil && len(f.MetadataNames) == 0
+	return f.Kind == nil && f.AgentID == nil && len(f.MetadataNames) == 0 &&
+		f.Cluster == nil && f.Namespace == nil && f.Node == nil
 }
 
 // DecodeEventFilters decodes URL query parameters into ListEventsFilters.
@@ -538,6 +543,19 @@ func DecodeEventFilters(values url.Values) *ListEventsFilters {
 			}
 		}
 		filters.MetadataNames = validNames
+	}
+
+	// Kubernetes context filters
+	if cluster := values.Get("filter.cluster"); cluster != "" {
+		filters.Cluster = &cluster
+	}
+
+	if namespace := values.Get("filter.namespace"); namespace != "" {
+		filters.Namespace = &namespace
+	}
+
+	if node := values.Get("filter.node"); node != "" {
+		filters.Node = &node
 	}
 
 	if filters.IsEmpty() {

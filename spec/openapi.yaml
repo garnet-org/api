@@ -645,8 +645,8 @@ paths:
       summary: List events
       description: |
         Retrieves a paginated list of V2 events for the authenticated user's project.
-        Supports filtering by agent ID, ashkaal kind, and metadata names, as well as cursor-based pagination and sorting.
-        All events are now stored and returned in V2 format using ashkaal structure.
+        Supports filtering by agent ID, ashkaal kind, metadata names, and Kubernetes context fields (cluster, namespace, node).
+        Includes cursor-based pagination and sorting. All events are now stored and returned in V2 format using ashkaal structure.
       operationId: listEvents
       security:
         - BearerAuth: []
@@ -675,6 +675,24 @@ paths:
             type: array
             items:
               $ref: "#/components/schemas/MetadataName"
+        - name: filter.cluster
+          in: query
+          description: Filter events by Kubernetes cluster name
+          required: false
+          schema:
+            type: string
+        - name: filter.namespace
+          in: query
+          description: Filter events by Kubernetes namespace
+          required: false
+          schema:
+            type: string
+        - name: filter.node
+          in: query
+          description: Filter events by Kubernetes node name
+          required: false
+          schema:
+            type: string
         - $ref: '#/components/parameters/CursorAfter'
         - $ref: '#/components/parameters/CursorBefore'
         - $ref: '#/components/parameters/First'
