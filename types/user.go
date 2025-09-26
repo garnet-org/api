@@ -125,6 +125,17 @@ func (u *UpdateUser) Validate() error {
 	return nil
 }
 
+// CurrentUserInfo represents the current user's information including organization and project details.
+type CurrentUserInfo struct {
+	UserID           string `json:"user_id"`
+	Username         string `json:"username"`
+	Email            string `json:"email"`
+	OrganizationID   string `json:"organization_id"`
+	OrganizationName string `json:"organization_name"`
+	ProjectID        string `json:"project_id,omitempty"`
+	ProjectName      string `json:"project_name,omitempty"`
+}
+
 // ListUsers represents the query parameters for listing users.
 type ListUsers struct {
 	OrganizationID string `json:"organization_id,omitempty"`

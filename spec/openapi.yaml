@@ -423,6 +423,37 @@ paths:
                 type: string
               description: URL to Auth0's logout endpoint
 
+  /api/v1/me:
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: Get current user information
+      description: |
+        Returns information about the currently authenticated user including their organization and project details.
+        This endpoint provides essential context about the user's identity and their default project.
+
+        Required authentication: User token (JWT)
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Current user information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUserInfo"
+        "401":
+          description: Unauthorized, authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/tokens:
     post:
       security:
@@ -4019,6 +4050,46 @@ components:
           description: When the token was deleted (if applicable)
           nullable: true
           
+    CurrentUserInfo:
+      type: object
+      description: Information about the current authenticated user
+      required:
+        - user_id
+        - username
+        - email
+        - organization_id
+        - organization_name
+      properties:
+        user_id:
+          type: string
+          description: Unique identifier of the user
+          example: "usr_1234567890"
+        username:
+          type: string
+          description: Display name of the user
+          example: "John Doe"
+        email:
+          type: string
+          description: Email address of the user
+          format: email
+          example: "john.doe@example.com"
+        organization_id:
+          type: string
+          description: Unique identifier of the user's organization
+          example: "org_1234567890"
+        organization_name:
+          type: string
+          description: Name of the user's organization
+          example: "Acme Corporation"
+        project_id:
+          type: string
+          description: Unique identifier of the user's default project
+          example: "prj_1234567890"
+        project_name:
+          type: string
+          description: Name of the user's default project
+          example: "Default Project"
+
     CreateToken:
       type: object
       description: Request to create a new token
