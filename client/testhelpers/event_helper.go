@@ -28,7 +28,9 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 		LocalIP:     "10.0.0.1",
 		RemoteName:  defaultRemoteName,
 		LocalName:   "localhost",
-		Protocol:    "tcp",
+		Protocol:    "TCP",
+		SrcPort:     54321,
+		DstPort:     443,
 		Description: defaultDescription,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -36,6 +38,17 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 
 	for _, opt := range opts {
 		opt(config)
+	}
+
+	// Build port matrix if ports are specified
+	var portMatrix []ongoing.PortCommAgg
+	if config.SrcPort > 0 || config.DstPort > 0 {
+		portMatrix = []ongoing.PortCommAgg{
+			{
+				SrcPort: config.SrcPort,
+				DstPort: config.DstPort,
+			},
+		}
 	}
 
 	return types.CreateOrUpdateEventV2{
@@ -71,6 +84,7 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 											Name:    config.RemoteName,
 										},
 									},
+									PortMatrix: portMatrix,
 								},
 							},
 						},
@@ -203,14 +217,16 @@ type EventConfig struct {
 	Note        string
 	Importance  string
 	Description string
-	
+
 	// Network-related fields
 	RemoteIP    string
 	LocalIP     string
 	RemoteName  string
 	LocalName   string
 	Protocol    string
-	
+	SrcPort     int
+	DstPort     int
+
 	// Process-related fields
 	Command     string
 	Args        string
@@ -218,7 +234,7 @@ type EventConfig struct {
 	PID         int
 	PPID        int
 	UID         uint
-	
+
 	// Timestamps
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
