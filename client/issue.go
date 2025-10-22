@@ -36,8 +36,8 @@ func (c *Client) UpdateIssue(ctx context.Context, issueID string, issue types.Up
 }
 
 // Issues retrieves a list of issues based on the provided filters and pagination parameters.
-func (c *Client) Issues(ctx context.Context, params types.ListIssues) (types.Page[types.Issue], error) {
-	var out types.Page[types.Issue]
+func (c *Client) Issues(ctx context.Context, params types.ListIssues) (types.Paginator[types.Issue], error) {
+	var out types.Paginator[types.Issue]
 
 	// Build query parameters
 	query := url.Values{}
@@ -74,17 +74,11 @@ func (c *Client) Issues(ctx context.Context, params types.ListIssues) (types.Pag
 	}
 
 	// Add pagination parameters
-	if params.PageArgs.First != nil {
-		query.Set("first", strconv.FormatUint(uint64(*params.PageArgs.First), 10))
+	if params.PageArgs.Page != nil {
+		query.Set("page", strconv.Itoa(*params.PageArgs.Page))
 	}
-	if params.PageArgs.Last != nil {
-		query.Set("last", strconv.FormatUint(uint64(*params.PageArgs.Last), 10))
-	}
-	if params.PageArgs.After != nil {
-		query.Set("after", string(*params.PageArgs.After))
-	}
-	if params.PageArgs.Before != nil {
-		query.Set("before", string(*params.PageArgs.Before))
+	if params.PageArgs.PerPage != nil {
+		query.Set("perPage", strconv.Itoa(*params.PageArgs.PerPage))
 	}
 
 	// Add include_ignored parameter if true

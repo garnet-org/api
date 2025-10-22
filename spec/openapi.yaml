@@ -88,17 +88,15 @@ paths:
       summary: List all project settings
       description: |
         Retrieves a list of all project settings for the authenticated user's project.
-        This endpoint supports pagination with cursor-based navigation.
+        This endpoint supports pagination with offset-based pagination.
       operationId: listProjectSettings
       security:
         - BearerAuth: []
         - UserTokenAuth: []
         - ProjectTokenAuth: []
       parameters:
-        - $ref: '#/components/parameters/CursorAfter'
-        - $ref: '#/components/parameters/CursorBefore'
-        - $ref: '#/components/parameters/First'
-        - $ref: '#/components/parameters/Last'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
       responses:
         "200":
           description: Successfully retrieved list of project settings
@@ -511,10 +509,8 @@ paths:
         Required permissions: `list` on token resource.
       operationId: listTokens
       parameters:
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/CursorBefore"
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/Last"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: List of tokens
@@ -677,7 +673,7 @@ paths:
       description: |
         Retrieves a paginated list of V2 events for the authenticated user's project.
         Supports filtering by agent ID, ashkaal kind, metadata names, and Kubernetes context fields (cluster, namespace, node).
-        Includes cursor-based pagination and sorting. All events are now stored and returned in V2 format using ashkaal structure.
+        Includes offset-based pagination and sorting. All events are now stored and returned in V2 format using ashkaal structure.
       operationId: listEvents
       security:
         - BearerAuth: []
@@ -724,10 +720,8 @@ paths:
           required: false
           schema:
             type: string
-        - $ref: '#/components/parameters/CursorAfter'
-        - $ref: '#/components/parameters/CursorBefore'
-        - $ref: '#/components/parameters/First'
-        - $ref: '#/components/parameters/Last'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
         - name: sort.field
           in: query
           description: Field to sort by
@@ -1124,10 +1118,8 @@ paths:
             label.environment: production
             label.region: us-west-1
 
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: Object with list of agents and pagination
@@ -1317,10 +1309,8 @@ paths:
             label.severity: high
             label.type: bug
         
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       
       responses:
         "200":
@@ -1674,10 +1664,8 @@ paths:
           schema:
             type: string
             format: uuid
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: Object with list of issue actions and pagination
@@ -1890,10 +1878,8 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/NetworkPolicyScope"
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: Object with list of network policies and pagination
@@ -2356,8 +2342,8 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Webhook"
-                  pageInfo:
-                    $ref: "#/components/schemas/PageInfo"
+                  paginator_info:
+                    $ref: "#/components/schemas/PaginatorInfo"
         "400":
           description: Invalid input
           content:
@@ -2514,7 +2500,7 @@ paths:
       summary: List events for a specific project
       description: |
         Retrieves a paginated list of V2 events for the specified project.
-        Supports filtering by agent ID, ashkaal kind, and metadata names, as well as cursor-based pagination and sorting.
+        Supports filtering by agent ID, ashkaal kind, and metadata names, as well as offset-based pagination and sorting.
         This endpoint is primarily intended for use by the web UI.
         All events are now stored and returned in V2 format using ashkaal structure.
       operationId: listProjectEvents
@@ -2550,10 +2536,8 @@ paths:
             type: array
             items:
               $ref: "#/components/schemas/MetadataName"
-        - $ref: '#/components/parameters/CursorAfter'
-        - $ref: '#/components/parameters/CursorBefore'
-        - $ref: '#/components/parameters/First'
-        - $ref: '#/components/parameters/Last'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
         - name: sort.field
           in: query
           description: Field to sort by
@@ -2970,10 +2954,8 @@ paths:
           schema:
             type: string
             format: uuid
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: Object with list of issue actions and pagination
@@ -3121,10 +3103,8 @@ paths:
           schema:
             type: string
             format: uuid
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/CursorBefore"
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/Last"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: List of tokens
@@ -3231,10 +3211,8 @@ paths:
           explode: true
           schema:
             type: object
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: List of agents for the specified project
@@ -3358,10 +3336,8 @@ paths:
           schema:
             type: boolean
             default: false
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: List of issues for the specified project
@@ -3467,10 +3443,8 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/NetworkPolicyScope"
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: List of network policies for the specified project and scope
@@ -3825,10 +3799,8 @@ paths:
           schema:
             type: string
             format: uuid
-        - $ref: "#/components/parameters/First"
-        - $ref: "#/components/parameters/CursorAfter"
-        - $ref: "#/components/parameters/Last"
-        - $ref: "#/components/parameters/CursorBefore"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: List of webhooks for the specified project
@@ -3859,45 +3831,31 @@ paths:
 
 components:
   parameters:
-    CursorAfter:
-      name: after
+    Page:
+      name: page
       in: query
-      description: Cursor for pagination - return items after this cursor (a string identifying the position)
-      required: false
-      schema:
-        type: string
-        description: A cursor reference to an item
-    
-    CursorBefore:
-      name: before
-      in: query
-      description: Cursor for pagination - return items before this cursor (a string identifying the position)
-      required: false
-      schema:
-        type: string
-        description: A cursor reference to an item
-    
-    First:
-      name: first
-      in: query
-      description: Limit result set to the first n items (maximum number of items to return)
+      description: Page number for pagination (1-indexed)
       required: false
       schema:
         type: integer
-        format: uint
+        format: int32
         minimum: 1
-        description: Maximum number of items to return
-    
-    Last:
-      name: last
+        default: 1
+        description: The page number to retrieve (starts at 1)
+        example: 1
+
+    PerPage:
+      name: perPage
       in: query
-      description: Limit result set to the last n items (maximum number of items to return)
+      description: Number of items per page (0 returns all items)
       required: false
       schema:
         type: integer
-        format: uint
-        minimum: 1
-        description: Maximum number of items to return
+        format: int32
+        minimum: 0
+        default: 10
+        description: Maximum number of items to return per page. Use 0 to return all items without pagination.
+        example: 10
         
   securitySchemes:
     BearerAuth:
@@ -5079,35 +5037,52 @@ components:
               - $ref: "#/components/schemas/NetworkPolicy"
               - $ref: "#/components/schemas/IssueActionHistory"
               - $ref: "#/components/schemas/Webhook"
-        pageInfo:
-          $ref: "#/components/schemas/PageInfo"
+        paginator_info:
+          $ref: "#/components/schemas/PaginatorInfo"
 
-    PageInfo:
+    PaginatorInfo:
       type: object
       description: |
-        Contains information about pagination for use with cursor-based pagination.
-        To paginate forward, use the endCursor as the after parameter.
-        To paginate backward, use the startCursor as the before parameter.
+        Contains information about pagination for offset-based pagination.
+        Use the current_page, last_page, and per_page values to navigate between pages.
       required:
-        - hasNextPage
-        - hasPrevPage
+        - current_page
+        - per_page
+        - total
+        - last_page
+        - from
+        - to
       properties:
-        hasNextPage:
-          type: boolean
-          description: Whether there are more items after the end cursor
-        endCursor:
-          type: string
-          description: The cursor to continue paginating forwards (use this as the 'after' parameter)
-          nullable: true
-          example: "MTY0MjUyOTkzMDAwMDAwMDAwMA=="
-        hasPrevPage:
-          type: boolean
-          description: Whether there are more items before the start cursor
-        startCursor:
-          type: string
-          description: The cursor to continue paginating backwards (use this as the 'before' parameter)
-          nullable: true
-          example: "MTY0MjUyOTkzMDAwMDAwMDAwMA=="
+        current_page:
+          type: integer
+          format: int32
+          description: The current page number (1-indexed)
+          example: 1
+        per_page:
+          type: integer
+          format: int32
+          description: Number of items per page
+          example: 10
+        total:
+          type: integer
+          format: int32
+          description: Total number of items across all pages
+          example: 42
+        last_page:
+          type: integer
+          format: int32
+          description: The last page number
+          example: 5
+        from:
+          type: integer
+          format: int32
+          description: Index of the first item on the current page (1-indexed)
+          example: 1
+        to:
+          type: integer
+          format: int32
+          description: Index of the last item on the current page (1-indexed)
+          example: 10
     
     AgentFilters:
       type: object
@@ -6138,7 +6113,7 @@ components:
     ProjectSettingPage:
       type: object
       description: |
-        A paginated list of project settings with cursor-based navigation.
+        A paginated list of project settings with offset-based pagination.
       required:
         - items
       properties:
@@ -6167,7 +6142,7 @@ components:
     EventV2Page:
       type: object
       description: |
-        A paginated list of v2 events with cursor-based navigation.
+        A paginated list of v2 events with offset-based pagination.
         Contains events returned from the list events endpoints.
       required:
         - items
@@ -6178,8 +6153,8 @@ components:
           description: The list of v2 events matching the query
           items:
             $ref: '#/components/schemas/EventV2'
-        pageInfo:
-          $ref: '#/components/schemas/PageInfo'
+        paginator_info:
+          $ref: '#/components/schemas/PaginatorInfo'
           description: Information about the pagination status
     
     WebhookEnabledIssueClasses:

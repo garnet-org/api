@@ -45,24 +45,18 @@ func (c *Client) DeleteProjectSetting(ctx context.Context, key string) error {
 }
 
 // ProjectSettings lists all project settings.
-func (c *Client) ProjectSettings(ctx context.Context, params *types.PageArgs) (types.Page[types.ProjectSetting], error) {
-	var out types.Page[types.ProjectSetting]
+func (c *Client) ProjectSettings(ctx context.Context, params *types.PageArgs) (types.Paginator[types.ProjectSetting], error) {
+	var out types.Paginator[types.ProjectSetting]
 
 	q := url.Values{}
 
 	// Add pagination parameters
 	if params != nil {
-		if params.First != nil {
-			q.Set("first", strconv.FormatUint(uint64(*params.First), 10))
+		if params.Page != nil {
+			q.Set("page", strconv.Itoa(*params.Page))
 		}
-		if params.Last != nil {
-			q.Set("last", strconv.FormatUint(uint64(*params.Last), 10))
-		}
-		if params.After != nil {
-			q.Set("after", string(*params.After))
-		}
-		if params.Before != nil {
-			q.Set("before", string(*params.Before))
+		if params.PerPage != nil {
+			q.Set("perPage", strconv.Itoa(*params.PerPage))
 		}
 	}
 

@@ -41,8 +41,8 @@ func (c *Client) AgentHeartbeat(ctx context.Context) error {
 }
 
 // Agents retrieves a list of agents with optional filters and pagination.
-func (c *Client) Agents(ctx context.Context, in types.ListAgents) (types.Page[types.Agent], error) {
-	var out types.Page[types.Agent]
+func (c *Client) Agents(ctx context.Context, in types.ListAgents) (types.Paginator[types.Agent], error) {
+	var out types.Paginator[types.Agent]
 
 	q := url.Values{}
 	q1 := in.Filters.Encode()
@@ -52,17 +52,11 @@ func (c *Client) Agents(ctx context.Context, in types.ListAgents) (types.Page[ty
 	maps.Copy(q, q2)
 
 	// Add pagination parameters
-	if in.First != nil {
-		q.Set("first", strconv.FormatUint(uint64(*in.First), 10))
+	if in.Page != nil {
+		q.Set("page", strconv.Itoa(*in.Page))
 	}
-	if in.Last != nil {
-		q.Set("last", strconv.FormatUint(uint64(*in.Last), 10))
-	}
-	if in.After != nil {
-		q.Set("after", string(*in.After))
-	}
-	if in.Before != nil {
-		q.Set("before", string(*in.Before))
+	if in.PerPage != nil {
+		q.Set("perPage", strconv.Itoa(*in.PerPage))
 	}
 
 	path := "/api/v1/agents?" + q.Encode()

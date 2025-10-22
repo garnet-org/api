@@ -29,8 +29,8 @@ func (c *Client) Event(ctx context.Context, eventID string) (types.Event, error)
 }
 
 // Events retrieves a list of events with optional filters.
-func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Page[types.EventV2], error) {
-	var out types.Page[types.EventV2]
+func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Paginator[types.EventV2], error) {
+	var out types.Paginator[types.EventV2]
 
 	// Build query parameters
 	query := url.Values{}
@@ -58,17 +58,11 @@ func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Pag
 	}
 
 	// Add pagination parameters
-	if params.PageArgs.First != nil {
-		query.Set("first", strconv.FormatUint(uint64(*params.PageArgs.First), 10))
+	if params.PageArgs.Page != nil {
+		query.Set("page", strconv.Itoa(*params.PageArgs.Page))
 	}
-	if params.PageArgs.Last != nil {
-		query.Set("last", strconv.FormatUint(uint64(*params.PageArgs.Last), 10))
-	}
-	if params.PageArgs.After != nil {
-		query.Set("after", string(*params.PageArgs.After))
-	}
-	if params.PageArgs.Before != nil {
-		query.Set("before", string(*params.PageArgs.Before))
+	if params.PageArgs.PerPage != nil {
+		query.Set("perPage", strconv.Itoa(*params.PageArgs.PerPage))
 	}
 
 	// Add sorting parameters

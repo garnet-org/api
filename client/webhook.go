@@ -22,23 +22,17 @@ func (c *Client) DeleteWebhook(ctx context.Context, id string) error {
 }
 
 // ListWebhooks retrieves a list of webhooks.
-func (c *Client) ListWebhooks(ctx context.Context, in types.WebhookList) (types.Page[types.Webhook], error) {
-	var out types.Page[types.Webhook]
+func (c *Client) ListWebhooks(ctx context.Context, in types.WebhookList) (types.Paginator[types.Webhook], error) {
+	var out types.Paginator[types.Webhook]
 
 	q := url.Values{}
 
 	// Add pagination parameters
-	if in.First != nil {
-		q.Set("first", strconv.FormatUint(uint64(*in.First), 10))
+	if in.Page != nil {
+		q.Set("page", strconv.Itoa(*in.Page))
 	}
-	if in.Last != nil {
-		q.Set("last", strconv.FormatUint(uint64(*in.Last), 10))
-	}
-	if in.After != nil {
-		q.Set("after", string(*in.After))
-	}
-	if in.Before != nil {
-		q.Set("before", string(*in.Before))
+	if in.PerPage != nil {
+		q.Set("perPage", strconv.Itoa(*in.PerPage))
 	}
 
 	url := "/api/v1/webhooks"

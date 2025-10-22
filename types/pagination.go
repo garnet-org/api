@@ -2,78 +2,64 @@ package types
 
 import (
 	"fmt"
+	"math"
 	"net/url"
 	"strconv"
 )
 
-// Page is a generic type for paginated results.
-type Page[T any] struct {
-	Items    []T      `json:"items"`
-	PageInfo PageInfo `json:"pageInfo"`
+const (
+	// DefaultPageSize is the default number of items per page.
+	DefaultPageSize = 20
+)
+
+// Paginator is a generic type for paginated results using offset-based pagination.
+type Paginator[T any] struct {
+	Data          []T           `json:"data"`
+	PaginatorInfo PaginatorInfo `json:"paginatorInfo"`
 }
 
-// PageInfo contains pagination information.
-type PageInfo struct {
-	HasNextPage bool    `json:"hasNextPage"`
-	EndCursor   *Cursor `json:"endCursor"`
-	HasPrevPage bool    `json:"hasPrevPage"`
-	StartCursor *Cursor `json:"startCursor"`
+// PaginatorInfo contains offset-based pagination metadata.
+type PaginatorInfo struct {
+	Total       int  `json:"total"`       // Total number of items available
+	PerPage     int  `json:"perPage"`     // Number of items shown per page
+	CurrentPage int  `json:"currentPage"` // Current page number (1-based)
+	LastPage    int  `json:"lastPage"`    // Last page number
+	From        *int `json:"from,omitempty"` // Index of first item on page (1-based)
+	To          *int `json:"to,omitempty"`   // Index of last item on page (1-based)
 }
 
-// Cursor is a string type used for pagination.
-type Cursor string
-
-// PageArgs contains arguments for pagination.
+// PageArgs contains arguments for offset-based pagination.
 type PageArgs struct {
-	First  *uint   `json:"first,omitempty"`
-	After  *Cursor `json:"after,omitempty"`
-	Last   *uint   `json:"last,omitempty"`
-	Before *Cursor `json:"before,omitempty"`
+	Page    *int `json:"page,omitempty"`    // Page number (1-based)
+	PerPage *int `json:"perPage,omitempty"` // Items per page
 }
 
 // DecodePageArgs extracts PageArgs from URL query parameters.
+// Supports: ?page=1&perPage=20.
 func DecodePageArgs(v url.Values) PageArgs {
-	var first *uint
-	f := v.Get("first")
-	if f != "" {
-		ff, err := strconv.ParseUint(f, 10, 64)
+	var page *int
+	p := v.Get("page")
+	if p != "" {
+		pp, err := strconv.Atoi(p)
 		if err != nil {
 			panic(err)
 		}
-		uFirst := uint(ff)
-		first = &uFirst
+		page = &pp
 	}
 
-	var last *uint
-	l := v.Get("last")
-	if l != "" {
-		ll, err := strconv.ParseUint(l, 10, 64)
+	var perPage *int
+	pp := v.Get("perPage")
+	if pp != "" {
+		ppp, err := strconv.Atoi(pp)
 		if err != nil {
 			panic(err)
 		}
-		uLast := uint(ll)
-		last = &uLast
-	}
-
-	var before *Cursor
-	b := v.Get("before")
-	if b != "" {
-		bf := Cursor(b)
-		before = &bf
-	}
-
-	var after *Cursor
-	a := v.Get("after")
-	if a != "" {
-		af := Cursor(a)
-		after = &af
+		perPage = &ppp
 	}
 
 	return PageArgs{
-		First:  first,
-		After:  after,
-		Last:   last,
-		Before: before,
+		Page:    page,
+		PerPage: perPage,
 	}
 }
 
@@ -131,4 +117,38 @@ func DecodeSort(v url.Values) *Sort {
 	}
 
 	return s
+}
+
+// CalculatePaginatorInfo calculates pagination metadata based on data and parameters.
+func CalculatePaginatorInfo(dataLen, total int, page, perPage *int) PaginatorInfo {
+	pageValue := 1
+	if page != nil {
+		pageValue = *page
+	}
+
+	perPageValue := DefaultPageSize
+	if perPage != nil {
+		perPageValue = *perPage
+	}
+
+	lastPage := int(math.Ceil(float64(total) / float64(perPageValue)))
+	if lastPage == 0 {
+		lastPage = 1
+	}
+
+	out := PaginatorInfo{
+		Total:       total,
+		PerPage:     perPageValue,
+		CurrentPage: pageValue,
+		LastPage:    lastPage,
+	}
+
+	if dataLen != 0 {
+		from := ((pageValue - 1) * perPageValue) + 1
+		to := from + dataLen - 1
+		out.From = &from
+		out.To = &to
+	}
+
+	return out
 }
