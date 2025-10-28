@@ -138,6 +138,7 @@ type CurrentUserInfo struct {
 
 // ListUsers represents the query parameters for listing users.
 type ListUsers struct {
-	OrganizationID string `json:"organization_id,omitempty"`
 	PageArgs
+
+	OrganizationID string `json:"organization_id,omitempty"`
 }

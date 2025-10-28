@@ -72,7 +72,8 @@ func (u *UpdateOrganizationMember) Validate() error {
 
 // ListOrganizationMembers represents the query parameters for listing organization members.
 type ListOrganizationMembers struct {
+	PageArgs
+
 	OrganizationID string `json:"organization_id,omitempty"`
 	UserID         string `json:"user_id,omitempty"`
-	PageArgs
 }

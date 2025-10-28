@@ -76,16 +76,18 @@ func (w *WebhookCreate) Validate() error {
 
 // Webhook represents a webhook configuration.
 type Webhook struct {
-	ID        string `json:"id"`
-	ProjectID string `json:"-"`
 	WebhookCreate
+
+	ID        string    `json:"id"`
+	ProjectID string    `json:"-"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 // WebhookCreated represents a webhook creation response.
 type WebhookCreated struct {
-	ID string `json:"id"`
 	WebhookCreate
+
+	ID string `json:"id"`
 }
 
 // WebhookList represents a list of webhooks.
@@ -128,5 +130,6 @@ func (w *WebhookUpdate) Validate() error {
 // WebhookUpdated represents a webhook update response.
 type WebhookUpdated struct {
 	WebhookCreated
+
 	UpdatedAt time.Time `json:"updated_at"`
 }

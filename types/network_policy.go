@@ -121,14 +121,20 @@ func (s NetworkPolicyScope) IsValid() bool {
 type NetworkPolicyCIDRMode string
 
 const (
-	// NetworkPolicyCIDRModeIPv4 represents a network policy that applies to IPv4 addresses.
-	NetworkPolicyCIDRModeIPv4 NetworkPolicyCIDRMode = "ipv4"
+	// NetworkPolicyCIDRModeAlert represents alert mode - detections are logged but not blocked.
+	NetworkPolicyCIDRModeAlert NetworkPolicyCIDRMode = "alert"
 
-	// NetworkPolicyCIDRModeIPv6 represents a network policy that applies to IPv6 addresses.
-	NetworkPolicyCIDRModeIPv6 NetworkPolicyCIDRMode = "ipv6"
+	// NetworkPolicyCIDRModeEnforce represents enforce mode - detections are blocked.
+	NetworkPolicyCIDRModeEnforce NetworkPolicyCIDRMode = "enforce"
 
-	// NetworkPolicyCIDRModeBoth represents a network policy that applies to both IPv4 and IPv6 addresses.
+	// NetworkPolicyCIDRModeBoth represents both alert and enforce mode.
 	NetworkPolicyCIDRModeBoth NetworkPolicyCIDRMode = "both"
+
+	// NetworkPolicyCIDRModeIPv4 is deprecated: Use NetworkPolicyCIDRModeAlert instead.
+	NetworkPolicyCIDRModeIPv4 = NetworkPolicyCIDRModeAlert
+
+	// NetworkPolicyCIDRModeIPv6 is deprecated: Use NetworkPolicyCIDRModeEnforce instead.
+	NetworkPolicyCIDRModeIPv6 = NetworkPolicyCIDRModeEnforce
 )
 
 // String returns the string representation of the NetworkPolicyCIDRMode.
@@ -139,7 +145,7 @@ func (m NetworkPolicyCIDRMode) String() string {
 // IsValid checks if the NetworkPolicyCIDRMode is valid.
 func (m NetworkPolicyCIDRMode) IsValid() bool {
 	switch m {
-	case NetworkPolicyCIDRModeIPv4, NetworkPolicyCIDRModeIPv6, NetworkPolicyCIDRModeBoth:
+	case NetworkPolicyCIDRModeAlert, NetworkPolicyCIDRModeEnforce, NetworkPolicyCIDRModeBoth:
 		return true
 	}
 	return false
@@ -193,6 +199,38 @@ func (m NetworkPolicyResolveMode) String() string {
 func (m NetworkPolicyResolveMode) IsValid() bool {
 	switch m {
 	case NetworkPolicyResolveModsBypass, NetworkPolicyResolveModeStrict, NetworkPolicyResolveModePermissive:
+		return true
+	}
+	return false
+}
+
+// NetworkPolicyMode represents the enforcement mode for network policies.
+// This is the simplified mode field that combines CIDR and resolve modes.
+type NetworkPolicyMode string
+
+const (
+	// NetworkPolicyModeBypass means no enforcement - all traffic allowed.
+	NetworkPolicyModeBypass NetworkPolicyMode = "bypass"
+
+	// NetworkPolicyModeAlert means log violations but allow traffic.
+	NetworkPolicyModeAlert NetworkPolicyMode = "alert"
+
+	// NetworkPolicyModeEnforce means block violations.
+	NetworkPolicyModeEnforce NetworkPolicyMode = "enforce"
+
+	// NetworkPolicyModeBoth means alert AND enforce (log and block).
+	NetworkPolicyModeBoth NetworkPolicyMode = "both"
+)
+
+// String returns the string representation of the NetworkPolicyMode.
+func (m NetworkPolicyMode) String() string {
+	return string(m)
+}
+
+// IsValid checks if the NetworkPolicyMode is valid.
+func (m NetworkPolicyMode) IsValid() bool {
+	switch m {
+	case NetworkPolicyModeBypass, NetworkPolicyModeAlert, NetworkPolicyModeEnforce, NetworkPolicyModeBoth:
 		return true
 	}
 	return false
@@ -339,12 +377,14 @@ type GlobalNetworkPolicy struct {
 // RepoNetworkPolicy represents a network policy with repository scope.
 type RepoNetworkPolicy struct {
 	NetworkPolicy
+
 	RepositoryID string `json:"repository_id"`
 }
 
 // WorkflowNetworkPolicy represents a network policy with workflow scope.
 type WorkflowNetworkPolicy struct {
 	NetworkPolicy
+
 	RepositoryID string `json:"repository_id"`
 	WorkflowName string `json:"workflow_name"`
 }
@@ -352,20 +392,32 @@ type WorkflowNetworkPolicy struct {
 // ClusterNetworkPolicy represents a network policy with Kubernetes cluster scope.
 type ClusterNetworkPolicy struct {
 	NetworkPolicy
+
 	ClusterName string `json:"cluster_name"`
 }
 
 // NodeNetworkPolicy represents a network policy with Kubernetes node scope.
 type NodeNetworkPolicy struct {
 	NetworkPolicy
+
 	ClusterName string `json:"cluster_name"`
 	NodeName    string `json:"node_name"`
 }
 
 // MergedNetworkPolicy represents a network policy that combines all applicable policies.
 type MergedNetworkPolicy struct {
+	// Legacy format (for backwards compatibility)
 	Config              NetworkPolicyConfig       `json:"config"`
 	Rules               []NetworkPolicyRule       `json:"rules"`
+
+	// New simplified format
+	Mode                NetworkPolicyMode         `json:"mode"`
+	Policy              NetworkPolicyType         `json:"policy"`
+	Allow               []string                  `json:"allow"`
+	Deny                []string                  `json:"deny"`
+	Resolve             []string                  `json:"resolve"`
+
+	// Policy references for traceability
 	SystemGlobalPolicy  *SystemGlobalNetworkPolicy `json:"system_global_policy,omitempty"`
 	GlobalPolicy        *NetworkPolicy            `json:"global_policy,omitempty"`
 
@@ -401,6 +453,20 @@ func (c *CreateNetworkPolicy) Validate() error {
 	// Check network policy scope
 	if !c.Scope.IsValid() {
 		return ErrInvalidNetworkPolicyScope
+	}
+
+	// Set defaults for config if not provided
+	if c.Config.CIDRMode == "" {
+		c.Config.CIDRMode = NetworkPolicyCIDRModeEnforce
+	}
+	if c.Config.CIDRPolicy == "" {
+		c.Config.CIDRPolicy = NetworkPolicyTypeAllow
+	}
+	if c.Config.ResolveMode == "" {
+		c.Config.ResolveMode = NetworkPolicyResolveModsBypass
+	}
+	if c.Config.ResolvePolicy == "" {
+		c.Config.ResolvePolicy = NetworkPolicyTypeAllow
 	}
 
 	// Validate required fields based on scope
@@ -541,13 +607,8 @@ type NetworkPolicyRuleUpdated struct {
 // This is a helper function used by the merge policy functions.
 func initialMergedNetworkPolicy() *MergedNetworkPolicy {
 	return &MergedNetworkPolicy{
-		Config: NetworkPolicyConfig{
-			CIDRMode:      NetworkPolicyCIDRModeBoth,      // Default values
-			CIDRPolicy:    NetworkPolicyTypeAllow,         // Default values
-			ResolveMode:   NetworkPolicyResolveModsBypass, // Default values
-			ResolvePolicy: NetworkPolicyTypeAllow,         // Default values
-		},
-		Rules: []NetworkPolicyRule{},
+		Config: GetDefaultNetworkPolicyConfig(),
+		Rules:  []NetworkPolicyRule{},
 	}
 }
 
@@ -565,6 +626,46 @@ func applyPolicy(merged *MergedNetworkPolicy, policy *NetworkPolicy) {
 
 	// Config overrides existing config
 	merged.Config = policy.Config
+}
+
+// populateSimplifiedFormat converts the legacy rules format into the simplified format.
+// This populates the Mode, Policy, Allow, Deny, and Resolve fields.
+func populateSimplifiedFormat(merged *MergedNetworkPolicy) {
+	// Convert CIDRMode to simplified Mode
+	// The mode determines enforcement behavior across both CIDR and domain resolution
+	switch merged.Config.CIDRMode {
+	case NetworkPolicyCIDRModeBoth:
+		merged.Mode = NetworkPolicyModeBoth
+	case NetworkPolicyCIDRModeIPv4:
+		merged.Mode = NetworkPolicyModeAlert
+	case NetworkPolicyCIDRModeIPv6:
+		merged.Mode = NetworkPolicyModeEnforce
+	default:
+		merged.Mode = NetworkPolicyModeBypass
+	}
+
+	// Set the default policy (applies to traffic not matching any rule)
+	merged.Policy = merged.Config.CIDRPolicy
+
+	// Initialize the lists
+	merged.Allow = []string{}
+	merged.Deny = []string{}
+	merged.Resolve = []string{}
+
+	// Populate the lists from rules
+	for _, rule := range merged.Rules {
+		switch {
+		case rule.Type == NetworkPolicyRuleTypeCIDR && rule.Action == NetworkPolicyTypeAllow:
+			merged.Allow = append(merged.Allow, rule.Value)
+		case rule.Type == NetworkPolicyRuleTypeCIDR && rule.Action == NetworkPolicyTypeDeny:
+			merged.Deny = append(merged.Deny, rule.Value)
+		case rule.Type == NetworkPolicyRuleTypeDomain && rule.Action == NetworkPolicyTypeAllow:
+			merged.Allow = append(merged.Allow, rule.Value)
+		case rule.Type == NetworkPolicyRuleTypeDomain && rule.Action == NetworkPolicyTypeDeny:
+			// Domains with deny action go to resolve list (DNS resolution will be checked)
+			merged.Resolve = append(merged.Resolve, rule.Value)
+		}
+	}
 }
 
 // GetMergedNetworkPolicy constructs a merged policy from the provided GitHub context policies.
@@ -613,6 +714,9 @@ func GetMergedNetworkPolicy(systemGlobal *SystemGlobalNetworkPolicy, global *Glo
 	if workflow != nil {
 		applyPolicy(merged, &workflow.NetworkPolicy)
 	}
+
+	// Populate the simplified format from the merged rules
+	populateSimplifiedFormat(merged)
 
 	return merged
 }
@@ -664,13 +768,16 @@ func GetMergedNetworkPolicyForK8s(systemGlobal *SystemGlobalNetworkPolicy, globa
 		applyPolicy(merged, &node.NetworkPolicy)
 	}
 
+	// Populate the simplified format from the merged rules
+	populateSimplifiedFormat(merged)
+
 	return merged
 }
 
 // GetDefaultNetworkPolicyConfig returns a default network policy configuration.
 func GetDefaultNetworkPolicyConfig() NetworkPolicyConfig {
 	return NetworkPolicyConfig{
-		CIDRMode:      NetworkPolicyCIDRModeBoth,
+		CIDRMode:      NetworkPolicyCIDRModeEnforce,
 		CIDRPolicy:    NetworkPolicyTypeAllow,
 		ResolveMode:   NetworkPolicyResolveModsBypass,
 		ResolvePolicy: NetworkPolicyTypeAllow,

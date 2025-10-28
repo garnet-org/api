@@ -368,6 +368,7 @@ type FlowSimple struct {
 // Flow represents a network flow event with additional properties.
 type Flow struct {
 	FlowSimple
+
 	Properties *Properties `json:"properties,omitempty"`
 }
 

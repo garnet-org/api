@@ -370,12 +370,20 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 		
 		switch event.Data.Metadata.Name {
 		case MetadataNameDropIP:
-			// Extract remote IP from V2 event flows
+			// With jibril-ashkaal v0.1.4+, DropIP events can contain both IP and domain names
+			// When a domain is blocked, the event has the resolved IP + the domain name(s)
+			// Prefer domain if available, otherwise return IP
+			if domain := ExtractDomainFromV2Event(event); domain != "" {
+				return NetworkPolicyRuleTypeDomain, domain, nil
+			}
+			// Fallback to IP if no domain names present
 			if ip := ExtractIPFromV2Event(event); ip != "" {
 				return formatCIDRAddress(ip)
 			}
 
 		case MetadataNameDropDomain:
+			// DropDomain events are deprecated in jibril-ashkaal v0.1.4+
+			// Keep for backward compatibility with older jibril agents
 			// Extract domain information from V2 event flows
 			if domain := ExtractDomainFromV2Event(event); domain != "" {
 				return NetworkPolicyRuleTypeDomain, domain, nil
@@ -457,6 +465,8 @@ func ExtractIPFromV2Event(event Event) string {
 }
 
 // ExtractDomainFromV2Event extracts domain name from V2 event's Background.Flows structure.
+// With jibril-ashkaal v0.1.4+, ProtocolNode now has both Name (singular) and Names (plural) fields.
+// This function checks both fields and returns the first non-empty domain found.
 func ExtractDomainFromV2Event(event Event) string {
 	if event.Data.Background == nil || event.Data.Background.Flows == nil {
 		return ""
@@ -474,7 +484,11 @@ func ExtractDomainFromV2Event(event Event) string {
 		}
 
 		for _, pair := range protocol.Pairs {
-			// Check remote node for domain name
+			// Check remote node for domain names (new Names field in v0.1.4+)
+			if len(pair.Nodes.Remote.Names) > 0 && pair.Nodes.Remote.Names[0] != "" {
+				return pair.Nodes.Remote.Names[0]
+			}
+			// Fallback to singular Name field for backward compatibility
 			if pair.Nodes.Remote.Name != "" {
 				return pair.Nodes.Remote.Name
 			}

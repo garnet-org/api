@@ -404,10 +404,11 @@ func join(strs []string) string {
 
 // ListAgents represents the request to list agents.
 type ListAgents struct {
+	PageArgs
+
 	Labels    AgentLabels   `json:"labels,omitempty"`
 	Filters   *AgentFilters `json:"filters,omitempty"`
 	ProjectID string        `json:"project_id,omitempty"` // ProjectID for filtering
-	PageArgs
 }
 
 // Validate checks if the ListAgents has all required fields set.

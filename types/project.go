@@ -89,14 +89,16 @@ type ProjectUpdated struct {
 
 // ListProjects represents the query parameters for listing projects.
 type ListProjects struct {
-	OrganizationID string `json:"organization_id,omitempty"`
 	PageArgs
+
+	OrganizationID string `json:"organization_id,omitempty"`
 }
 
 // ListUserProjects represents the query parameters for listing projects a user has access to.
 type ListUserProjects struct {
-	UserID string `json:"user_id"`
 	PageArgs
+
+	UserID string `json:"user_id"`
 }
 
 // ProjectCounters represents the count of repositories and workflows in a project.

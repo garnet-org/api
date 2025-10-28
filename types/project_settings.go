@@ -115,8 +115,9 @@ type ProjectSettingUpdated struct {
 
 // ListProjectSettings represents the query parameters for listing project settings.
 type ListProjectSettings struct {
-	ProjectID string `json:"-"` // Set internally, not from user input
 	PageArgs
+
+	ProjectID string `json:"-"` // Set internally, not from user input
 }
 
 // WebhookEnabledIssueClasses represents the enabled issue classes for webhooks.

@@ -145,8 +145,9 @@ func (u *UpdateRole) Validate() error {
 
 // ListRoles represents the query parameters for listing roles.
 type ListRoles struct {
-	ProjectID string `json:"project_id,omitempty"`
 	PageArgs
+
+	ProjectID string `json:"project_id,omitempty"`
 }
 
 // Member represents a user's membership in a project with an assigned role.
@@ -210,10 +211,11 @@ func (u *UpdateMember) Validate() error {
 
 // ListMembers represents the query parameters for listing members.
 type ListMembers struct {
+	PageArgs
+
 	ProjectID string `json:"project_id,omitempty"`
 	UserID    string `json:"user_id,omitempty"`
 	RoleID    string `json:"role_id,omitempty"`
-	PageArgs
 }
 
 // PredefinedRoles returns the predefined roles for a project.
