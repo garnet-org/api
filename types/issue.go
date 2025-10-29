@@ -4,6 +4,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/url"
 	"slices"
 	"strings"
@@ -485,11 +486,17 @@ func ExtractDomainFromV2Event(event Event) string {
 
 		for _, pair := range protocol.Pairs {
 			// Check remote node for domain names (new Names field in v0.1.4+)
-			if len(pair.Nodes.Remote.Names) > 0 && pair.Nodes.Remote.Names[0] != "" {
-				return pair.Nodes.Remote.Names[0]
+			// Names array may contain both IPs and domains, prefer domain over IP
+			if len(pair.Nodes.Remote.Names) > 0 {
+				// Find the first non-IP entry (domain name)
+				for _, name := range pair.Nodes.Remote.Names {
+					if name != "" && !isIPAddress(name) {
+						return name
+					}
+				}
 			}
 			// Fallback to singular Name field for backward compatibility
-			if pair.Nodes.Remote.Name != "" {
+			if pair.Nodes.Remote.Name != "" && !isIPAddress(pair.Nodes.Remote.Name) {
 				return pair.Nodes.Remote.Name
 			}
 		}
@@ -498,6 +505,11 @@ func ExtractDomainFromV2Event(event Event) string {
 	return ""
 }
 
+
+// isIPAddress checks if a string is an IP address (IPv4 or IPv6).
+func isIPAddress(s string) bool {
+	return net.ParseIP(s) != nil
+}
 
 // formatCIDRAddress ensures an IP address is properly formatted as a CIDR.
 func formatCIDRAddress(ipAddress string) (NetworkPolicyRuleType, string, error) {
