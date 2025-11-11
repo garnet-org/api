@@ -485,19 +485,24 @@ func ExtractDomainFromV2Event(event Event) string {
 		}
 
 		for _, pair := range protocol.Pairs {
-			// Check remote node for domain names (new Names field in v0.1.4+)
-			// Names array may contain both IPs and domains, prefer domain over IP
+			// Check singular Name field first - this is the original requested domain
+			// In jibril-ashkaal v0.1.4+, this contains the domain that was actually requested
+			if pair.Nodes.Remote.Name != "" && !isIPAddress(pair.Nodes.Remote.Name) {
+				return pair.Nodes.Remote.Name
+			}
+
+			// Fallback to Names array for backward compatibility
+			// Names array contains the DNS resolution chain from resolved IP to original domain:
+			// [IP, CNAME_N, ..., CNAME_1, original_domain]
+			// We want the last non-IP entry (the original requested domain)
 			if len(pair.Nodes.Remote.Names) > 0 {
-				// Find the first non-IP entry (domain name)
-				for _, name := range pair.Nodes.Remote.Names {
+				// Iterate backwards to find the last non-IP entry
+				for i := len(pair.Nodes.Remote.Names) - 1; i >= 0; i-- {
+					name := pair.Nodes.Remote.Names[i]
 					if name != "" && !isIPAddress(name) {
 						return name
 					}
 				}
-			}
-			// Fallback to singular Name field for backward compatibility
-			if pair.Nodes.Remote.Name != "" && !isIPAddress(pair.Nodes.Remote.Name) {
-				return pair.Nodes.Remote.Name
 			}
 		}
 	}
