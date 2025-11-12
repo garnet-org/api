@@ -14,4 +14,4 @@
 // The Event:.
 // now it can have only what really need for the event, it also have the reference to the agent that generates
 // the event, so we can know where the event comes from.
-package types
+package types //nolint:revive // Package name is intentionally descriptive

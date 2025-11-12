@@ -1,5 +1,5 @@
 // Package types contains all the required clients for marshal/unmarshal requests and responses from/to jibril-server.
-package types
+package types //nolint:revive // Package name is intentionally descriptive
 
 import (
 	"encoding/json"

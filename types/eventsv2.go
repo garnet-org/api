@@ -1,5 +1,5 @@
 // Package types contains all the required types for v2 events API using ashkaal format.
-package types
+package types //nolint:revive // Package name is intentionally descriptive
 
 import (
 	"fmt"

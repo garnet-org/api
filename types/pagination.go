@@ -1,4 +1,4 @@
-package types
+package types //nolint:revive // Package name is intentionally descriptive
 
 import (
 	"fmt"
