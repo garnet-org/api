@@ -2439,6 +2439,44 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
+  /api/v1/github_webhook:
+    post:
+      security: []
+      summary: GitHub App webhook receiver
+      description: |
+        Receives webhook events from GitHub App installations.
+        This endpoint processes workflow_run completion events to post
+        comments on pull requests when security scans complete.
+      operationId: githubWebhook
+      parameters:
+        - name: X-Github-Event
+          in: header
+          description: GitHub event type
+          required: true
+          schema:
+            type: string
+            example: workflow_run
+      requestBody:
+        description: GitHub webhook payload
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: GitHub webhook event payload
+      responses:
+        "200":
+          description: Webhook processed successfully (non-workflow_run events)
+        "202":
+          description: Workflow completion accepted for background processing
+        "400":
+          description: Invalid webhook payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
   /healthz:
     get:
       security: []
