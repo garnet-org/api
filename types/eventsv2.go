@@ -10,6 +10,7 @@ import (
 
 	"github.com/garnet-org/jibril-ashkaal/pkg/kind"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
+	"github.com/google/uuid"
 	"github.com/garnet-org/api/types/errs"
 )
 
@@ -19,6 +20,9 @@ const (
 
 	// ErrIDcannotBeEmptyV2 is returned when the v2 event ID is empty.
 	ErrIDcannotBeEmptyV2 = errs.InvalidArgumentError("v2 event id is required")
+
+	// ErrInvalidEventV2ID is returned when the v2 event ID is not a valid UUID.
+	ErrInvalidEventV2ID = errs.InvalidArgumentError("v2 event id must be a valid UUID")
 
 	// ErrMetadataNameEmpty is returned when metadata name is empty.
 	ErrMetadataNameEmpty = errs.InvalidArgumentError("metadataName cannot be empty")
@@ -201,6 +205,11 @@ func (e *CreateOrUpdateEventV2) SetAgentID(agentID string) {
 func (e *CreateOrUpdateEventV2) Validate() error {
 	if e.ID == "" {
 		return ErrIDcannotBeEmptyV2
+	}
+
+	// Validate that ID is a valid UUID
+	if _, err := uuid.Parse(e.ID); err != nil {
+		return ErrInvalidEventV2ID
 	}
 
 	if !isValidAshkaalKind(e.Kind) {

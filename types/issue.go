@@ -233,9 +233,11 @@ type IssueFilters struct {
 	State        *IssueState    `json:"state,omitempty"`
 	Priority     *IssuePriority `json:"priority,omitempty"`
 	AgentKind    *AgentKind     `json:"agent_kind,omitempty"`
+	AgentID      *string        `json:"agent_id,omitempty"`
 	RepositoryID *string        `json:"repository_id,omitempty"`
 	Repository   *string        `json:"repository,omitempty"`
 	WorkflowName *string        `json:"workflow_name,omitempty"`
+	CreatedAfter *time.Time     `json:"created_after,omitempty"`
 }
 
 // Validate checks if the IssueFilters has all required fields set.
