@@ -25,6 +25,7 @@ const (
 
 	IssueClassNetworkExfiltration IssueClass = "network_exfiltration"
 	IssueClassCryptoMiner         IssueClass = "crypto_miner"
+	IssueClassNetworkAnomaly      IssueClass = "network_anomaly"
 )
 
 // IssueActionType represents the type of action performed on an issue.
@@ -142,7 +143,7 @@ func (c IssueClass) String() string {
 // IsValid checks if the IssueClass is valid.
 func (c IssueClass) IsValid() bool {
 	switch c {
-	case IssueClassNetworkExfiltration, IssueClassCryptoMiner:
+	case IssueClassNetworkExfiltration, IssueClassCryptoMiner, IssueClassNetworkAnomaly:
 		return true
 	}
 	return false
@@ -153,6 +154,7 @@ func AllEnabledIssueClasses() []IssueClass {
 	return []IssueClass{
 		IssueClassNetworkExfiltration,
 		IssueClassCryptoMiner,
+		IssueClassNetworkAnomaly,
 	}
 }
 
