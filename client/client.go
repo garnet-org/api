@@ -160,7 +160,7 @@ func (c *Client) do(ctx context.Context, out any, method, path string, body any)
 			return fmt.Errorf("read error response body: %w", err)
 		}
 
-		return fmt.Errorf("unexpected status code %d: %s", resp.StatusCode, string(b))
+		return fmt.Errorf("unexpected status code %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {

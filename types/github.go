@@ -34,7 +34,7 @@ type AgentGithubContext struct {
 	WorkflowSHA       string    `json:"workflow_sha"`
 	Workspace         string    `json:"workspace"`
 	CreatedAt         time.Time `json:"created_at"`
-	UpdateAt          time.Time `json:"updated_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 // Validate checks if the AgentGithubContext has all required fields set.

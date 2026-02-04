@@ -138,7 +138,7 @@ func (c *AgentKubernetesContext) Validate() error {
 	}
 
 	var errs []string
-	
+
 	// Validate cluster name
 	if c.Cluster == "" {
 		errs = append(errs, "cluster is required")
@@ -179,6 +179,7 @@ type Agent struct {
 	MachineID         string                  `json:"machine_id"`
 	Labels            AgentLabels             `json:"labels"`
 	Kind              AgentKind               `json:"kind"`
+	ContextID         string                  `json:"context_id"`
 	GithubContext     *AgentGithubContext     `json:"github_context,omitempty"`
 	KubernetesContext *AgentKubernetesContext `json:"kubernetes_context,omitempty"`
 	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
@@ -526,4 +527,50 @@ func DecodeAgentFilters(values url.Values) *AgentFilters {
 func (f AgentFilters) IsEmpty() bool {
 	return f.OS == nil && f.Arch == nil && f.Hostname == nil &&
 		f.Version == nil && f.IP == nil && f.MachineID == nil && f.Kind == nil
+}
+
+type RetrieveAgentsCounts struct {
+	ProjectID    string
+	Kind         *AgentKind
+	CreatedSince *time.Time
+
+	agentActiveThreshold time.Duration
+}
+
+func (in *RetrieveAgentsCounts) SetAgentActiveThreshold(threshold time.Duration) {
+	in.agentActiveThreshold = threshold
+}
+
+func (in RetrieveAgentsCounts) AgentActiveThreshold() time.Duration {
+	return in.agentActiveThreshold
+}
+
+func (in *RetrieveAgentsCounts) Validate() error {
+	if in.ProjectID == "" {
+		return errors.New("project_id is required")
+	}
+
+	if in.Kind != nil && !in.Kind.IsValid() {
+		return ErrInvalidAgentType
+	}
+
+	if in.CreatedSince != nil {
+		if in.CreatedSince.IsZero() {
+			return errs.InvalidArgumentError("created_since is zero")
+		}
+
+		if in.CreatedSince.After(time.Now()) {
+			return errs.InvalidArgumentError("created_since is in the future")
+		}
+	}
+
+	return nil
+}
+
+type AgentsCounts struct {
+	Total        uint64    `json:"total" db:"total"`
+	Active       uint64    `json:"active" db:"active"`
+	Inactive     uint64    `json:"inactive" db:"inactive"`
+	CreatedSince *uint64   `json:"createdSince,omitempty" db:"created_since"`
+	At           time.Time `json:"at" db:"at"`
 }

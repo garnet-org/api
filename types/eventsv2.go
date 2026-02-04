@@ -58,121 +58,121 @@ const (
 	MaxMetadataNameCount = 20
 
 	// MetadataNameDropIP defines metadata name for IP drop events.
-	MetadataNameDropIP     = "dropip"
+	MetadataNameDropIP = "dropip"
 	// MetadataNameDropDomain defines metadata name for domain drop events.
 	MetadataNameDropDomain = "dropdomain"
 	// MetadataNameFlow defines metadata name for flow events.
-	MetadataNameFlow       = "flow"
+	MetadataNameFlow = "flow"
 
 	// MetadataNameAdultDomainAccess defines metadata name for adult domain access events.
-	MetadataNameAdultDomainAccess    = "adult_domain_access"
+	MetadataNameAdultDomainAccess = "adult_domain_access"
 	// MetadataNameThreatDomainAccess defines metadata name for threat domain access events.
-	MetadataNameThreatDomainAccess   = "threat_domain_access"
+	MetadataNameThreatDomainAccess = "threat_domain_access"
 	// MetadataNameBadwareDomainAccess defines metadata name for badware domain access events.
-	MetadataNameBadwareDomainAccess  = "badware_domain_access"
+	MetadataNameBadwareDomainAccess = "badware_domain_access"
 	// MetadataNameDynDNSDomainAccess defines metadata name for dynamic DNS domain access events.
-	MetadataNameDynDNSDomainAccess   = "dyndns_domain_access"
+	MetadataNameDynDNSDomainAccess = "dyndns_domain_access"
 	// MetadataNameFakeDomainAccess defines metadata name for fake domain access events.
-	MetadataNameFakeDomainAccess     = "fake_domain_access"
+	MetadataNameFakeDomainAccess = "fake_domain_access"
 	// MetadataNameGamblingDomainAccess defines metadata name for gambling domain access events.
 	MetadataNameGamblingDomainAccess = "gambling_domain_access"
 	// MetadataNamePiracyDomainAccess defines metadata name for piracy domain access events.
-	MetadataNamePiracyDomainAccess   = "piracy_domain_access"
+	MetadataNamePiracyDomainAccess = "piracy_domain_access"
 	// MetadataNamePlaintextComm defines metadata name for plaintext communication events.
-	MetadataNamePlaintextComm        = "plaintext_communication"
+	MetadataNamePlaintextComm = "plaintext_communication"
 	// MetadataNameTrackingDomainAccess defines metadata name for tracking domain access events.
 	MetadataNameTrackingDomainAccess = "tracking_domain_access"
 	// MetadataNameVPNLikeDomainAccess defines metadata name for VPN-like domain access events.
-	MetadataNameVPNLikeDomainAccess  = "vpnlike_domain_access"
+	MetadataNameVPNLikeDomainAccess = "vpnlike_domain_access"
 
 	// MetadataNameCapabilitiesModification defines metadata name for capabilities modification events.
-	MetadataNameCapabilitiesModification         = "capabilities_modification"
+	MetadataNameCapabilitiesModification = "capabilities_modification"
 	// MetadataNameCodeModificationThroughProcfs defines metadata name for code modification through procfs events.
-	MetadataNameCodeModificationThroughProcfs   = "code_modification_through_procfs"
+	MetadataNameCodeModificationThroughProcfs = "code_modification_through_procfs"
 	// MetadataNameCorePatternAccess defines metadata name for core pattern access events.
-	MetadataNameCorePatternAccess                = "core_pattern_access"
+	MetadataNameCorePatternAccess = "core_pattern_access"
 	// MetadataNameCPUFingerprint defines metadata name for CPU fingerprint events.
-	MetadataNameCPUFingerprint                   = "cpu_fingerprint"
+	MetadataNameCPUFingerprint = "cpu_fingerprint"
 	// MetadataNameCredentialsFilesAccess defines metadata name for credentials files access events.
-	MetadataNameCredentialsFilesAccess           = "credentials_files_access"
+	MetadataNameCredentialsFilesAccess = "credentials_files_access"
 	// MetadataNameFilesystemFingerprint defines metadata name for filesystem fingerprint events.
-	MetadataNameFilesystemFingerprint            = "filesystem_fingerprint"
+	MetadataNameFilesystemFingerprint = "filesystem_fingerprint"
 	// MetadataNameJavaDebugLibLoad defines metadata name for Java debug library load events.
-	MetadataNameJavaDebugLibLoad                 = "java_debug_lib_load"
+	MetadataNameJavaDebugLibLoad = "java_debug_lib_load"
 	// MetadataNameJavaInstrumentLibLoad defines metadata name for Java instrument library load events.
-	MetadataNameJavaInstrumentLibLoad            = "java_instrument_lib_load"
+	MetadataNameJavaInstrumentLibLoad = "java_instrument_lib_load"
 	// MetadataNameMachineFingerprint defines metadata name for machine fingerprint events.
-	MetadataNameMachineFingerprint               = "machine_fingerprint"
+	MetadataNameMachineFingerprint = "machine_fingerprint"
 	// MetadataNameOSFingerprint defines metadata name for OS fingerprint events.
-	MetadataNameOSFingerprint                    = "os_fingerprint"
+	MetadataNameOSFingerprint = "os_fingerprint"
 	// MetadataNameOSNetworkFingerprint defines metadata name for OS network fingerprint events.
-	MetadataNameOSNetworkFingerprint             = "os_network_fingerprint"
+	MetadataNameOSNetworkFingerprint = "os_network_fingerprint"
 	// MetadataNameOSStatusFingerprint defines metadata name for OS status fingerprint events.
-	MetadataNameOSStatusFingerprint              = "os_status_fingerprint"
+	MetadataNameOSStatusFingerprint = "os_status_fingerprint"
 	// MetadataNamePackageRepoConfigModification defines metadata name for package repository configuration modification events.
-	MetadataNamePackageRepoConfigModification    = "package_repo_config_modification"
+	MetadataNamePackageRepoConfigModification = "package_repo_config_modification"
 	// MetadataNamePAMConfigModification defines metadata name for PAM configuration modification events.
-	MetadataNamePAMConfigModification            = "pam_config_modification"
+	MetadataNamePAMConfigModification = "pam_config_modification"
 	// MetadataNameSchedDebugAccess defines metadata name for scheduler debug access events.
-	MetadataNameSchedDebugAccess                 = "sched_debug_access"
+	MetadataNameSchedDebugAccess = "sched_debug_access"
 	// MetadataNameShellConfigModification defines metadata name for shell configuration modification events.
-	MetadataNameShellConfigModification          = "shell_config_modification"
+	MetadataNameShellConfigModification = "shell_config_modification"
 	// MetadataNameSSLCertificateAccess defines metadata name for SSL certificate access events.
-	MetadataNameSSLCertificateAccess             = "ssl_certificate_access"
+	MetadataNameSSLCertificateAccess = "ssl_certificate_access"
 	// MetadataNameSudoersModification defines metadata name for sudoers modification events.
-	MetadataNameSudoersModification              = "sudoers_modification"
+	MetadataNameSudoersModification = "sudoers_modification"
 	// MetadataNameSysrqAccess defines metadata name for sysrq access events.
-	MetadataNameSysrqAccess                      = "sysrq_access"
+	MetadataNameSysrqAccess = "sysrq_access"
 	// MetadataNameUnprivilegedBPFConfigAccess defines metadata name for unprivileged BPF configuration access events.
-	MetadataNameUnprivilegedBPFConfigAccess      = "unprivileged_bpf_config_access"
+	MetadataNameUnprivilegedBPFConfigAccess = "unprivileged_bpf_config_access"
 	// MetadataNameGlobalShlibModification defines metadata name for global shared library modification events.
-	MetadataNameGlobalShlibModification          = "global_shlib_modification"
+	MetadataNameGlobalShlibModification = "global_shlib_modification"
 	// MetadataNameEnvironReadFromProcfs defines metadata name for environment read from procfs events.
-	MetadataNameEnvironReadFromProcfs            = "environ_read_from_procfs"
+	MetadataNameEnvironReadFromProcfs = "environ_read_from_procfs"
 	// MetadataNameBinarySelfDeletion defines metadata name for binary self deletion events.
-	MetadataNameBinarySelfDeletion               = "binary_self_deletion"
+	MetadataNameBinarySelfDeletion = "binary_self_deletion"
 	// MetadataNameCryptoMinerFiles defines metadata name for crypto miner files events.
-	MetadataNameCryptoMinerFiles                 = "crypto_miner_files"
+	MetadataNameCryptoMinerFiles = "crypto_miner_files"
 	// MetadataNameAuthLogsTamper defines metadata name for authentication logs tamper events.
-	MetadataNameAuthLogsTamper                   = "auth_logs_tamper"
+	MetadataNameAuthLogsTamper = "auth_logs_tamper"
 	// MetadataNameBinaryExecutedByLoader defines metadata name for binary executed by loader events.
-	MetadataNameBinaryExecutedByLoader           = "binary_executed_by_loader"
+	MetadataNameBinaryExecutedByLoader = "binary_executed_by_loader"
 	// MetadataNameCodeOnTheFly defines metadata name for code on the fly events.
-	MetadataNameCodeOnTheFly                     = "code_on_the_fly"
+	MetadataNameCodeOnTheFly = "code_on_the_fly"
 	// MetadataNameDataEncoderExec defines metadata name for data encoder execution events.
-	MetadataNameDataEncoderExec                  = "data_encoder_exec"
+	MetadataNameDataEncoderExec = "data_encoder_exec"
 	// MetadataNameDenialOfServiceTools defines metadata name for denial of service tools events.
-	MetadataNameDenialOfServiceTools             = "denial_of_service_tools"
+	MetadataNameDenialOfServiceTools = "denial_of_service_tools"
 	// MetadataNameExecFromUnusualDir defines metadata name for execution from unusual directory events.
-	MetadataNameExecFromUnusualDir               = "exec_from_unusual_dir"
+	MetadataNameExecFromUnusualDir = "exec_from_unusual_dir"
 	// MetadataNameFileAttributeChange defines metadata name for file attribute change events.
-	MetadataNameFileAttributeChange              = "file_attribute_change"
+	MetadataNameFileAttributeChange = "file_attribute_change"
 	// MetadataNameHiddenELFExec defines metadata name for hidden ELF execution events.
-	MetadataNameHiddenELFExec                    = "hidden_elf_exec"
+	MetadataNameHiddenELFExec = "hidden_elf_exec"
 	// MetadataNameInterpreterShellSpawn defines metadata name for interpreter shell spawn events.
-	MetadataNameInterpreterShellSpawn            = "interpreter_shell_spawn"
+	MetadataNameInterpreterShellSpawn = "interpreter_shell_spawn"
 	// MetadataNameNetFilecopyToolExec defines metadata name for network file copy tool execution events.
-	MetadataNameNetFilecopyToolExec              = "net_filecopy_tool_exec"
+	MetadataNameNetFilecopyToolExec = "net_filecopy_tool_exec"
 	// MetadataNameNetMITMToolExec defines metadata name for network MITM tool execution events.
-	MetadataNameNetMITMToolExec                  = "net_mitm_tool_exec"
+	MetadataNameNetMITMToolExec = "net_mitm_tool_exec"
 	// MetadataNameNetScanToolExec defines metadata name for network scan tool execution events.
-	MetadataNameNetScanToolExec                  = "net_scan_tool_exec"
+	MetadataNameNetScanToolExec = "net_scan_tool_exec"
 	// MetadataNameNetSniffToolExec defines metadata name for network sniff tool execution events.
-	MetadataNameNetSniffToolExec                 = "net_sniff_tool_exec"
+	MetadataNameNetSniffToolExec = "net_sniff_tool_exec"
 	// MetadataNameNetSuspiciousToolExec defines metadata name for network suspicious tool execution events.
-	MetadataNameNetSuspiciousToolExec            = "net_suspicious_tool_exec"
+	MetadataNameNetSuspiciousToolExec = "net_suspicious_tool_exec"
 	// MetadataNameNetSuspiciousToolShell defines metadata name for network suspicious tool shell events.
-	MetadataNameNetSuspiciousToolShell           = "net_suspicious_tool_shell"
+	MetadataNameNetSuspiciousToolShell = "net_suspicious_tool_shell"
 	// MetadataNamePasswdUsage defines metadata name for passwd usage events.
-	MetadataNamePasswdUsage                      = "passwd_usage"
+	MetadataNamePasswdUsage = "passwd_usage"
 	// MetadataNameRuncSuspiciousExec defines metadata name for runc suspicious execution events.
-	MetadataNameRuncSuspiciousExec               = "runc_suspicious_exec"
+	MetadataNameRuncSuspiciousExec = "runc_suspicious_exec"
 	// MetadataNameWebserverExec defines metadata name for webserver execution events.
-	MetadataNameWebserverExec                    = "webserver_exec"
+	MetadataNameWebserverExec = "webserver_exec"
 	// MetadataNameWebserverShellExec defines metadata name for webserver shell execution events.
-	MetadataNameWebserverShellExec               = "webserver_shell_exec"
+	MetadataNameWebserverShellExec = "webserver_shell_exec"
 	// MetadataNameCryptoMinerExecution defines metadata name for crypto miner execution events.
-	MetadataNameCryptoMinerExecution             = "crypto_miner_execution"
+	MetadataNameCryptoMinerExecution = "crypto_miner_execution"
 )
 
 var (
@@ -234,6 +234,7 @@ func isValidAshkaalKind(k kind.Kind) bool {
 // EventV2 represents a v2 event with full agent details in ashkaal format.
 type EventV2 struct {
 	ID        string       `json:"id"`
+	AgentID   string       `json:"agent_id"`
 	Agent     Agent        `json:"agent"`
 	Kind      kind.Kind    `json:"kind"`
 	Data      ongoing.Base `json:"data"`
@@ -489,9 +490,9 @@ type ListEventsFilters struct {
 	AgentID       *string  `json:"agentID"`
 	MetadataNames []string `json:"metadataNames"`
 	// Kubernetes context filters
-	Cluster       *string  `json:"cluster"`
-	Namespace     *string  `json:"namespace"`
-	Node          *string  `json:"node"`
+	Cluster   *string `json:"cluster"`
+	Namespace *string `json:"namespace"`
+	Node      *string `json:"node"`
 }
 
 // Validate checks if the ListEventsFilters are valid.
@@ -512,11 +513,11 @@ func (f *ListEventsFilters) Validate() error {
 		if name == "" {
 			return ErrMetadataNameEmpty
 		}
-		
+
 		if len(name) > MaxMetadataNameLength {
 			return ErrMetadataNameTooLong
 		}
-		
+
 		if !metadataNameRegex.MatchString(name) {
 			return ErrMetadataNameInvalidChars
 		}
@@ -595,7 +596,7 @@ func (t EventActionType) IsValid() bool {
 // EventAction represents an action to be performed on an event.
 type EventAction struct {
 	ActionType       EventActionType       `json:"action_type"` // block
-	Scope            NetworkPolicyScope    `json:"scope"`       // global, repo, workflow, cluster, or node  
+	Scope            NetworkPolicyScope    `json:"scope"`       // global, repo, workflow, cluster, or node
 	Reason           string                `json:"reason"`      // User-provided reason for the action
 	UserID           *string               `json:"-"`           // ID of the user who performed the action
 	DestinationType  NetworkPolicyRuleType `json:"-"`           // Domain or CIDR

@@ -2,10 +2,12 @@ package client
 
 import (
 	"context"
+	"errors"
 	"maps"
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/garnet-org/api/types"
 )
@@ -60,6 +62,29 @@ func (c *Client) Agents(ctx context.Context, in types.ListAgents) (types.Paginat
 	}
 
 	path := "/api/v1/agents?" + q.Encode()
+
+	return out, c.do(ctx, &out, http.MethodGet, path, nil)
+}
+
+func (c *Client) AgentsCounts(ctx context.Context, in types.RetrieveAgentsCounts) (types.AgentsCounts, error) {
+	var out types.AgentsCounts
+
+	if in.ProjectID == "" {
+		return out, errors.New("projectID is required")
+	}
+
+	q := url.Values{}
+	if in.Kind != nil {
+		q.Set("kind", string(*in.Kind))
+	}
+	if in.CreatedSince != nil {
+		q.Set("createdSince", in.CreatedSince.Format(time.RFC3339Nano))
+	}
+
+	path := "/api/v1/projects/" + url.PathEscape(in.ProjectID) + "/agents_counts"
+	if len(q) != 0 {
+		path += "?" + q.Encode()
+	}
 
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }

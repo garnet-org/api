@@ -3278,7 +3278,53 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-  
+
+  /api/v1/projects/{projectID}/agents_counts:
+    parameters:
+      - name: projectID
+        in: path
+        description: ID of the project
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: agentsCounts
+      summary: Agent summary count within a project
+      security:
+        - UserTokenAuth: []
+      parameters:
+        - name: kind
+          in: query
+          description: Filter by agent kind
+          required: false
+          schema:
+            $ref: "#/components/schemas/AgentKind"
+            nullable: true
+        - name: createdSince
+          in: query
+          description: |-
+            It does not filter out agents created before this time
+            but instead adds an additional count of such agents in the response.
+          required: false
+          schema:
+            type: string
+            format: date-time
+            nullable: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentsCounts"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/projects/{project_id}/issues:
     post:
       security:
@@ -5121,6 +5167,35 @@ components:
           format: int32
           description: Index of the last item on the current page (1-indexed)
           example: 10
+
+    AgentsCounts:
+      type: object
+      description: |
+        Contains counts of agents by their operating system.
+      properties:
+        total:
+          type: integer
+          format: int64
+          minimum: 0
+        active:
+          type: integer
+          format: int64
+          minimum: 0
+        inactive:
+          type: integer
+          format: int64
+          minimum: 0
+        createdSince:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+          description: |-
+            Returned only when `createdSince` filter is applied.
+        at:
+          type: string
+          format: date-time
+          description: Timestamp when the counts were calculated
     
     AgentFilters:
       type: object
