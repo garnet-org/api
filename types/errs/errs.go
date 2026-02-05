@@ -1,6 +1,8 @@
 // Package errs contains the error types returned by the jibril-server.
 package errs
 
+import "errors"
+
 const (
 	// ErrInvalidArgument is returned when an invalid argument is provided.
 	ErrInvalidArgument = InvalidArgumentError("invalid argument")
@@ -136,4 +138,14 @@ func (e PermissionDeniedError) Is(target error) bool {
 		return e == target
 	}
 	return false
+}
+
+func Is(err error) bool {
+	return errors.Is(err, ErrNotFound) ||
+		errors.Is(err, ErrUnauthorized) ||
+		errors.Is(err, ErrInvalidArgument) ||
+		errors.Is(err, ErrInternalServer) ||
+		errors.Is(err, ErrConflict) ||
+		errors.Is(err, ErrPermissionDenied) ||
+		errors.Is(err, ErrInvalidAgentID)
 }

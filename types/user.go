@@ -19,16 +19,16 @@ const (
 	ErrUserNameRequired = errs.InvalidArgumentError("name is required")
 
 	// ErrUserEmailExists is returned when the email already exists in the system.
-	ErrUserEmailExists = errs.InvalidArgumentError("email already exists")
+	ErrUserEmailExists = errs.ConflictError("email already exists")
 
 	// ErrUserGithubIDExists is returned when the GitHub ID already exists in the system.
-	ErrUserGithubIDExists = errs.InvalidArgumentError("github_id already exists")
+	ErrUserGithubIDExists = errs.ConflictError("github_id already exists")
 
 	// ErrUserGoogleIDExists is returned when the Google ID already exists in the system.
-	ErrUserGoogleIDExists = errs.InvalidArgumentError("google_id already exists")
+	ErrUserGoogleIDExists = errs.ConflictError("google_id already exists")
 
 	// ErrUserAuth0SubExists is returned when the Auth0 sub already exists in the system.
-	ErrUserAuth0SubExists = errs.InvalidArgumentError("auth0_sub already exists")
+	ErrUserAuth0SubExists = errs.ConflictError("auth0_sub already exists")
 
 	// ErrUserNotFound is returned when the user is not found in the system.
 	ErrUserNotFound = errs.NotFoundError("user not found")
@@ -44,7 +44,7 @@ type User struct {
 	Name           string     `json:"name"`
 	GithubID       *string    `json:"github_id,omitempty"`
 	GoogleID       *string    `json:"google_id,omitempty"` // Deprecated: use Auth0Sub
-	Auth0Sub       *string    `json:"auth0_sub,omitempty"`  // Auth0 subject identifier
+	Auth0Sub       *string    `json:"auth0_sub,omitempty"` // Auth0 subject identifier
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 	DeletedAt      *time.Time `json:"-"`
