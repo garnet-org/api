@@ -58,7 +58,7 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 			Timestamp: config.CreatedAt.Format(time.RFC3339),
 			UUID:      uuid.New().String(),
 			Note:      config.Note,
-			Metadata: &ongoing.Metadata{
+			Metadata: ongoing.Metadata{
 				Name:        metadataName,
 				Version:     "1.0",
 				Format:      "ashkaal",
@@ -66,8 +66,8 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 				Kind:        "flow",
 				Importance:  config.Importance,
 			},
-			Background: &ongoing.Background{
-				Flows: &ongoing.FlowAggregate{
+			Background: ongoing.Background{
+				Flows: ongoing.FlowAggregate{
 					IPVersion: 4,
 					Protocols: []ongoing.ProtocolAggregate{
 						{
@@ -141,7 +141,7 @@ func (h *EventV2Helper) CreateCryptoMinerEvent(opts ...EventOption) types.Create
 			Timestamp: config.CreatedAt.Format(time.RFC3339),
 			UUID:      uuid.New().String(),
 			Note:      config.Note,
-			Metadata: &ongoing.Metadata{
+			Metadata: ongoing.Metadata{
 				Name:        types.MetadataNameCryptoMinerExecution,
 				Version:     "1.0",
 				Format:      "ashkaal",
@@ -149,7 +149,7 @@ func (h *EventV2Helper) CreateCryptoMinerEvent(opts ...EventOption) types.Create
 				Kind:        "detection",
 				Importance:  config.Importance,
 			},
-			Background: &ongoing.Background{
+			Background: ongoing.Background{
 				Ancestry: []ongoing.Process{
 					{
 						Comm:  "bash",
@@ -194,7 +194,7 @@ func (h *EventV2Helper) CreateEventWithMetadata(metadataName string, opts ...Eve
 			Timestamp: config.CreatedAt.Format(time.RFC3339),
 			UUID:      uuid.New().String(),
 			Note:      config.Note,
-			Metadata: &ongoing.Metadata{
+			Metadata: ongoing.Metadata{
 				Name:        metadataName,
 				Version:     "1.0",
 				Format:      "ashkaal",

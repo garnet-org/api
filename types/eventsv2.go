@@ -413,9 +413,9 @@ func (w *EventV2Wrapper) ToCreateOrUpdateEventV2() (*CreateOrUpdateEventV2, erro
 	case kind.KindFlows:
 		// Try to unmarshal as different flow types
 		if dropIP, ok := w.Data.(ongoing.DropIP); ok {
-			event.Data = *dropIP.Base
+			event.Data = dropIP.Base
 		} else if networkFlow, ok := w.Data.(ongoing.NetworkFlow); ok {
-			event.Data = *networkFlow.Base
+			event.Data = networkFlow.Base
 		} else if base, ok := w.Data.(ongoing.Base); ok {
 			event.Data = base
 		} else {
@@ -424,9 +424,9 @@ func (w *EventV2Wrapper) ToCreateOrUpdateEventV2() (*CreateOrUpdateEventV2, erro
 	case kind.KindDetections:
 		// Try to unmarshal as different detection types
 		if execution, ok := w.Data.(ongoing.Execution); ok {
-			event.Data = *execution.Base
+			event.Data = execution.Base
 		} else if fileAccess, ok := w.Data.(ongoing.FileAccess); ok {
-			event.Data = *fileAccess.Base
+			event.Data = fileAccess.Base
 		} else if base, ok := w.Data.(ongoing.Base); ok {
 			event.Data = base
 		} else {

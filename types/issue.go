@@ -369,7 +369,7 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 	// Examine events to extract network destination
 	for _, event := range i.Events {
 		// For V2 events, check metadata name instead of Kind
-		if event.Data.Metadata == nil {
+		if event.Data.Metadata.IsZero() {
 			continue
 		}
 		
@@ -443,7 +443,7 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 
 // ExtractIPFromV2Event extracts IP address from V2 event's Background.Flows structure.
 func ExtractIPFromV2Event(event Event) string {
-	if event.Data.Background == nil || event.Data.Background.Flows == nil {
+	if event.Data.Background.Flows.IsZero() {
 		return ""
 	}
 
@@ -473,7 +473,7 @@ func ExtractIPFromV2Event(event Event) string {
 // With jibril-ashkaal v0.1.4+, ProtocolNode now has both Name (singular) and Names (plural) fields.
 // This function checks both fields and returns the first non-empty domain found.
 func ExtractDomainFromV2Event(event Event) string {
-	if event.Data.Background == nil || event.Data.Background.Flows == nil {
+	if event.Data.Background.Flows.IsZero() {
 		return ""
 	}
 
