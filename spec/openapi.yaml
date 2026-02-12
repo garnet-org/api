@@ -688,10 +688,18 @@ paths:
             type: string
         - name: filter.kind
           in: query
-          description: Filter events by ashkaal kind
+          description: Deprecated. Use filter.kinds instead.
+          deprecated: true
           required: false
           schema:
             $ref: "#/components/schemas/AshkaalKind"
+        - name: filter.kinds
+          in: query
+          description: Filter events by ashkaal kinds. Multiple values can be provided to filter by any of the specified kinds.
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/AshkaalKind"
         - name: filter.metadata.name
           in: query
           description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
@@ -720,6 +728,18 @@ paths:
           required: false
           schema:
             type: string
+        - name: filter.time_start
+          in: query
+          description: Filter events that were created at or after this time (RFC 3339 nano)
+          schema:
+            type: string
+            format: date-time
+        - name: filter.time_end
+          in: query
+          description: Filter events that were created before this time (RFC 3339 nano)
+          schema:
+            type: string
+            format: date-time
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PerPage'
         - name: sort.field
@@ -4324,14 +4344,6 @@ components:
         data:
           $ref: "#/components/schemas/AshkaalBase"
           description: Ashkaal ongoing Base structure containing event metadata and background data
-        createdAt:
-          type: string
-          format: date-time
-          description: When the v2 event was initially created
-        updatedAt:
-          type: string
-          format: date-time
-          description: When the v2 event was last updated
 
     EventV2:
       type: object
@@ -4343,6 +4355,8 @@ components:
         - agent
         - kind
         - data
+        - created_at
+        - updated_at
       properties:
         id:
           type: string

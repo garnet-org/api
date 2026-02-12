@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/garnet-org/api/types"
 )
@@ -40,7 +41,10 @@ func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Pag
 			query.Set("filter.agent_id", *params.Filters.AgentID)
 		}
 		if params.Filters.Kind != nil {
-			query.Set("filter.kind", *params.Filters.Kind)
+			query.Set("filter.kind", params.Filters.Kind.String())
+		}
+		for _, kind := range params.Filters.Kinds {
+			query.Add("filter.kinds", kind.String())
 		}
 		for _, name := range params.Filters.MetadataNames {
 			query.Add("filter.metadata.name", name)
@@ -54,6 +58,12 @@ func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Pag
 		}
 		if params.Filters.Node != nil {
 			query.Set("filter.node", *params.Filters.Node)
+		}
+		if params.Filters.TimeStart != nil {
+			query.Set("filter.time_start", params.Filters.TimeStart.Format(time.RFC3339Nano))
+		}
+		if params.Filters.TimeEnd != nil {
+			query.Set("filter.time_end", params.Filters.TimeEnd.Format(time.RFC3339Nano))
 		}
 	}
 

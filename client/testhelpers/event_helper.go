@@ -92,8 +92,6 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 				},
 			},
 		},
-		CreatedAt: config.CreatedAt,
-		UpdatedAt: config.UpdatedAt,
 	}
 }
 
@@ -164,8 +162,6 @@ func (h *EventV2Helper) CreateCryptoMinerEvent(opts ...EventOption) types.Create
 				},
 			},
 		},
-		CreatedAt: config.CreatedAt,
-		UpdatedAt: config.UpdatedAt,
 	}
 
 	return event
@@ -203,8 +199,6 @@ func (h *EventV2Helper) CreateEventWithMetadata(metadataName string, opts ...Eve
 				Importance:  config.Importance,
 			},
 		},
-		CreatedAt: config.CreatedAt,
-		UpdatedAt: config.UpdatedAt,
 	}
 
 	return event
@@ -219,25 +213,25 @@ type EventConfig struct {
 	Description string
 
 	// Network-related fields
-	RemoteIP    string
-	LocalIP     string
-	RemoteName  string
-	LocalName   string
-	Protocol    string
-	SrcPort     int
-	DstPort     int
+	RemoteIP   string
+	LocalIP    string
+	RemoteName string
+	LocalName  string
+	Protocol   string
+	SrcPort    int
+	DstPort    int
 
 	// Process-related fields
-	Command     string
-	Args        string
-	Executable  string
-	PID         int
-	PPID        int
-	UID         uint
+	Command    string
+	Args       string
+	Executable string
+	PID        int
+	PPID       int
+	UID        uint
 
 	// Timestamps
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // EventOption is a function that modifies EventConfig.

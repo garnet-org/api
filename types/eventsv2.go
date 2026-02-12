@@ -8,9 +8,10 @@ import (
 	"slices"
 	"time"
 
-	"github.com/garnet-org/jibril-ashkaal/pkg/kind"
+	eventkind "github.com/garnet-org/jibril-ashkaal/pkg/kind"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 	"github.com/google/uuid"
+	"github.com/garnet-org/api/ptr"
 	"github.com/garnet-org/api/types/errs"
 )
 
@@ -184,11 +185,11 @@ var (
 type CreateOrUpdateEventV2 struct {
 	ID string `json:"id"`
 	// agentID is populated from JWT token
-	agentID   string       `json:"-"`
-	Kind      kind.Kind    `json:"kind"`
-	Data      ongoing.Base `json:"data"`
-	CreatedAt time.Time    `json:"createdAt"`
-	UpdatedAt time.Time    `json:"updatedAt"`
+	agentID string         `json:"-"`
+	Kind    eventkind.Kind `json:"kind"`
+	Data    ongoing.Base   `json:"data"`
+	// CreatedAt time.Time      `json:"createdAt"`
+	// UpdatedAt time.Time      `json:"updatedAt"`
 }
 
 // AgentID returns the ID of the agent that created or updated the event.
@@ -220,11 +221,11 @@ func (e *CreateOrUpdateEventV2) Validate() error {
 }
 
 // isValidAshkaalKind checks if the ashkaal kind.Kind is valid.
-func isValidAshkaalKind(k kind.Kind) bool {
+func isValidAshkaalKind(k eventkind.Kind) bool {
 	switch k {
-	case kind.KindFlows, kind.KindDetections, kind.KindInfos, kind.KindNetPolicy:
+	case eventkind.KindFlows, eventkind.KindDetections, eventkind.KindInfos, eventkind.KindNetPolicy:
 		return true
-	case kind.KindNone, kind.KindEmpty:
+	case eventkind.KindNone, eventkind.KindEmpty:
 		return false
 	default:
 		return false
@@ -233,13 +234,13 @@ func isValidAshkaalKind(k kind.Kind) bool {
 
 // EventV2 represents a v2 event with full agent details in ashkaal format.
 type EventV2 struct {
-	ID        string       `json:"id"`
-	AgentID   string       `json:"agent_id"`
-	Agent     Agent        `json:"agent"`
-	Kind      kind.Kind    `json:"kind"`
-	Data      ongoing.Base `json:"data"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at"`
+	ID        string         `json:"id"`
+	AgentID   string         `json:"agent_id"`
+	Agent     Agent          `json:"agent"`
+	Kind      eventkind.Kind `json:"kind"`
+	Data      ongoing.Base   `json:"data"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
 }
 
 // Validate checks if the EventV2 is valid.
@@ -394,23 +395,21 @@ func (e *CreateOrUpdateFileAccessEventV2) Validate() error {
 
 // EventV2Wrapper is a wrapper struct for unmarshaling v2 events in different formats.
 type EventV2Wrapper struct {
-	ID   string      `json:"id"`
-	Kind kind.Kind   `json:"kind"`
-	Data interface{} `json:"data"`
+	ID   string         `json:"id"`
+	Kind eventkind.Kind `json:"kind"`
+	Data any            `json:"data"`
 }
 
 // ToCreateOrUpdateEventV2 converts the wrapper to a CreateOrUpdateEventV2.
 func (w *EventV2Wrapper) ToCreateOrUpdateEventV2() (*CreateOrUpdateEventV2, error) {
 	event := &CreateOrUpdateEventV2{
-		ID:        w.ID,
-		Kind:      w.Kind,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:   w.ID,
+		Kind: w.Kind,
 	}
 
 	// Convert data based on kind
 	switch w.Kind {
-	case kind.KindFlows:
+	case eventkind.KindFlows:
 		// Try to unmarshal as different flow types
 		if dropIP, ok := w.Data.(ongoing.DropIP); ok {
 			event.Data = dropIP.Base
@@ -421,7 +420,7 @@ func (w *EventV2Wrapper) ToCreateOrUpdateEventV2() (*CreateOrUpdateEventV2, erro
 		} else {
 			return nil, errs.InvalidArgumentError("invalid flow event data")
 		}
-	case kind.KindDetections:
+	case eventkind.KindDetections:
 		// Try to unmarshal as different detection types
 		if execution, ok := w.Data.(ongoing.Execution); ok {
 			event.Data = execution.Base
@@ -432,19 +431,19 @@ func (w *EventV2Wrapper) ToCreateOrUpdateEventV2() (*CreateOrUpdateEventV2, erro
 		} else {
 			return nil, errs.InvalidArgumentError("invalid detection event data")
 		}
-	case kind.KindInfos:
+	case eventkind.KindInfos:
 		if base, ok := w.Data.(ongoing.Base); ok {
 			event.Data = base
 		} else {
 			return nil, errs.InvalidArgumentError("invalid info event data")
 		}
-	case kind.KindNetPolicy:
+	case eventkind.KindNetPolicy:
 		if base, ok := w.Data.(ongoing.Base); ok {
 			event.Data = base
 		} else {
 			return nil, errs.InvalidArgumentError("invalid netpolicy event data")
 		}
-	case kind.KindNone, kind.KindEmpty:
+	case eventkind.KindNone, eventkind.KindEmpty:
 		return nil, ErrInvalidEventV2Kind
 	default:
 		return nil, ErrInvalidEventV2Kind
@@ -486,13 +485,17 @@ func (l *ListEvents) Validate() error {
 
 // ListEventsFilters defines the filters for listing v2 events.
 type ListEventsFilters struct {
-	Kind          *string  `json:"kind"`
-	AgentID       *string  `json:"agentID"`
-	MetadataNames []string `json:"metadataNames"`
+	// Deprecated: use Kinds instead. Kind is still supported for backward compatibility but will be removed in the future.
+	Kind          *eventkind.Kind  `json:"kind"`
+	Kinds         []eventkind.Kind `json:"kinds"`
+	AgentID       *string          `json:"agentID"`
+	MetadataNames []string         `json:"metadataNames"`
 	// Kubernetes context filters
-	Cluster   *string `json:"cluster"`
-	Namespace *string `json:"namespace"`
-	Node      *string `json:"node"`
+	Cluster   *string    `json:"cluster"`
+	Namespace *string    `json:"namespace"`
+	Node      *string    `json:"node"`
+	TimeStart *time.Time `json:"timeStart"`
+	TimeEnd   *time.Time `json:"timeEnd"`
 }
 
 // Validate checks if the ListEventsFilters are valid.
@@ -523,36 +526,47 @@ func (f *ListEventsFilters) Validate() error {
 		}
 	}
 
+	if f.TimeStart != nil && f.TimeEnd != nil && f.TimeStart.After(*f.TimeEnd) {
+		return errs.InvalidArgumentError("timeStart cannot be after timeEnd")
+	}
+
 	return nil
 }
 
 // IsEmpty checks if the filters are empty.
 func (f *ListEventsFilters) IsEmpty() bool {
-	return f.Kind == nil && f.AgentID == nil && len(f.MetadataNames) == 0 &&
-		f.Cluster == nil && f.Namespace == nil && f.Node == nil
+	return f.Kind == nil && len(f.Kinds) == 0 &&
+		f.AgentID == nil && len(f.MetadataNames) == 0 &&
+		f.Cluster == nil && f.Namespace == nil && f.Node == nil &&
+		f.TimeStart == nil && f.TimeEnd == nil
 }
 
 // DecodeEventFilters decodes URL query parameters into ListEventsFilters.
-func DecodeEventFilters(values url.Values) *ListEventsFilters {
+func DecodeEventFilters(values url.Values) (*ListEventsFilters, error) {
 	filters := &ListEventsFilters{}
 
 	if kindStr := values.Get("filter.kind"); kindStr != "" {
-		filters.Kind = &kindStr
+		filters.Kind = ptr.From(eventkind.Kind(kindStr))
+	}
+
+	if kindStrs := values["filter.kinds"]; len(kindStrs) != 0 {
+		for _, kindStr := range kindStrs {
+			if kindStr != "" {
+				filters.Kinds = append(filters.Kinds, eventkind.Kind(kindStr))
+			}
+		}
 	}
 
 	if agentID := values.Get("filter.agent_id"); agentID != "" {
 		filters.AgentID = &agentID
 	}
 
-	if metadataNames := values["filter.metadata.name"]; len(metadataNames) > 0 {
-		// Filter out empty values
-		var validNames []string
+	if metadataNames := values["filter.metadata.name"]; len(metadataNames) != 0 {
 		for _, name := range metadataNames {
 			if name != "" {
-				validNames = append(validNames, name)
+				filters.MetadataNames = append(filters.MetadataNames, name)
 			}
 		}
-		filters.MetadataNames = validNames
 	}
 
 	// Kubernetes context filters
@@ -568,11 +582,27 @@ func DecodeEventFilters(values url.Values) *ListEventsFilters {
 		filters.Node = &node
 	}
 
-	if filters.IsEmpty() {
-		return nil
+	if timeStartStr := values.Get("filter.time_start"); timeStartStr != "" {
+		timeStart, err := time.Parse(time.RFC3339Nano, timeStartStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid time_start format: %w", err)
+		}
+		filters.TimeStart = &timeStart
 	}
 
-	return filters
+	if timeEndStr := values.Get("filter.time_end"); timeEndStr != "" {
+		timeEnd, err := time.Parse(time.RFC3339Nano, timeEndStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid time_end format: %w", err)
+		}
+		filters.TimeEnd = &timeEnd
+	}
+
+	if filters.IsEmpty() {
+		return nil, nil
+	}
+
+	return filters, nil
 }
 
 // EventActionType represents the type of action performed on an event.
