@@ -10,7 +10,11 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
+	"strconv"
 	"strings"
+
+	"github.com/garnet-org/api/types"
 )
 
 // Client is a generic HTTP client for interacting with the Jibril API.
@@ -239,4 +243,24 @@ func (c *Client) doRaw(ctx context.Context, path string) ([]byte, error) {
 
 func (c *Client) endpoint(path string) string {
 	return strings.TrimRight(c.BaseURL, "/") + "/" + strings.TrimLeft(path, "/")
+}
+
+func addCursorPageArgs(values url.Values, args types.CursorPageArgs) {
+	if args.First != nil {
+		s := strconv.FormatUint(uint64(*args.First), 10)
+		values.Set("first", s)
+	}
+
+	if args.Last != nil {
+		s := strconv.FormatUint(uint64(*args.Last), 10)
+		values.Set("last", s)
+	}
+
+	if args.After != nil {
+		values.Set("after", *args.After)
+	}
+
+	if args.Before != nil {
+		values.Set("before", *args.Before)
+	}
 }

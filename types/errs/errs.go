@@ -56,6 +56,9 @@ func (e NotFoundError) Error() string { return string(e) }
 
 // Is checks if the error is of type NotFoundError.
 func (e NotFoundError) Is(target error) bool {
+	if target == ErrNotFound {
+		return true
+	}
 	if target, ok := target.(NotFoundError); ok {
 		return e == target
 	}
@@ -77,23 +80,6 @@ func (e UnauthorizedError) Is(target error) bool {
 		return true // All UnauthorizedError types should match ErrUnauthorized
 	}
 	if target, ok := target.(UnauthorizedError); ok {
-		return e == target
-	}
-	return false
-}
-
-// ErrInvalidAgentID is returned when an agent ID is invalid.
-const ErrInvalidAgentID = InvalidAgentIDError("invalid agent ID")
-
-// InvalidAgentIDError represents an error indicating that the agent ID is invalid.
-type InvalidAgentIDError string
-
-// Error implements the error interface for InvalidAgentIDError.
-func (e InvalidAgentIDError) Error() string { return string(e) }
-
-// Is checks if the error is of type InvalidAgentIDError.
-func (e InvalidAgentIDError) Is(target error) bool {
-	if target, ok := target.(InvalidAgentIDError); ok {
 		return e == target
 	}
 	return false
@@ -146,6 +132,5 @@ func Is(err error) bool {
 		errors.Is(err, ErrInvalidArgument) ||
 		errors.Is(err, ErrInternalServer) ||
 		errors.Is(err, ErrConflict) ||
-		errors.Is(err, ErrPermissionDenied) ||
-		errors.Is(err, ErrInvalidAgentID)
+		errors.Is(err, ErrPermissionDenied)
 }

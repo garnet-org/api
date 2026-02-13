@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/garnet-org/api/types/errs"
+	"github.com/garnet-org/api/validator"
 )
 
 // AgentKind represents the type of agent.
@@ -133,38 +134,35 @@ type AgentKubernetesContext struct {
 // Validate checks if the AgentKubernetesContext has all required fields set
 // and validates that fields conform to Kubernetes naming conventions.
 func (c *AgentKubernetesContext) Validate() error {
-	if c == nil {
-		return errors.New("kubernetes context is required")
-	}
+	v := validator.New()
 
-	var errs []string
+	if c == nil {
+		v.Add("kubernetes_context", "kubernetes context is required")
+		return v.AsError()
+	}
 
 	// Validate cluster name
 	if c.Cluster == "" {
-		errs = append(errs, "cluster is required")
+		v.Add("cluster", "cluster is required")
 	} else if err := ValidateK8sClusterName(c.Cluster); err != nil {
-		errs = append(errs, fmt.Sprintf("invalid cluster name: %v", err))
+		v.Add("cluster", fmt.Sprintf("invalid cluster name: %v", err))
 	}
 
 	// Validate node name
 	if c.Node == "" {
-		errs = append(errs, "node is required")
+		v.Add("node", "node is required")
 	} else if err := ValidateK8sNodeName(c.Node); err != nil {
-		errs = append(errs, fmt.Sprintf("invalid node name: %v", err))
+		v.Add("node", fmt.Sprintf("invalid node name: %v", err))
 	}
 
 	// Validate namespace (optional)
 	if c.Namespace != "" {
 		if err := ValidateK8sNamespace(c.Namespace); err != nil {
-			errs = append(errs, fmt.Sprintf("invalid namespace: %v", err))
+			v.Add("namespace", fmt.Sprintf("invalid namespace: %v", err))
 		}
 	}
 
-	if len(errs) > 0 {
-		return fmt.Errorf("invalid kubernetes context: %s", join(errs))
-	}
-
-	return nil
+	return v.AsError()
 }
 
 // Agent represents the stored agent model.
