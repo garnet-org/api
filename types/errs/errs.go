@@ -3,6 +3,8 @@ package errs
 
 import "errors"
 
+var PermanentFailure = errors.New("permanent failure")
+
 const (
 	// ErrInvalidArgument is returned when an invalid argument is provided.
 	ErrInvalidArgument = InvalidArgumentError("invalid argument")
