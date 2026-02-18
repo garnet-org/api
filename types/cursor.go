@@ -36,12 +36,20 @@ func (args CursorPageArgs) IsBackwards() bool {
 func (args *CursorPageArgs) Validator() *validator.Validator {
 	v := validator.New()
 
-	if args.First != nil && *args.First > maxPageSize {
-		v.Add("first", fmt.Sprintf("first cannot be greater than %d", maxPageSize))
+	if args.First != nil {
+		if *args.First == 0 {
+			v.Add("first", "first must be greater than 0")
+		} else if *args.First > maxPageSize {
+			v.Add("first", fmt.Sprintf("first cannot be greater than %d", maxPageSize))
+		}
 	}
 
-	if args.Last != nil && *args.Last > maxPageSize {
-		v.Add("last", fmt.Sprintf("last cannot be greater than %d", maxPageSize))
+	if args.Last != nil {
+		if *args.Last == 0 {
+			v.Add("last", "last must be greater than 0")
+		} else if *args.Last > maxPageSize {
+			v.Add("last", fmt.Sprintf("last cannot be greater than %d", maxPageSize))
+		}
 	}
 
 	if args.First != nil && args.Last != nil {

@@ -1,0 +1,864 @@
+info:
+    title: Ashkaal Types
+    version: 0.1.0
+openapi: 3.0.3
+paths: {}
+components:
+    schemas:
+        AshkaalAssertion:
+            nullable: true
+            properties:
+                evidence:
+                    items:
+                        $ref: "#/components/schemas/AshkaalEvidence"
+                    nullable: true
+                    type: array
+                result:
+                    $ref: "#/components/schemas/AshkaalAssertionResult"
+            type: object
+        AshkaalAssertionResult:
+            nullable: true
+            type: string
+            enum:
+                - good
+                - attention
+                - bad
+        AshkaalAttenuator:
+            nullable: true
+            properties:
+                attenuated_by:
+                    nullable: true
+                    type: string
+                interpretation:
+                    nullable: true
+                    type: string
+                is_false_positive:
+                    nullable: true
+                    type: boolean
+                new_confidence:
+                    format: double
+                    nullable: true
+                    type: number
+                new_risk_score:
+                    format: double
+                    nullable: true
+                    type: number
+                new_severity:
+                    nullable: true
+                    type: integer
+                new_severity_level:
+                    nullable: true
+                    type: string
+                thinking:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalBackground:
+            nullable: true
+            properties:
+                ancestry:
+                    items:
+                        $ref: "#/components/schemas/AshkaalProcess"
+                    nullable: true
+                    type: array
+                containers:
+                    $ref: "#/components/schemas/AshkaalContainerAggregate"
+                files:
+                    $ref: "#/components/schemas/AshkaalFileAggregate"
+                flows:
+                    $ref: "#/components/schemas/AshkaalFlowAggregate"
+            type: object
+        AshkaalContainer:
+            nullable: true
+            properties:
+                cgroupns_mode:
+                    nullable: true
+                    type: string
+                cmd:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                created_at:
+                    nullable: true
+                    type: string
+                cwd:
+                    nullable: true
+                    type: string
+                driver:
+                    nullable: true
+                    type: string
+                env:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                exit_code:
+                    nullable: true
+                    type: integer
+                finished_at:
+                    nullable: true
+                    type: string
+                hostname:
+                    nullable: true
+                    type: string
+                id:
+                    nullable: true
+                    type: string
+                image:
+                    nullable: true
+                    type: string
+                image_id:
+                    nullable: true
+                    type: string
+                ipc_mode:
+                    nullable: true
+                    type: string
+                is_attached:
+                    nullable: true
+                    type: boolean
+                mounts:
+                    items:
+                        $ref: "#/components/schemas/AshkaalMount"
+                    nullable: true
+                    type: array
+                name:
+                    nullable: true
+                    type: string
+                namespaces:
+                    $ref: "#/components/schemas/AshkaalNamespaces"
+                network_mode:
+                    nullable: true
+                    type: string
+                path:
+                    nullable: true
+                    type: string
+                pid:
+                    nullable: true
+                    type: integer
+                pid_mode:
+                    nullable: true
+                    type: string
+                runtime:
+                    nullable: true
+                    type: string
+                started_at:
+                    nullable: true
+                    type: string
+                status:
+                    nullable: true
+                    type: string
+                userns_mode:
+                    nullable: true
+                    type: string
+                uts_mode:
+                    nullable: true
+                    type: string
+                version:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalContainerAggregate:
+            nullable: true
+            properties:
+                cgroup_namespace_ids:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainerPair"
+                    nullable: true
+                    type: array
+                containers:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainer"
+                    nullable: true
+                    type: array
+                ipc_namespace_ids:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainerPair"
+                    nullable: true
+                    type: array
+                mnt_namespace_ids:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainerPair"
+                    nullable: true
+                    type: array
+                net_namespace_ids:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainerPair"
+                    nullable: true
+                    type: array
+                pid_namespace_ids:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainerPair"
+                    nullable: true
+                    type: array
+                uts_namespace_ids:
+                    items:
+                        $ref: "#/components/schemas/AshkaalContainerPair"
+                    nullable: true
+                    type: array
+            type: object
+        AshkaalContainerPair:
+            nullable: true
+            properties:
+                id:
+                    nullable: true
+                    type: string
+                name:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalDirection:
+            nullable: true
+            properties:
+                domains:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                peers:
+                    items:
+                        $ref: "#/components/schemas/AshkaalPeer"
+                    nullable: true
+                    type: array
+            type: object
+        AshkaalDirectionNetTelemetry:
+            nullable: true
+            properties:
+                total_connections:
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                total_domains:
+                    minimum: 0
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalEvidence:
+            nullable: true
+            properties:
+                event_name:
+                    nullable: true
+                    type: string
+                peer:
+                    $ref: "#/components/schemas/AshkaalPeer"
+                timestamp:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalFSDir:
+            nullable: true
+            properties:
+                base:
+                    nullable: true
+                    type: string
+                dirs:
+                    items:
+                        $ref: "#/components/schemas/AshkaalFSDir"
+                    nullable: true
+                    type: array
+                files:
+                    items:
+                        $ref: "#/components/schemas/AshkaalFSFile"
+                    nullable: true
+                    type: array
+                path:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalFSFile:
+            nullable: true
+            properties:
+                actions:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                base:
+                    nullable: true
+                    type: string
+                metadata:
+                    $ref: "#/components/schemas/AshkaalFileMetadata"
+                mode:
+                    nullable: true
+                    type: string
+                owner:
+                    $ref: "#/components/schemas/AshkaalFileOwner"
+                path:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalFileAggregate:
+            nullable: true
+            properties:
+                root:
+                    $ref: "#/components/schemas/AshkaalFSDir"
+            type: object
+        AshkaalFileMetadata:
+            nullable: true
+            properties:
+                access:
+                    nullable: true
+                    type: string
+                change:
+                    nullable: true
+                    type: string
+                creation:
+                    nullable: true
+                    type: string
+                size:
+                    format: int64
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalFileOwner:
+            nullable: true
+            properties:
+                gid:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                uid:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalFlowAggregate:
+            nullable: true
+            properties:
+                ip_version:
+                    nullable: true
+                    type: integer
+                protocols:
+                    items:
+                        $ref: "#/components/schemas/AshkaalProtocolAggregate"
+                    nullable: true
+                    type: array
+            type: object
+        AshkaalICMP:
+            nullable: true
+            properties:
+                code:
+                    nullable: true
+                    type: string
+                type:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalLocalRemotePair:
+            nullable: true
+            properties:
+                local:
+                    $ref: "#/components/schemas/AshkaalProtocolNode"
+                remote:
+                    $ref: "#/components/schemas/AshkaalProtocolNode"
+            type: object
+        AshkaalMetadata:
+            nullable: true
+            properties:
+                description:
+                    nullable: true
+                    type: string
+                documentation:
+                    nullable: true
+                    type: string
+                format:
+                    nullable: true
+                    type: string
+                importance:
+                    nullable: true
+                    type: string
+                kind:
+                    nullable: true
+                    type: string
+                name:
+                    nullable: true
+                    type: string
+                subtechnique:
+                    nullable: true
+                    type: string
+                tactic:
+                    nullable: true
+                    type: string
+                technique:
+                    nullable: true
+                    type: string
+                version:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalMount:
+            nullable: true
+            properties:
+                destination:
+                    nullable: true
+                    type: string
+                source:
+                    nullable: true
+                    type: string
+                type:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalNamespaces:
+            nullable: true
+            properties:
+                cgroup_ns:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                ipc_ns:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                mnt_ns:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                net_ns:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                pid_ns:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+                uts_ns:
+                    maximum: 4.294967295e+09
+                    minimum: 0
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalNetProfile:
+            nullable: true
+            properties:
+                egress:
+                    $ref: "#/components/schemas/AshkaalDirection"
+                ingress:
+                    $ref: "#/components/schemas/AshkaalDirection"
+                local:
+                    $ref: "#/components/schemas/AshkaalDirection"
+            type: object
+        AshkaalNetTelemetry:
+            nullable: true
+            properties:
+                egress:
+                    $ref: "#/components/schemas/AshkaalDirectionNetTelemetry"
+                ingress:
+                    $ref: "#/components/schemas/AshkaalDirectionNetTelemetry"
+                local:
+                    $ref: "#/components/schemas/AshkaalDirectionNetTelemetry"
+            type: object
+        AshkaalPeer:
+            nullable: true
+            properties:
+                detections:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                local_address:
+                    nullable: true
+                    type: string
+                local_names:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                proc_trees:
+                    items:
+                        $ref: "#/components/schemas/AshkaalProcessTree"
+                    nullable: true
+                    type: array
+                protocol:
+                    nullable: true
+                    type: string
+                remote_address:
+                    nullable: true
+                    type: string
+                remote_names:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                remote_ports:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+            type: object
+        AshkaalPhase:
+            nullable: true
+            properties:
+                direction:
+                    nullable: true
+                    type: string
+                ended_by:
+                    nullable: true
+                    type: string
+                initiated_by:
+                    nullable: true
+                    type: string
+                status:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalPortCommAgg:
+            nullable: true
+            properties:
+                dst_port:
+                    nullable: true
+                    type: integer
+                phase:
+                    $ref: "#/components/schemas/AshkaalPhase"
+                src_port:
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalProcess:
+            nullable: true
+            properties:
+                args:
+                    nullable: true
+                    type: string
+                cmd:
+                    nullable: true
+                    type: string
+                comm:
+                    nullable: true
+                    type: string
+                envs:
+                    nullable: true
+                    type: string
+                exe:
+                    nullable: true
+                    type: string
+                exit:
+                    nullable: true
+                    type: string
+                loader:
+                    nullable: true
+                    type: string
+                namespaces:
+                    $ref: "#/components/schemas/AshkaalNamespaces"
+                pid:
+                    nullable: true
+                    type: integer
+                ppid:
+                    nullable: true
+                    type: integer
+                prev_args:
+                    nullable: true
+                    type: string
+                prev_envs:
+                    nullable: true
+                    type: string
+                prev_exe:
+                    nullable: true
+                    type: string
+                prev_loader:
+                    nullable: true
+                    type: string
+                retcode:
+                    nullable: true
+                    type: integer
+                start:
+                    nullable: true
+                    type: string
+                uid:
+                    minimum: 0
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalProcessTree:
+            nullable: true
+            properties:
+                ancestry:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                process:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalProfile:
+            nullable: true
+            properties:
+                assertions:
+                    items:
+                        $ref: "#/components/schemas/AshkaalAssertion"
+                    nullable: true
+                    type: array
+                attenuator:
+                    $ref: "#/components/schemas/AshkaalAttenuator"
+                background:
+                    $ref: "#/components/schemas/AshkaalBackground"
+                metadata:
+                    $ref: "#/components/schemas/AshkaalMetadata"
+                network:
+                    $ref: "#/components/schemas/AshkaalNetProfile"
+                note:
+                    nullable: true
+                    type: string
+                scenarios:
+                    $ref: "#/components/schemas/AshkaalScenarios"
+                score:
+                    $ref: "#/components/schemas/AshkaalScore"
+                telemetry:
+                    $ref: "#/components/schemas/AshkaalTelemetry"
+                timestamp:
+                    nullable: true
+                    type: string
+                uuid:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalProtocolAggregate:
+            nullable: true
+            properties:
+                icmps:
+                    items:
+                        $ref: "#/components/schemas/AshkaalICMP"
+                    nullable: true
+                    type: array
+                pairs:
+                    items:
+                        $ref: "#/components/schemas/AshkaalProtocolLocalRemoteAgg"
+                    nullable: true
+                    type: array
+                proto:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalProtocolLocalRemoteAgg:
+            nullable: true
+            properties:
+                nodes:
+                    $ref: "#/components/schemas/AshkaalLocalRemotePair"
+                port_matrix:
+                    items:
+                        $ref: "#/components/schemas/AshkaalPortCommAgg"
+                    nullable: true
+                    type: array
+            type: object
+        AshkaalProtocolNode:
+            nullable: true
+            properties:
+                address:
+                    nullable: true
+                    type: string
+                name:
+                    nullable: true
+                    type: string
+                names:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+            type: object
+        AshkaalScenarioGitHub:
+            nullable: true
+            properties:
+                action:
+                    nullable: true
+                    type: string
+                actor:
+                    nullable: true
+                    type: string
+                actor_id:
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                event_name:
+                    nullable: true
+                    type: string
+                id:
+                    nullable: true
+                    type: string
+                job:
+                    nullable: true
+                    type: string
+                ref:
+                    nullable: true
+                    type: string
+                ref_name:
+                    nullable: true
+                    type: string
+                ref_protected:
+                    nullable: true
+                    type: string
+                ref_type:
+                    nullable: true
+                    type: string
+                repository:
+                    nullable: true
+                    type: string
+                repository_id:
+                    nullable: true
+                    type: string
+                repository_owner:
+                    nullable: true
+                    type: string
+                repository_owner_id:
+                    nullable: true
+                    type: string
+                run_attempt:
+                    nullable: true
+                    type: string
+                run_id:
+                    nullable: true
+                    type: string
+                run_number:
+                    nullable: true
+                    type: string
+                runner_arch:
+                    nullable: true
+                    type: string
+                runner_os:
+                    nullable: true
+                    type: string
+                scenario_type:
+                    $ref: "#/components/schemas/AshkaalScenarioTypeGitHub"
+                server_url:
+                    nullable: true
+                    type: string
+                sha:
+                    nullable: true
+                    type: string
+                triggering_actor:
+                    nullable: true
+                    type: string
+                updated_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                workflow:
+                    nullable: true
+                    type: string
+                workflow_ref:
+                    nullable: true
+                    type: string
+                workflow_sha:
+                    nullable: true
+                    type: string
+                workspace:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalScenarioHostOS:
+            nullable: true
+            properties:
+                arch:
+                    nullable: true
+                    type: string
+                hostname:
+                    nullable: true
+                    type: string
+                ip:
+                    nullable: true
+                    type: string
+                machine_id:
+                    nullable: true
+                    type: string
+                os:
+                    nullable: true
+                    type: string
+                scenario_type:
+                    $ref: "#/components/schemas/AshkaalScenarioTypeHostOS"
+            type: object
+        AshkaalScenarioK8S:
+            nullable: true
+            properties:
+                cluster:
+                    nullable: true
+                    type: string
+                namespace:
+                    nullable: true
+                    type: string
+                node:
+                    nullable: true
+                    type: string
+                pod:
+                    nullable: true
+                    type: string
+                scenario_type:
+                    $ref: "#/components/schemas/AshkaalScenarioTypeK8S"
+            type: object
+        AshkaalScenarioTypeGitHub:
+            nullable: true
+            type: string
+            enum:
+                - github
+        AshkaalScenarioTypeHostOS:
+            nullable: true
+            type: string
+            enum:
+                - hostos
+        AshkaalScenarioTypeK8S:
+            nullable: true
+            type: string
+            enum:
+                - k8s
+        AshkaalScenarios:
+            nullable: true
+            properties:
+                github:
+                    $ref: "#/components/schemas/AshkaalScenarioGitHub"
+                hostos:
+                    $ref: "#/components/schemas/AshkaalScenarioHostOS"
+                k8s:
+                    $ref: "#/components/schemas/AshkaalScenarioK8S"
+            type: object
+        AshkaalScore:
+            nullable: true
+            properties:
+                confidence:
+                    format: double
+                    nullable: true
+                    type: number
+                reasons:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                risk_score:
+                    format: double
+                    nullable: true
+                    type: number
+                severity:
+                    nullable: true
+                    type: integer
+                severity_level:
+                    nullable: true
+                    type: string
+                source:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalTelemetry:
+            nullable: true
+            properties:
+                network:
+                    $ref: "#/components/schemas/AshkaalNetTelemetry"
+            type: object

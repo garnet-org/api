@@ -3,24 +3,24 @@ info:
   title: Jibril API
   description: |
     API for managing events, issues, agents, and network policies associated with the Jibril agent.
-    
+
     ## Authentication
-    
+
     The API supports multiple authentication methods:
-    
+
     - **User Authentication**: Using Auth0 OAuth 2.0 for secure user login
     - **Project Token Authentication**: For programmatic access to project resources
     - **Agent Token Authentication**: Limited to agent operations only
-    
+
     ## Authorization System
-    
+
     The API implements a Role-Based Access Control (RBAC) system with granular permissions:
     - `create`: Allows creating new resources
     - `read`: Allows reading/viewing existing resources  
     - `update`: Allows modifying existing resources
     - `delete`: Allows removing resources
     - `list`: Allows listing multiple resources
-    
+
     ## Authorization Errors
 
     The API returns specific authorization error types based on the resource:
@@ -31,13 +31,13 @@ info:
     - Event access: Returns `UnauthorizedEvents` error (401) when access to events is denied
     - Token access: Returns `UnauthorizedTokenAccess` error (401) when access to tokens is denied
     - Project Setting access: Returns `UnauthorizedProjectSetting` error (401) when access to project settings is denied
-    
+
     All authorization errors inherit from the base `AuthorizationError` type.
-    
+
     ## CORS Support
-    
+
     The API includes Cross-Origin Resource Sharing (CORS) support, allowing browsers to make cross-origin requests.
-    
+
     When CORS is enabled, the server will:
     - Include appropriate Access-Control-* headers in responses
     - Handle OPTIONS preflight requests
@@ -73,15 +73,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IssueClass'
+                  $ref: "#/components/schemas/IssueClass"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedIssue'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedIssue"
 
   /api/v1/project_settings:
     get:
@@ -95,23 +95,23 @@ paths:
         - UserTokenAuth: []
         - ProjectTokenAuth: []
       parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PerPage'
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
       responses:
         "200":
           description: Successfully retrieved list of project settings
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettingPage'
+                $ref: "#/components/schemas/ProjectSettingPage"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedProjectSetting'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedProjectSetting"
     post:
       summary: Create a new project setting
       description: |
@@ -127,38 +127,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectSettingCreate'
+              $ref: "#/components/schemas/ProjectSettingCreate"
       responses:
         "201":
           description: Successfully created project setting
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettingCreated'
+                $ref: "#/components/schemas/ProjectSettingCreated"
         "400":
           description: Bad request - invalid key or value
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/InvalidProjectSettingKey'
-                  - $ref: '#/components/schemas/InvalidProjectSettingValue'
-                  - $ref: '#/components/schemas/InvalidIssueClass'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/InvalidProjectSettingKey"
+                  - $ref: "#/components/schemas/InvalidProjectSettingValue"
+                  - $ref: "#/components/schemas/InvalidIssueClass"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedProjectSetting'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedProjectSetting"
         "409":
           description: Conflict - setting with this key already exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /api/v1/project_settings/{key}:
     parameters:
@@ -183,27 +183,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSetting'
+                $ref: "#/components/schemas/ProjectSetting"
         "400":
           description: Bad request - invalid project setting key
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvalidProjectSettingKey'
+                $ref: "#/components/schemas/InvalidProjectSettingKey"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedProjectSetting'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedProjectSetting"
         "404":
           description: Not found - project setting doesn't exist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettingNotFound'
+                $ref: "#/components/schemas/ProjectSettingNotFound"
     patch:
       summary: Update a project setting
       description: |
@@ -218,38 +218,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProjectSettingUpdate'
+              $ref: "#/components/schemas/ProjectSettingUpdate"
       responses:
         "200":
           description: Successfully updated project setting
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettingUpdated'
+                $ref: "#/components/schemas/ProjectSettingUpdated"
         "400":
           description: Bad request - invalid key or value
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/InvalidProjectSettingKey'
-                  - $ref: '#/components/schemas/InvalidProjectSettingValue'
-                  - $ref: '#/components/schemas/InvalidIssueClass'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/InvalidProjectSettingKey"
+                  - $ref: "#/components/schemas/InvalidProjectSettingValue"
+                  - $ref: "#/components/schemas/InvalidIssueClass"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedProjectSetting'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedProjectSetting"
         "404":
           description: Not found - project setting doesn't exist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettingNotFound'
+                $ref: "#/components/schemas/ProjectSettingNotFound"
     delete:
       summary: Delete a project setting
       description: |
@@ -267,21 +267,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvalidProjectSettingKey'
+                $ref: "#/components/schemas/InvalidProjectSettingKey"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedProjectSetting'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedProjectSetting"
         "404":
           description: Not found - project setting doesn't exist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectSettingNotFound'
+                $ref: "#/components/schemas/ProjectSettingNotFound"
 
   /api/v1/auth/login:
     get:
@@ -290,13 +290,13 @@ paths:
         Redirects the user to Auth0's authentication page to begin the OAuth 2.0 authentication flow.
         This endpoint starts the process of authenticating a user via Auth0, which supports multiple
         identity providers including social logins, enterprise connections, and username/password.
-        
+
         The flow works as follows:
         1. User accesses this endpoint with a redirect_uri parameter
         2. Server generates a state token for CSRF protection
         3. User is redirected to Auth0's universal login page
         4. After authentication with Auth0, user is redirected to the callback endpoint
-        
+
         No authentication is required to access this endpoint.
       operationId: auth0LoginInit
       security: []
@@ -332,7 +332,7 @@ paths:
         Handles the callback from Auth0 OAuth 2.0 authentication flow.
         This endpoint receives the authorization code from Auth0, exchanges it for tokens,
         retrieves the user's profile information, and creates or authenticates the user in the system.
-        
+
         The flow continues as follows:
         1. Auth0 redirects the user to this endpoint with a code and state parameter
         2. Server validates the state parameter to prevent CSRF attacks
@@ -340,7 +340,7 @@ paths:
         4. Server validates the ID token and extracts user information
         5. Server creates or updates the user record (supporting migration from other auth methods)
         6. Server redirects to the original redirect_uri with authentication token
-        
+
         No authentication is required to access this endpoint.
       operationId: auth0Callback
       security: []
@@ -392,13 +392,13 @@ paths:
       description: |
         Initiates the logout process by redirecting the user to Auth0's logout endpoint.
         This will clear the Auth0 session and optionally redirect the user back to a specified URL.
-        
+
         The logout flow:
         1. User accesses this endpoint with an optional returnTo parameter
         2. Server redirects to Auth0's logout endpoint
         3. Auth0 clears the user's session
         4. Auth0 redirects to the returnTo URL (if provided and allowed)
-        
+
         No authentication is required to access this endpoint.
       operationId: auth0Logout
       security: []
@@ -460,10 +460,10 @@ paths:
       description: |
         Creates a new project API token that can be used for programmatic access to the API.
         Project tokens can have specific permissions and are used to authenticate API requests.
-        
+
         A user can only create tokens with permissions they themselves possess.
         This prevents privilege escalation where a user could create a token with more permissions than they have.
-        
+
         Required permissions: `create` on token resource.
       operationId: createToken
       requestBody:
@@ -505,7 +505,7 @@ paths:
       summary: List all tokens for a project
       description: |
         Retrieves a paginated list of all tokens associated with the authenticated project.
-        
+
         Required permissions: `list` on token resource.
       operationId: listTokens
       parameters:
@@ -532,7 +532,7 @@ paths:
       summary: Get a token by ID
       description: |
         Retrieves a specific token by its ID.
-        
+
         Required permissions: `read` on token resource.
       operationId: getToken
       parameters:
@@ -575,10 +575,10 @@ paths:
       summary: Update a token
       description: |
         Updates an existing token's properties such as name or permissions.
-        
+
         A user can only update tokens with permissions they themselves possess.
         This prevents privilege escalation where a user could give a token more permissions than they have.
-        
+
         Required permissions: `update` on token resource.
       operationId: updateToken
       parameters:
@@ -634,7 +634,7 @@ paths:
       summary: Delete a token
       description: |
         Deletes a token, immediately revoking its access to the API.
-        
+
         Required permissions: `delete` on token resource.
       operationId: deleteToken
       parameters:
@@ -740,8 +740,8 @@ paths:
           schema:
             type: string
             format: date-time
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PerPage'
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
         - name: sort.field
           in: query
           description: Field to sort by
@@ -766,27 +766,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventV2Page'
+                $ref: "#/components/schemas/EventV2Page"
         "400":
           description: Invalid request parameters
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedEvents'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedEvents"
         "500":
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /api/v1/events_v2:
     put:
@@ -832,6 +832,197 @@ paths:
                 $ref: "#/components/schemas/UnauthorizedEvents"
         "500":
           description: Internal server error
+
+  /api/v1/profiles:
+    post:
+      security:
+        - AgentTokenAuth: []
+      summary: Create or update a profile
+      description: |
+        Creates or updates an Ashkaal profile for the authenticated agent.
+        The agent ID is automatically extracted from the agent token.
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProfile"
+      responses:
+        "201":
+          description: Profile created or updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedProfile"
+        "400":
+          description: Invalid profile payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Missing or invalid agent token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/projects/{projectID}/profiles:
+    parameters:
+      - name: projectID
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      summary: List profiles by project
+      description: |
+        Returns cursor-paginated profiles for a project.
+      operationId: projectProfiles
+      parameters:
+        - name: first
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: last
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePage"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/agents/{agentID}/profiles:
+    parameters:
+      - name: agentID
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      summary: List profiles by agent
+      description: |
+        Returns cursor-paginated profiles for an agent.
+      operationId: agentProfiles
+      parameters:
+        - name: first
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: last
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePage"
+        "400":
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/profiles/{runID}:
+    parameters:
+      - name: runID
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      summary: Get profile by run ID
+      operationId: profile
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   # Event Action endpoints
   /api/v1/events/{event_id}/actions/block:
@@ -1000,7 +1191,7 @@ paths:
                 error: "permission denied"
         "500":
           description: Internal server error
-          
+
   /api/v1/agent_heartbeat:
     post:
       security:
@@ -1283,21 +1474,21 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/AgentKind"
-            
+
         - name: filter.repository_id
           in: query
           description: Filter issues by repository ID
           required: false
           schema:
             type: string
-            
+
         - name: filter.repository
           in: query
           description: Filter issues by repository name
           required: false
           schema:
             type: string
-            
+
         - name: filter.workflow_name
           in: query
           description: Filter issues by workflow name
@@ -1328,10 +1519,10 @@ paths:
           example:
             label.severity: high
             label.type: bug
-        
+
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/PerPage"
-      
+
       responses:
         "200":
           description: Object with list of issues and pagination
@@ -1971,7 +2162,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
   /api/v1/network_policies/k8s/merged:
     get:
       security:
@@ -2021,7 +2212,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
   /api/v1/network_policies/k8s/cluster/{cluster_name}:
     get:
       security:
@@ -2062,7 +2253,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
   /api/v1/network_policies/k8s/cluster/{cluster_name}/node/{node_name}:
     get:
       security:
@@ -2509,7 +2700,7 @@ paths:
           description: Service not found
         "500":
           description: Service is unhealthy
-          
+
   # Project-specific endpoints with project_id path parameter
   /api/v1/projects/{project_id}/issue_classes:
     get:
@@ -2537,15 +2728,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IssueClass'
+                  $ref: "#/components/schemas/IssueClass"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedIssue'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedIssue"
         "404":
           description: Project not found
           content:
@@ -2594,8 +2785,8 @@ paths:
             type: array
             items:
               $ref: "#/components/schemas/MetadataName"
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PerPage'
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
         - name: sort.field
           in: query
           description: Field to sort by
@@ -2620,21 +2811,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventV2Page'
+                $ref: "#/components/schemas/EventV2Page"
         "400":
           description: Invalid request parameters
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
         "401":
           description: Unauthorized - authentication required
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Error'
-                  - $ref: '#/components/schemas/UnauthorizedEvents'
+                  - $ref: "#/components/schemas/Error"
+                  - $ref: "#/components/schemas/UnauthorizedEvents"
         "404":
           description: Project not found
           content:
@@ -2646,7 +2837,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /api/v1/projects/{project_id}/issues/{id}:
     get:
@@ -3052,9 +3243,9 @@ paths:
       description: |
         Retrieves counters for a specific project, including repository and workflow counts.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/project_counters but with explicit project ID in the path.
-        
+
         Required permissions: `read` on project resource.
       operationId: projectCountersByPath
       parameters:
@@ -3086,7 +3277,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
   /api/v1/projects/{project_id}/tokens:
     post:
       security:
@@ -3095,9 +3286,9 @@ paths:
       description: |
         Creates a new API token for the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/tokens but with explicit project ID in the path.
-        
+
         Required permissions: `create` on token resource.
       operationId: createTokenByPath
       parameters:
@@ -3140,7 +3331,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-                
+
     get:
       security:
         - UserTokenAuth: []
@@ -3148,9 +3339,9 @@ paths:
       description: |
         Retrieves a paginated list of all tokens associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/tokens but with explicit project ID in the path.
-        
+
         Required permissions: `list` on token resource.
       operationId: listTokensByPath
       parameters:
@@ -3182,7 +3373,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-                
+
   /api/v1/projects/{project_id}/agents:
     post:
       security:
@@ -3191,9 +3382,9 @@ paths:
       description: |
         Creates a new agent associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/agents but with explicit project ID in the path.
-        
+
         Required permissions: `create` on agent resource.
       operationId: createAgentByPath
       parameters:
@@ -3232,7 +3423,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
     get:
       security:
         - UserTokenAuth: []
@@ -3240,9 +3431,9 @@ paths:
       description: |
         Lists agents associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/agents but with explicit project ID in the path.
-        
+
         Required permissions: `list` on agent resource.
       operationId: listAgentsByPath
       parameters:
@@ -3353,9 +3544,9 @@ paths:
       description: |
         Creates a new issue associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/issues but with explicit project ID in the path.
-        
+
         Required permissions: `create` on issue resource.
       operationId: createIssueByPath
       parameters:
@@ -3394,7 +3585,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
     get:
       security:
         - UserTokenAuth: []
@@ -3402,9 +3593,9 @@ paths:
       description: |
         Lists issues associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/issues but with explicit project ID in the path.
-        
+
         Required permissions: `list` on issue resource.
       operationId: listIssuesByPath
       parameters:
@@ -3469,7 +3660,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-  
+
   /api/v1/projects/{project_id}/network_policies:
     post:
       security:
@@ -3478,9 +3669,9 @@ paths:
       description: |
         Creates a new network policy associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/network_policies but with explicit project ID in the path.
-        
+
         Required permissions: `create` on network_policy resource.
       operationId: createNetworkPolicyByPath
       parameters:
@@ -3519,7 +3710,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-  
+
   /api/v1/projects/{project_id}/network_policies/scope/{scope}:
     get:
       security:
@@ -3528,9 +3719,9 @@ paths:
       description: |
         Lists network policies for the specified project and scope.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/network_policies/scope/{scope} but with explicit project ID in the path.
-        
+
         Required permissions: `list` on network_policy resource.
       operationId: listNetworkPoliciesByScopeAndPath
       parameters:
@@ -3576,7 +3767,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-  
+
   /api/v1/projects/{project_id}/network_policies/merged:
     get:
       security:
@@ -3585,9 +3776,9 @@ paths:
       description: |
         Retrieves the merged network policy for the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/network_policies/merged but with explicit project ID in the path.
-        
+
         Required permissions: `read` on network_policy resource.
       operationId: getMergedNetworkPolicyByPath
       parameters:
@@ -3646,7 +3837,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-  
+
   /api/v1/projects/{project_id}/network_policies/k8s/merged:
     get:
       security:
@@ -3655,9 +3846,9 @@ paths:
       description: |
         Retrieves the merged network policy for a Kubernetes context in the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/network_policies/k8s/merged but with explicit project ID in the path.
-        
+
         Required permissions: `read` on network_policy resource.
       operationId: getMergedNetworkPolicyForK8sByPath
       parameters:
@@ -3716,7 +3907,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-                
+
   /api/v1/projects/{project_id}/network_policies/k8s/cluster/{cluster_name}:
     get:
       security:
@@ -3725,9 +3916,9 @@ paths:
       description: |
         Retrieves the network policy for a specific Kubernetes cluster in the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/network_policies/k8s/cluster/{cluster_name} but with explicit project ID in the path.
-        
+
         Required permissions: `read` on network_policy resource.
       operationId: getClusterNetworkPolicyByPath
       parameters:
@@ -3771,7 +3962,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-                
+
   /api/v1/projects/{project_id}/network_policies/k8s/cluster/{cluster_name}/node/{node_name}:
     get:
       security:
@@ -3780,9 +3971,9 @@ paths:
       description: |
         Retrieves the network policy for a specific Kubernetes node in the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/network_policies/k8s/cluster/{cluster_name}/node/{node_name} but with explicit project ID in the path.
-        
+
         Required permissions: `read` on network_policy resource.
       operationId: getNodeNetworkPolicyByPath
       parameters:
@@ -3832,7 +4023,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-  
+
   /api/v1/projects/{project_id}/webhooks:
     post:
       security:
@@ -3841,9 +4032,9 @@ paths:
       description: |
         Creates a new webhook associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/webhooks but with explicit project ID in the path.
-        
+
         Required permissions: `create` on webhook resource.
       operationId: createWebhookByPath
       parameters:
@@ -3882,7 +4073,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
-          
+
     get:
       security:
         - UserTokenAuth: []
@@ -3890,9 +4081,9 @@ paths:
       description: |
         Lists webhooks associated with the specified project.
         This endpoint uses the project_id from the path parameter instead of inferring it from the token.
-        
+
         Functionally equivalent to /api/v1/webhooks but with explicit project ID in the path.
-        
+
         Required permissions: `list` on webhook resource.
       operationId: listWebhooksByPath
       parameters:
@@ -3960,26 +4151,26 @@ components:
         default: 10
         description: Maximum number of items to return per page. Use 0 to return all items without pagination.
         example: 10
-        
+
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: JWT Bearer token obtained through Auth0 authentication for user authorization
-      
+
     UserTokenAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: JWT Bearer token obtained through Auth0 authentication with role-based permissions
-      
+
     AgentTokenAuth:
       type: apiKey
       in: header
       name: X-Agent-Token
       description: JWT token for agent authentication, limited to agent-specific operations
-      
+
     ProjectTokenAuth:
       type: apiKey
       in: header
@@ -3995,7 +4186,7 @@ components:
         error:
           type: string
           example: "invalid event kind"
-          
+
     # Project Setting Error Types
     InvalidProjectSettingKey:
       type: object
@@ -4006,7 +4197,7 @@ components:
         error:
           type: string
           enum: ["invalid project setting key"]
-          
+
     InvalidProjectSettingValue:
       type: object
       description: Returned when a project setting value is invalid
@@ -4016,7 +4207,7 @@ components:
         error:
           type: string
           enum: ["invalid project setting value"]
-          
+
     ProjectSettingNotFound:
       type: object
       description: Returned when a requested project setting does not exist
@@ -4026,7 +4217,7 @@ components:
         error:
           type: string
           enum: ["project setting not found"]
-          
+
     UnauthorizedProjectSetting:
       type: object
       description: Returned when a user does not have permission to access a project setting
@@ -4036,7 +4227,7 @@ components:
         error:
           type: string
           enum: ["permission denied for project setting"]
-          
+
     # Issue Class Error Types
     InvalidIssueClass:
       type: object
@@ -4047,7 +4238,7 @@ components:
         error:
           type: string
           enum: ["invalid issue class"]
-    
+
     Permission:
       type: string
       enum: [create, read, update, delete, list]
@@ -4058,7 +4249,7 @@ components:
         - update: Allows modifying existing resources
         - delete: Allows removing resources
         - list: Allows listing multiple resources
-    
+
     Token:
       type: object
       description: Represents a project API token used for authentication
@@ -4111,7 +4302,7 @@ components:
           format: date-time
           description: When the token was deleted (if applicable)
           nullable: true
-          
+
     CurrentUserInfo:
       type: object
       description: Information about the current authenticated user
@@ -4172,7 +4363,7 @@ components:
           items:
             $ref: "#/components/schemas/Permission"
           example: ["read", "list"]
-          
+
     TokenCreated:
       type: object
       description: Response when a token is successfully created
@@ -4209,7 +4400,7 @@ components:
           type: string
           format: date-time
           description: When the token was created
-          
+
     UpdateToken:
       type: object
       description: Request to update an existing token
@@ -4229,7 +4420,7 @@ components:
           items:
             $ref: "#/components/schemas/Permission"
           example: ["read", "list"]
-          
+
     TokenUpdated:
       type: object
       description: Response when a token is successfully updated
@@ -4245,7 +4436,7 @@ components:
           type: string
           format: date-time
           description: When the token was updated
-    
+
     AuthorizationError:
       type: object
       required:
@@ -4255,7 +4446,7 @@ components:
           type: string
           description: Authorization error message
           example: "permission denied"
-        
+
     PermissionDeniedError:
       type: object
       description: Error returned when a user attempts to perform an action they don't have permission for
@@ -4265,7 +4456,7 @@ components:
         error:
           type: string
           example: "permission denied: operation requires delete permission"
-      
+
     UnauthorizedAgent:
       allOf:
         - $ref: "#/components/schemas/AuthorizationError"
@@ -4379,6 +4570,82 @@ components:
           format: date-time
           description: When the v2 event was last updated
 
+    CreateProfile:
+      $ref: "./ashkaal.yaml#/components/schemas/AshkaalProfile"
+
+    Profile:
+      type: object
+      required:
+        - runID
+        - agentID
+        - data
+        - createdAt
+        - updatedAt
+      properties:
+        runID:
+          type: string
+        agentID:
+          type: string
+        data:
+          $ref: "./ashkaal.yaml#/components/schemas/AshkaalProfile"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreatedProfile:
+      type: object
+      required:
+        - created
+        - createdAt
+        - updatedAt
+      properties:
+        created:
+          type: boolean
+          description: True if the profile was inserted, false if it was updated.
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProfilePage:
+      type: object
+      required:
+        - items
+        - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Profile"
+        pageInfo:
+          $ref: "#/components/schemas/CursorPageInfo"
+
+    CursorPageInfo:
+      type: object
+      required:
+        - totalCount
+        - hasNextPage
+        - hasPreviousPage
+      properties:
+        totalCount:
+          type: integer
+          minimum: 0
+        startCursor:
+          type: string
+          nullable: true
+        endCursor:
+          type: string
+          nullable: true
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+
     AshkaalKind:
       type: string
       description: Type of ashkaal event from the jibril-ashkaal package
@@ -4453,136 +4720,16 @@ components:
       example: dropip
 
     AshkaalBase:
-      type: object
-      description: |
-        Ashkaal ongoing Base structure containing detection event data.
-        This follows the ashkaal package specification for event data.
-      required:
-        - uuid
-        - timestamp
-      properties:
-        uuid:
-          type: string
-          description: The unique ID of the detection
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        timestamp:
-          type: string
-          format: date-time
-          description: The timestamp of the detection in RFC3339 format
-          example: "2023-01-01T12:00:00Z"
-        note:
-          type: string
-          description: A note about the detection
-          example: "Suspicious network activity detected"
-        metadata:
-          $ref: "#/components/schemas/AshkaalMetadata"
-          description: The detection metadata (similar to previous Head structure)
-        background:
-          $ref: "#/components/schemas/AshkaalBackground"
-          description: The detection context (similar to previous Body structure)
+      $ref: "./ashkaal.yaml#/components/schemas/AshkaalBase"
 
     AshkaalMetadata:
-      type: object
-      description: Detection event metadata from ashkaal package
-      properties:
-        kind:
-          type: string
-          description: Detection event class name
-          example: "flow"
-        name:
-          type: string
-          description: Detection recipe name
-          example: "dropip"
-        format:
-          type: string
-          description: Detection event format
-          example: "ashkaal"
-        version:
-          type: string
-          description: Detection event format version
-          example: "1.0"
-        description:
-          type: string
-          description: Detection event description
-          example: "Blocked IP connection"
-        importance:
-          type: string
-          description: Detection event importance
-          example: "critical"
-        documentation:
-          type: string
-          description: Detection event documentation URL
-          example: "https://docs.example.com/dropip"
-        tactic:
-          type: string
-          description: Detection event MITRE tactic
-          example: "Exfiltration"
-        technique:
-          type: string
-          description: Detection event MITRE technique
-          example: "T1041"
-        subtechnique:
-          type: string
-          description: Detection event MITRE subtechnique
-          example: "T1041.001"
+      $ref: "./ashkaal.yaml#/components/schemas/AshkaalMetadata"
 
     AshkaalBackground:
-      type: object
-      description: Detection context information from ashkaal package
-      properties:
-        files:
-          type: object
-          description: File access information (simplified representation)
-          additionalProperties: true
-        flows:
-          type: object
-          description: Network flow information (simplified representation)
-          additionalProperties: true
-        ancestry:
-          type: array
-          description: Process ancestry information
-          items:
-            $ref: "#/components/schemas/AshkaalProcess"
+      $ref: "./ashkaal.yaml#/components/schemas/AshkaalBackground"
 
     AshkaalProcess:
-      type: object
-      description: Process information from ashkaal package
-      properties:
-        start:
-          type: string
-          format: date-time
-          description: The start time of the process
-        exit:
-          type: string
-          format: date-time
-          description: The exit time of the process
-        retcode:
-          type: integer
-          description: The return code of the process
-        uid:
-          type: integer
-          description: The user ID of the process
-        pid:
-          type: integer
-          description: The process ID
-        ppid:
-          type: integer
-          description: The parent process ID
-        comm:
-          type: string
-          description: The command name
-        cmd:
-          type: string
-          description: The command
-        exe:
-          type: string
-          description: The executable name
-        args:
-          type: string
-          description: The arguments
-        loader:
-          type: string
-          description: The loader name
+      $ref: "./ashkaal.yaml#/components/schemas/AshkaalProcess"
 
     CreateOrUpdateEvent:
       type: object
@@ -4643,7 +4790,7 @@ components:
           type: string
           format: date-time
           description: When the event was last updated
-          
+
     EventKind:
       type: string
       description: Type of security or observability event
@@ -5063,11 +5210,11 @@ components:
           type: string
           nullable: true
         github_context:
-          $ref: '#/components/schemas/AgentGithubContext'
+          $ref: "#/components/schemas/AgentGithubContext"
         kubernetes_context:
-          $ref: '#/components/schemas/AgentKubernetesContext'
+          $ref: "#/components/schemas/AgentKubernetesContext"
         vanilla_context:
-          $ref: '#/components/schemas/AgentVanillaContext'
+          $ref: "#/components/schemas/AgentVanillaContext"
 
     AgentVanillaContext:
       type: object
@@ -5084,7 +5231,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
 
     AgentCreated:
       type: object
@@ -5104,7 +5250,7 @@ components:
       description: |
         Generic paginated response that contains a list of items and pagination information.
         This structure is used for all paginated list endpoints in the API.
-        
+
         The actual type of items in the 'items' array depends on the endpoint:
         - For /api/v1/tokens: The items are Token objects
         - For /api/v1/agents: The items are Agent objects
@@ -5210,7 +5356,7 @@ components:
           type: string
           format: date-time
           description: Timestamp when the counts were calculated
-    
+
     AgentFilters:
       type: object
       properties:
@@ -5812,7 +5958,7 @@ components:
         workflow_policy:
           $ref: "#/components/schemas/NetworkPolicy"
           nullable: true
-        
+
     ClusterNetworkPolicy:
       type: object
       description: Network policy for a Kubernetes cluster
@@ -5823,7 +5969,7 @@ components:
             cluster_name:
               type: string
               description: Name of the Kubernetes cluster
-              
+
     NodeNetworkPolicy:
       type: object
       description: Network policy for a Kubernetes node
@@ -5837,7 +5983,7 @@ components:
             node_name:
               type: string
               description: Name of the Kubernetes node
-              
+
     MergedK8sNetworkPolicy:
       type: object
       description: Merged network policy for Kubernetes contexts
@@ -5857,7 +6003,7 @@ components:
         node_policy:
           $ref: "#/components/schemas/NodeNetworkPolicy"
           nullable: true
-          
+
     JibrilFormatNetworkPolicy:
       type: object
       description: Network policy in Jibril format
@@ -6077,7 +6223,7 @@ components:
         workflow_ref:
           type: string
           description: Reference to the workflow file
-        
+
     AgentKubernetesContext:
       type: object
       description: Kubernetes-specific context for agents running in Kubernetes environments
@@ -6120,7 +6266,7 @@ components:
           type: integer
         workflow_count:
           type: integer
-        
+
     ProjectSetting:
       type: object
       description: |
@@ -6152,7 +6298,7 @@ components:
           type: string
           format: date-time
           description: When the setting was last updated
-    
+
     ProjectSettingCreate:
       type: object
       description: |
@@ -6172,8 +6318,8 @@ components:
           description: |
             The setting value, which must be a valid JSON value.
             The structure depends on the key being set.
-          example: {"classes": ["network_exfiltration", "crypto_miner"]}
-    
+          example: { "classes": ["network_exfiltration", "crypto_miner"] }
+
     ProjectSettingUpdate:
       type: object
       description: |
@@ -6186,8 +6332,8 @@ components:
           description: |
             The new setting value, which must be a valid JSON value.
             The structure depends on the key being updated.
-          example: {"classes": ["network_exfiltration"]}
-    
+          example: { "classes": ["network_exfiltration"] }
+
     ProjectSettingCreated:
       type: object
       description: |
@@ -6214,7 +6360,7 @@ components:
           type: string
           format: date-time
           description: Same as created_at for a new setting
-    
+
     ProjectSettingUpdated:
       type: object
       description: |
@@ -6236,7 +6382,7 @@ components:
           type: string
           format: date-time
           description: When the setting was updated
-    
+
     ProjectSettingPage:
       type: object
       description: |
@@ -6248,7 +6394,7 @@ components:
           type: array
           description: The list of project settings matching the query
           items:
-            $ref: '#/components/schemas/ProjectSetting'
+            $ref: "#/components/schemas/ProjectSetting"
         page_info:
           type: object
           description: Information about the pagination status
@@ -6279,11 +6425,11 @@ components:
           type: array
           description: The list of v2 events matching the query
           items:
-            $ref: '#/components/schemas/EventV2'
+            $ref: "#/components/schemas/EventV2"
         paginator_info:
-          $ref: '#/components/schemas/PaginatorInfo'
+          $ref: "#/components/schemas/PaginatorInfo"
           description: Information about the pagination status
-    
+
     WebhookEnabledIssueClasses:
       type: object
       description: |
@@ -6298,5 +6444,5 @@ components:
             - null: All classes are enabled (default)
             - empty array: No classes are enabled
           items:
-            $ref: '#/components/schemas/IssueClass'
+            $ref: "#/components/schemas/IssueClass"
           example: ["network_exfiltration", "crypto_miner"]
