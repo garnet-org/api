@@ -885,6 +885,18 @@ paths:
         Returns cursor-paginated profiles for a project.
       operationId: projectProfiles
       parameters:
+        - name: time_start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
         - name: first
           in: query
           required: false
@@ -946,6 +958,18 @@ paths:
         Returns cursor-paginated profiles for an agent.
       operationId: agentProfiles
       parameters:
+        - name: time_start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
         - name: first
           in: query
           required: false

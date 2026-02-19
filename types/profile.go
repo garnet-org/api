@@ -53,6 +53,8 @@ type CreatedProfile struct {
 type ListProfiles struct {
 	AgentID   *string
 	ProjectID *string
+	TimeStart *time.Time
+	TimeEnd   *time.Time
 	PageArgs  CursorPageArgs
 }
 
@@ -70,6 +72,10 @@ func (in *ListProfiles) Validate() error {
 	if in.AgentID == nil && in.ProjectID == nil {
 		v.Add("agent_id", "agent_id or project_id is required")
 		v.Add("project_id", "agent_id or project_id is required")
+	}
+
+	if in.TimeStart != nil && in.TimeEnd != nil && in.TimeStart.After(*in.TimeEnd) {
+		v.Add("time_range", "time_start must be before time_end")
 	}
 
 	v.Join(in.PageArgs.Validator())

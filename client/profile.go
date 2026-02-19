@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/garnet-org/api/types"
 	"github.com/garnet-org/api/types/errs"
@@ -27,6 +28,12 @@ func (c *Client) Profiles(ctx context.Context, in types.ListProfiles) (types.Cur
 	}
 
 	q := url.Values{}
+	if in.TimeStart != nil {
+		q.Set("time_start", in.TimeStart.Format(time.RFC3339Nano))
+	}
+	if in.TimeEnd != nil {
+		q.Set("time_end", in.TimeEnd.Format(time.RFC3339Nano))
+	}
 	addCursorPageArgs(q, in.PageArgs)
 
 	if len(q) != 0 {

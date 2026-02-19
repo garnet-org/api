@@ -11,7 +11,6 @@ import (
 	eventkind "github.com/garnet-org/jibril-ashkaal/pkg/kind"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 	"github.com/google/uuid"
-	"github.com/garnet-org/api/ptr"
 	"github.com/garnet-org/api/types/errs"
 )
 
@@ -546,7 +545,7 @@ func DecodeEventFilters(values url.Values) (*ListEventsFilters, error) {
 	filters := &ListEventsFilters{}
 
 	if kindStr := values.Get("filter.kind"); kindStr != "" {
-		filters.Kind = ptr.From(eventkind.Kind(kindStr))
+		filters.Kind = new(eventkind.Kind(kindStr))
 	}
 
 	if kindStrs := values["filter.kinds"]; len(kindStrs) != 0 {
