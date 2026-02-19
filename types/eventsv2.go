@@ -545,7 +545,8 @@ func DecodeEventFilters(values url.Values) (*ListEventsFilters, error) {
 	filters := &ListEventsFilters{}
 
 	if kindStr := values.Get("filter.kind"); kindStr != "" {
-		filters.Kind = new(eventkind.Kind(kindStr))
+		k := eventkind.Kind(kindStr)
+		filters.Kind = &k
 	}
 
 	if kindStrs := values["filter.kinds"]; len(kindStrs) != 0 {
