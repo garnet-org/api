@@ -77,6 +77,29 @@ components:
                 flows:
                     $ref: "#/components/schemas/AshkaalFlowAggregate"
             type: object
+        AshkaalBase:
+            nullable: true
+            properties:
+                attenuator:
+                    $ref: "#/components/schemas/AshkaalAttenuator"
+                background:
+                    $ref: "#/components/schemas/AshkaalBackground"
+                metadata:
+                    $ref: "#/components/schemas/AshkaalMetadata"
+                note:
+                    nullable: true
+                    type: string
+                scenarios:
+                    $ref: "#/components/schemas/AshkaalScenarios"
+                score:
+                    $ref: "#/components/schemas/AshkaalScore"
+                timestamp:
+                    nullable: true
+                    type: string
+                uuid:
+                    nullable: true
+                    type: string
+            type: object
         AshkaalContainer:
             nullable: true
             properties:
