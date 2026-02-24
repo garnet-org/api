@@ -1,6 +1,6 @@
 info:
     title: Ashkaal Types
-    version: 0.1.0
+    version: 0.2.9
 openapi: 3.0.3
 paths: {}
 components:
@@ -13,16 +13,25 @@ components:
                         $ref: "#/components/schemas/AshkaalEvidence"
                     nullable: true
                     type: array
+                id:
+                    $ref: "#/components/schemas/AshkaalAssertionID"
                 result:
                     $ref: "#/components/schemas/AshkaalAssertionResult"
             type: object
+        AshkaalAssertionID:
+            nullable: true
+            type: string
+            enum:
+                - no_bad_egress_domain
+                - no_bad_ingress_domain
+                - no_bad_local_domain
         AshkaalAssertionResult:
             nullable: true
             type: string
             enum:
-                - good
+                - pass
                 - attention
-                - bad
+                - fail
         AshkaalAttenuator:
             nullable: true
             properties:
@@ -340,6 +349,48 @@ components:
                     nullable: true
                     type: array
             type: object
+        AshkaalGeoIPLocation:
+            nullable: true
+            properties:
+                asname:
+                    nullable: true
+                    type: string
+                city:
+                    nullable: true
+                    type: string
+                continent:
+                    nullable: true
+                    type: string
+                continent_code:
+                    nullable: true
+                    type: string
+                country:
+                    nullable: true
+                    type: string
+                country_code:
+                    nullable: true
+                    type: string
+                isp:
+                    nullable: true
+                    type: string
+                latitude:
+                    format: double
+                    nullable: true
+                    type: number
+                longitude:
+                    format: double
+                    nullable: true
+                    type: number
+                org:
+                    nullable: true
+                    type: string
+                region:
+                    nullable: true
+                    type: string
+                region_name:
+                    nullable: true
+                    type: string
+            type: object
         AshkaalICMP:
             nullable: true
             properties:
@@ -488,6 +539,8 @@ components:
                 remote_address:
                     nullable: true
                     type: string
+                remote_geo_info:
+                    $ref: "#/components/schemas/AshkaalGeoIPLocation"
                 remote_names:
                     items:
                         nullable: true
@@ -500,6 +553,8 @@ components:
                         type: string
                     nullable: true
                     type: array
+                result:
+                    $ref: "#/components/schemas/AshkaalAssertionResult"
             type: object
         AshkaalPhase:
             nullable: true
