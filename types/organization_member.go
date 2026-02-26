@@ -64,7 +64,7 @@ type OrganizationMemberUpdated struct {
 // Validate validates the UpdateOrganizationMember input.
 func (u *UpdateOrganizationMember) Validate() error {
 	if u.IsAdmin == nil {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	return nil

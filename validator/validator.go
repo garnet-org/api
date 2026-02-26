@@ -21,6 +21,9 @@ func (v *Validator) Add(field, msg string) {
 }
 
 func (v *Validator) Join(another *Validator) {
+	if another == nil {
+		return
+	}
 	for field, msgs := range another.Errors {
 		for _, msg := range msgs {
 			v.Add(field, msg)

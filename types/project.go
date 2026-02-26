@@ -65,7 +65,7 @@ type UpdateProject struct {
 // Validate checks if the UpdateProject fields are valid.
 func (u *UpdateProject) Validate() error {
 	if u.Name == nil && u.Description == nil {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if u.Name != nil {

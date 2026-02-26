@@ -60,15 +60,15 @@ func (w *WebhookCreate) Validate() error {
 	}
 
 	if w.Name == "" {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if w.URL == "" {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if !isValidURL(w.URL) {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	return nil
@@ -105,15 +105,15 @@ type WebhookUpdate struct {
 // Validate checks if the WebhookUpdate fields are valid.
 func (w *WebhookUpdate) Validate() error {
 	if w.Name == nil && w.URL == nil && w.Kind == nil {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if w.Name != nil && *w.Name == "" {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if w.URL != nil && *w.URL == "" {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if w.URL != nil && !isValidURL(*w.URL) {
@@ -121,7 +121,7 @@ func (w *WebhookUpdate) Validate() error {
 	}
 
 	if w.Kind != nil && !w.Kind.IsValid() {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	return nil

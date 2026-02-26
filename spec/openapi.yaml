@@ -1320,13 +1320,14 @@ paths:
         "500":
           description: Internal server error
     get:
+      deprecated: true
       security:
         - BearerAuth: []
       summary: Query agents returning list of agents
       description: |
         Query and retrieve a paginated list of agents. Network policies are not included in the 
         agent list response for performance reasons.
-      operationId: listAgents
+      operationId: legacyAgents
       parameters:
         - name: filters
           in: query
@@ -3398,6 +3399,151 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /api/v2/projects/{projectID}/agents:
+    parameters:
+      - name: projectID
+        in: path
+        description: ID of the project
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: agents
+      summary: List agents for a specific project
+      description: |
+        Returns a cursor-paginated list of agents for the given project.
+        This is the successor endpoint to legacy `/api/v1/agents` list APIs.
+
+        Supports filtering by standard agent fields, labels, and time range.
+        Network policies are not included in the list response.
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active status
+          required: false
+          schema:
+            type: boolean
+        - name: os
+          in: query
+          description: Filter by operating system
+          required: false
+          schema:
+            type: string
+        - name: arch
+          in: query
+          description: Filter by CPU architecture
+          required: false
+          schema:
+            type: string
+        - name: hostname
+          in: query
+          description: Filter by hostname
+          required: false
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Filter by agent version
+          required: false
+          schema:
+            type: string
+        - name: ip
+          in: query
+          description: Filter by IP address
+          required: false
+          schema:
+            type: string
+        - name: machine_id
+          in: query
+          description: Filter by machine ID
+          required: false
+          schema:
+            type: string
+        - name: kinds
+          in: query
+          description: Filter by one or more agent kinds
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - github
+                - kubernetes
+                - vanilla
+        - name: labels
+          in: query
+          description: |
+            Labels for querying agents (e.g., `label.environment=production`).
+            Provide one or more query parameters prefixed with `label.`.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: object
+        - name: time_start
+          in: query
+          description: Include agents created at or after this timestamp
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          description: Include agents created at or before this timestamp
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: first
+          in: query
+          description: Number of items to return from the start
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: after
+          in: query
+          description: Cursor for paginating forward
+          required: false
+          schema:
+            type: string
+        - name: last
+          in: query
+          description: Number of items to return from the end
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: before
+          in: query
+          description: Cursor for paginating backward
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of agents and cursor pagination info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agents"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/projects/{project_id}/agents:
     post:
       security:
@@ -3449,6 +3595,7 @@ paths:
           description: Internal server error
 
     get:
+      deprecated: true
       security:
         - UserTokenAuth: []
       summary: List agents for a specific project
@@ -3459,7 +3606,7 @@ paths:
         Functionally equivalent to /api/v1/agents but with explicit project ID in the path.
 
         Required permissions: `list` on agent resource.
-      operationId: listAgentsByPath
+      operationId: legacyAgentsByPath
       parameters:
         - name: project_id
           in: path
@@ -4646,6 +4793,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Profile"
+        pageInfo:
+          $ref: "#/components/schemas/CursorPageInfo"
+
+    Agents:
+      type: object
+      required:
+        - items
+        - pageInfo
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agent"
         pageInfo:
           $ref: "#/components/schemas/CursorPageInfo"
 

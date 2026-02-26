@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/garnet-org/api/id"
 	"github.com/garnet-org/api/types/errs"
 	"github.com/garnet-org/api/validator"
 )
@@ -107,15 +109,25 @@ func (l *AgentLabels) Encode() url.Values {
 }
 
 // DecodeAgentLabels extracts AgentLabels from URL query parameters.
+// Example: `?label.env=prod&label.team=backend` will be decoded into AgentLabels{"env": "prod", "team": "backend"}`.
 func DecodeAgentLabels(values url.Values) AgentLabels {
-	labels := AgentLabels{}
+	var labels AgentLabels
 
-	prefix := "label."
-	for key, vals := range values {
-		if len(vals) > 0 && len(key) > len(prefix) && key[:len(prefix)] == prefix {
-			labelKey := key[len(prefix):]
-			labels[labelKey] = vals[0]
+	for key := range values {
+		if !strings.HasPrefix(key, "label.") {
+			continue
 		}
+
+		labelKey := strings.TrimPrefix(key, "label.")
+		if labelKey == "" {
+			continue
+		}
+
+		if labels == nil {
+			labels = AgentLabels{}
+		}
+
+		labels[labelKey] = values.Get(key)
 	}
 
 	return labels
@@ -401,8 +413,78 @@ func join(strs []string) string {
 	return result
 }
 
-// ListAgents represents the request to list agents.
 type ListAgents struct {
+	ProjectID string
+
+	Active    *bool
+	OS        *string
+	Arch      *string
+	Hostname  *string
+	Version   *string
+	IP        *string
+	MachineID *string
+	Kinds     []AgentKind
+	Labels    AgentLabels
+	TimeStart *time.Time
+	TimeEnd   *time.Time
+
+	PageArgs CursorPageArgs
+}
+
+func (in *ListAgents) Validate() error {
+	v := validator.New()
+
+	if !id.Valid(in.ProjectID) {
+		v.Add("projectID", "invalid project ID")
+	}
+
+	if in.OS != nil && *in.OS == "" {
+		v.Add("os", "os empty")
+	}
+
+	if in.Arch != nil && *in.Arch == "" {
+		v.Add("arch", "arch empty")
+	}
+
+	if in.Hostname != nil && *in.Hostname == "" {
+		v.Add("hostname", "hostname empty")
+	}
+
+	if in.Version != nil && *in.Version == "" {
+		v.Add("version", "version empty")
+	}
+
+	if in.IP != nil && *in.IP == "" {
+		v.Add("ip", "ip empty")
+	}
+
+	if in.MachineID != nil && *in.MachineID == "" {
+		v.Add("machineID", "machine ID empty")
+	}
+
+	for _, kind := range in.Kinds {
+		if !kind.IsValid() {
+			v.Add("kind", "invalid agent kind")
+		}
+	}
+
+	for k := range in.Labels {
+		if k == "" {
+			v.Add("labelKey", "label keys cannot be empty")
+		}
+	}
+
+	if in.TimeStart != nil && in.TimeEnd != nil && in.TimeStart.After(*in.TimeEnd) {
+		v.Add("timeRange", "timeStart must be before timeEnd")
+	}
+
+	v.Join(in.PageArgs.Validator())
+
+	return v.AsError()
+}
+
+// LegacyListAgents represents the request to list agents.
+type LegacyListAgents struct {
 	PageArgs
 
 	Labels    AgentLabels   `json:"labels,omitempty"`
@@ -411,7 +493,7 @@ type ListAgents struct {
 }
 
 // Validate checks if the ListAgents has all required fields set.
-func (q *ListAgents) Validate() error {
+func (q *LegacyListAgents) Validate() error {
 	// Validate filters if provided
 	if q.Filters != nil {
 		if q.Filters.IP != nil {
@@ -531,16 +613,6 @@ type RetrieveAgentsCounts struct {
 	ProjectID    string
 	Kind         *AgentKind
 	CreatedSince *time.Time
-
-	agentActiveThreshold time.Duration
-}
-
-func (in *RetrieveAgentsCounts) SetAgentActiveThreshold(threshold time.Duration) {
-	in.agentActiveThreshold = threshold
-}
-
-func (in RetrieveAgentsCounts) AgentActiveThreshold() time.Duration {
-	return in.agentActiveThreshold
 }
 
 func (in *RetrieveAgentsCounts) Validate() error {

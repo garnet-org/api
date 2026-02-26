@@ -59,7 +59,7 @@ type UpdateOrganization struct {
 // Validate checks if the UpdateOrganization fields are valid.
 func (u *UpdateOrganization) Validate() error {
 	if u.Name == nil {
-		return errs.ErrInvalidArgument
+		return errs.InvalidArgument
 	}
 
 	if u.Name != nil {
