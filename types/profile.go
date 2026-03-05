@@ -1,6 +1,8 @@
 package types
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
@@ -9,9 +11,13 @@ import (
 )
 
 type Profile struct {
-	RunID     string          `json:"runID" db:"run_id"`
+	ID        string          `json:"id"`
 	AgentID   string          `json:"agentID" db:"agent_id"`
-	Data      ongoing.Profile `json:"data" db:"data"`
+	GithubOrg string          `json:"githubOrg" db:"github_org"`
+	Repo      string          `json:"repo"`
+	Job       string          `json:"job"`
+	RunID     string          `json:"runID" db:"run_id"`
+	Data      ongoing.Profile `json:"data"`
 	CreatedAt time.Time       `json:"createdAt" db:"created_at"`
 	UpdatedAt time.Time       `json:"updatedAt" db:"updated_at"`
 }
@@ -29,6 +35,26 @@ func (in CreateProfile) AgentID() string {
 	return in.agentID
 }
 
+func (in CreateProfile) GithubOrg() string {
+	org, _, ok := strings.Cut(in.Profile.Scenarios.GitHub.Repository, "/")
+	if !ok {
+		return ""
+	}
+	return org
+}
+
+func (in CreateProfile) Repo() string {
+	_, repo, ok := strings.Cut(in.Profile.Scenarios.GitHub.Repository, "/")
+	if !ok {
+		return ""
+	}
+	return repo
+}
+
+func (in CreateProfile) Job() string {
+	return in.Profile.Scenarios.GitHub.Job
+}
+
 func (in CreateProfile) RunID() string {
 	return in.Profile.Scenarios.GitHub.RunID
 }
@@ -36,23 +62,34 @@ func (in CreateProfile) RunID() string {
 func (in *CreateProfile) Validate() error {
 	v := validator.New()
 
+	if in.Repo() == "" {
+		v.Add("repo", "repo is required in github scenario")
+	}
+
+	if in.GithubOrg() == "" {
+		v.Add("github_org", "github_org is required in github scenario")
+	}
+	if in.Job() == "" {
+		v.Add("job", "job is required in github scenario")
+	}
 	if in.RunID() == "" {
 		v.Add("run_id", "run_id is required in github scenario")
+	} else if id, err := strconv.ParseInt(in.RunID(), 10, 64); err != nil {
+		v.Add("run_id", "run_id must be a valid integer")
+	} else if id <= 0 {
+		v.Add("run_id", "run_id must be a positive integer")
 	}
 
 	return v.AsError()
 }
 
-type CreatedProfile struct {
-	// Created tells whether the profile was newly created or if it was updated (upserted).
-	Created   bool      `json:"created" db:"created"`
-	CreatedAt time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
-}
-
 type ListProfiles struct {
 	AgentID   *string
 	ProjectID *string
+	GitHubOrg *string
+	Repo      *string
+	Job       *string
+	RunID     *string
 	TimeStart *time.Time
 	TimeEnd   *time.Time
 	PageArgs  CursorPageArgs
@@ -72,6 +109,38 @@ func (in *ListProfiles) Validate() error {
 	if in.AgentID == nil && in.ProjectID == nil {
 		v.Add("agent_id", "agent_id or project_id is required")
 		v.Add("project_id", "agent_id or project_id is required")
+	}
+
+	if in.GitHubOrg != nil {
+		*in.GitHubOrg = strings.TrimSpace(*in.GitHubOrg)
+		if *in.GitHubOrg == "" {
+			v.Add("github_org", "github_org cannot be empty if provided")
+		}
+	}
+
+	if in.Repo != nil {
+		*in.Repo = strings.TrimSpace(*in.Repo)
+		if *in.Repo == "" {
+			v.Add("repo", "repo cannot be empty if provided")
+		}
+	}
+
+	if in.Job != nil {
+		*in.Job = strings.TrimSpace(*in.Job)
+		if *in.Job == "" {
+			v.Add("job", "job cannot be empty if provided")
+		}
+	}
+
+	if in.RunID != nil {
+		*in.RunID = strings.TrimSpace(*in.RunID)
+		if *in.RunID == "" {
+			v.Add("run_id", "run_id cannot be empty if provided")
+		} else if id, err := strconv.ParseInt(*in.RunID, 10, 64); err != nil {
+			v.Add("run_id", "run_id must be a valid integer")
+		} else if id <= 0 {
+			v.Add("run_id", "run_id must be a positive integer")
+		}
 	}
 
 	if in.TimeStart != nil && in.TimeEnd != nil && in.TimeStart.After(*in.TimeEnd) {

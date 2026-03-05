@@ -854,7 +854,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreatedProfile"
+                $ref: "#/components/schemas/Created"
         "400":
           description: Invalid profile payload
           content:
@@ -885,6 +885,26 @@ paths:
         Returns cursor-paginated profiles for a project.
       operationId: projectProfiles
       parameters:
+        - name: github_org
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: repo
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: job
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: run_id
+          in: query
+          required: false
+          schema:
+            type: string
         - name: time_start
           in: query
           required: false
@@ -958,6 +978,26 @@ paths:
         Returns cursor-paginated profiles for an agent.
       operationId: agentProfiles
       parameters:
+        - name: github_org
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: repo
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: job
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: run_id
+          in: query
+          required: false
+          schema:
+            type: string
         - name: time_start
           in: query
           required: false
@@ -1014,6 +1054,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /api/v2/profiles/{profileID}:
+    parameters:
+      - name: profileID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      summary: Get profile by its ID
+      operationId: profile
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/profiles/{runID}:
     parameters:
       - name: runID
@@ -1022,6 +1097,7 @@ paths:
         schema:
           type: string
     get:
+      deprecated: true
       security:
         - BearerAuth: []
         - UserTokenAuth: []
@@ -4747,15 +4823,29 @@ components:
     Profile:
       type: object
       required:
-        - runID
+        - id
         - agentID
+        - githubOrg
+        - repo
+        - job
+        - runID
         - data
         - createdAt
         - updatedAt
       properties:
-        runID:
+        id:
           type: string
+          format: uuid
         agentID:
+          type: string
+          format: uuid
+        githubOrg:
+          type: string
+        repo:
+          type: string
+        job:
+          type: string
+        runID:
           type: string
         data:
           $ref: "./ashkaal.yaml#/components/schemas/AshkaalProfile"
@@ -4766,20 +4856,16 @@ components:
           type: string
           format: date-time
 
-    CreatedProfile:
+    Created:
       type: object
       required:
-        - created
+        - id
         - createdAt
-        - updatedAt
       properties:
-        created:
-          type: boolean
-          description: True if the profile was inserted, false if it was updated.
-        createdAt:
+        id:
           type: string
-          format: date-time
-        updatedAt:
+          format: uuid
+        createdAt:
           type: string
           format: date-time
 
