@@ -79,7 +79,7 @@ type Webhook struct {
 	WebhookCreate
 
 	ID        string    `json:"id"`
-	ProjectID string    `json:"-"`
+	ProjectID string    `json:"project_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
