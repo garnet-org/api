@@ -40,22 +40,11 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 		opt(config)
 	}
 
-	// Build port matrix if ports are specified
-	var portMatrix []ongoing.PortCommAgg
-	if config.SrcPort > 0 || config.DstPort > 0 {
-		portMatrix = []ongoing.PortCommAgg{
-			{
-				SrcPort: config.SrcPort,
-				DstPort: config.DstPort,
-			},
-		}
-	}
-
 	return types.CreateOrUpdateEventV2{
 		ID:   config.ID,
 		Kind: config.Kind,
 		Data: ongoing.Base{
-			Timestamp: config.CreatedAt.Format(time.RFC3339),
+			Timestamp: config.CreatedAt,
 			UUID:      uuid.New().String(),
 			Note:      config.Note,
 			Metadata: ongoing.Metadata{
@@ -67,27 +56,14 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 				Importance:  config.Importance,
 			},
 			Background: ongoing.Background{
-				Flows: ongoing.FlowAggregate{
-					IPVersion: 4,
-					Protocols: []ongoing.ProtocolAggregate{
-						{
-							Proto: config.Protocol,
-							Pairs: []ongoing.ProtocolLocalRemoteAgg{
-								{
-									Nodes: ongoing.LocalRemotePair{
-										Local: ongoing.ProtocolNode{
-											Address: config.LocalIP,
-											Name:    config.LocalName,
-										},
-										Remote: ongoing.ProtocolNode{
-											Address: config.RemoteIP,
-											Name:    config.RemoteName,
-										},
-									},
-									PortMatrix: portMatrix,
-								},
-							},
-						},
+				Flows: []ongoing.Flow{
+					{
+						UUID:      uuid.New().String(),
+						IPVersion:  4,
+						Proto:      config.Protocol,
+						Local:      ongoing.Node{Address: config.LocalIP, Name: config.LocalName, Port: config.SrcPort},
+						Remote:     ongoing.Node{Address: config.RemoteIP, Name: config.RemoteName, Port: config.DstPort},
+						ServicePort: config.DstPort,
 					},
 				},
 			},
@@ -136,7 +112,7 @@ func (h *EventV2Helper) CreateCryptoMinerEvent(opts ...EventOption) types.Create
 		ID:   config.ID,
 		Kind: config.Kind,
 		Data: ongoing.Base{
-			Timestamp: config.CreatedAt.Format(time.RFC3339),
+			Timestamp: config.CreatedAt,
 			UUID:      uuid.New().String(),
 			Note:      config.Note,
 			Metadata: ongoing.Metadata{
@@ -157,7 +133,7 @@ func (h *EventV2Helper) CreateCryptoMinerEvent(opts ...EventOption) types.Create
 						Pid:   config.PID,
 						Ppid:  config.PPID,
 						UID:   config.UID,
-						Start: config.CreatedAt.Add(-time.Minute).Format(time.RFC3339),
+						Start: config.CreatedAt.Add(-time.Minute),
 					},
 				},
 			},
@@ -187,7 +163,7 @@ func (h *EventV2Helper) CreateEventWithMetadata(metadataName string, opts ...Eve
 		ID:   config.ID,
 		Kind: config.Kind,
 		Data: ongoing.Base{
-			Timestamp: config.CreatedAt.Format(time.RFC3339),
+			Timestamp: config.CreatedAt,
 			UUID:      uuid.New().String(),
 			Note:      config.Note,
 			Metadata: ongoing.Metadata{

@@ -425,7 +425,6 @@ type Process struct {
 	UID        *int       `json:"uid,omitempty"`
 }
 
-
 // EventWrapper is a wrapper struct for unmarshaling events in the new format.
 type EventWrapper struct {
 	Data EventData `json:"data"`

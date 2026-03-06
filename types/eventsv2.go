@@ -2,10 +2,13 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 
 	eventkind "github.com/garnet-org/jibril-ashkaal/pkg/kind"
@@ -191,6 +194,49 @@ type CreateOrUpdateEventV2 struct {
 	// UpdatedAt time.Time      `json:"updatedAt"`
 }
 
+type createOrUpdateEventV2Wire struct {
+	ID   string          `json:"id"`
+	Kind eventkind.Kind  `json:"kind"`
+	Data json.RawMessage `json:"data"`
+}
+
+// UnmarshalJSON is tolerant to legacy payload shapes by sanitizing obviously-invalid values
+// (e.g. time fields set to the string "running") before decoding.
+//
+// Note: legacy aggregates like background.flows/background.files are preserved in the
+// underlying ashkaal types (LegacyFlows/LegacyFiles) and are not converted into the new
+// *_list fields.
+func (e *CreateOrUpdateEventV2) UnmarshalJSON(b []byte) error {
+	var w createOrUpdateEventV2Wire
+	if err := json.Unmarshal(b, &w); err != nil {
+		return err
+	}
+
+	e.ID = w.ID
+	e.Kind = w.Kind
+
+	// Allow empty/null data.
+	if len(bytes.TrimSpace(w.Data)) == 0 || bytes.Equal(bytes.TrimSpace(w.Data), []byte("null")) {
+		e.Data = ongoing.Base{}
+		return nil
+	}
+
+	var base ongoing.Base
+
+	raw := w.Data
+	if normalized, ok := normalizeAshkaalBaseJSON(w.Data); ok {
+		raw = normalized
+	}
+
+	if err := json.Unmarshal(raw, &base); err != nil {
+		// Fall back to the original bytes to aid debugging/logging upstream.
+		return json.Unmarshal(w.Data, &base)
+	}
+
+	e.Data = base
+	return nil
+}
+
 // AgentID returns the ID of the agent that created or updated the event.
 func (e CreateOrUpdateEventV2) AgentID() string {
 	return e.agentID
@@ -230,6 +276,88 @@ func isValidAshkaalKind(k eventkind.Kind) bool {
 		return false
 	}
 }
+
+
+func normalizeAshkaalBaseJSON(b json.RawMessage) (json.RawMessage, bool) {
+	var base any
+	if err := json.Unmarshal(b, &base); err != nil {
+		return nil, false
+	}
+
+	changed := sanitizeRunningTimes(base)
+	if !changed {
+		return nil, false
+	}
+
+	out, err := json.Marshal(base)
+	return out, err == nil
+}
+
+var timeKeys = map[string]struct{}{
+	"timestamp": {},
+	"start":     {},
+	"exit":      {},
+	"access":    {},
+	"change":    {},
+	"creation":  {},
+}
+
+func sanitizeRunningTimes(v any) bool {
+	changed := false
+	switch t := v.(type) {
+	case map[string]any:
+		for k, vv := range t {
+			if _, isTimeKey := timeKeys[k]; isTimeKey {
+				if s, ok := vv.(string); ok {
+					s = strings.TrimSpace(s)
+					if s == "running" {
+						t[k] = nil
+						changed = true
+						continue
+					}
+					if normalized, ok := normalizeLegacyTimeString(s); ok {
+						t[k] = normalized
+						changed = true
+						continue
+					}
+				}
+			}
+			if sanitizeRunningTimes(vv) {
+				changed = true
+			}
+		}
+	case []any:
+		for i := range t {
+			if sanitizeRunningTimes(t[i]) {
+				changed = true
+			}
+		}
+	}
+	return changed
+}
+
+func normalizeLegacyTimeString(s string) (string, bool) {
+	// Already RFC3339/RFC3339Nano.
+	if _, err := time.Parse(time.RFC3339Nano, s); err == nil {
+		return "", false
+	}
+
+	layouts := []string{
+		"2006-01-02 15:04:05.999999999",
+		"2006-01-02 15:04:05",
+		"2006-01-02T15:04:05.999999999",
+		"2006-01-02T15:04:05",
+	}
+
+	for _, layout := range layouts {
+		if tm, err := time.ParseInLocation(layout, s, time.UTC); err == nil {
+			return tm.UTC().Format(time.RFC3339Nano), true
+		}
+	}
+
+	return "", false
+}
+
 
 // EventV2 represents a v2 event with full agent details in ashkaal format.
 type EventV2 struct {

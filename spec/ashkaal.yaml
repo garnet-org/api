@@ -73,9 +73,15 @@ components:
                 containers:
                     $ref: "#/components/schemas/AshkaalContainerAggregate"
                 files:
-                    $ref: "#/components/schemas/AshkaalFileAggregate"
+                    items:
+                        $ref: "#/components/schemas/AshkaalFile"
+                    nullable: true
+                    type: array
                 flows:
-                    $ref: "#/components/schemas/AshkaalFlowAggregate"
+                    items:
+                        $ref: "#/components/schemas/AshkaalFlow"
+                    nullable: true
+                    type: array
             type: object
         AshkaalBase:
             nullable: true
@@ -359,6 +365,172 @@ components:
                     minimum: 0
                     nullable: true
                     type: integer
+            type: object
+        AshkaalFileActions:
+            nullable: true
+            properties:
+                actions:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                open:
+                    nullable: true
+                    type: boolean
+                read:
+                    nullable: true
+                    type: boolean
+                write:
+                    nullable: true
+                    type: boolean
+                exec:
+                    nullable: true
+                    type: boolean
+                create:
+                    nullable: true
+                    type: boolean
+                unlink:
+                    nullable: true
+                    type: boolean
+                rename:
+                    nullable: true
+                    type: boolean
+                link:
+                    nullable: true
+                    type: boolean
+                truncate:
+                    nullable: true
+                    type: boolean
+                fsync:
+                    nullable: true
+                    type: boolean
+                flock:
+                    nullable: true
+                    type: boolean
+                mmap:
+                    nullable: true
+                    type: boolean
+                close:
+                    nullable: true
+                    type: boolean
+                async:
+                    nullable: true
+                    type: boolean
+                seek:
+                    nullable: true
+                    type: boolean
+            type: object
+        AshkaalFilePermissions:
+            nullable: true
+            properties:
+                mode:
+                    nullable: true
+                    type: string
+                owner_read:
+                    nullable: true
+                    type: boolean
+                owner_write:
+                    nullable: true
+                    type: boolean
+                owner_exec:
+                    nullable: true
+                    type: boolean
+                group_read:
+                    nullable: true
+                    type: boolean
+                group_write:
+                    nullable: true
+                    type: boolean
+                group_exec:
+                    nullable: true
+                    type: boolean
+                other_read:
+                    nullable: true
+                    type: boolean
+                other_write:
+                    nullable: true
+                    type: boolean
+                other_exec:
+                    nullable: true
+                    type: boolean
+                setuid:
+                    nullable: true
+                    type: boolean
+                setgid:
+                    nullable: true
+                    type: boolean
+                sticky:
+                    nullable: true
+                    type: boolean
+            type: object
+        AshkaalFile:
+            nullable: true
+            properties:
+                basename:
+                    nullable: true
+                    type: string
+                dir:
+                    nullable: true
+                    type: string
+                metadata:
+                    $ref: "#/components/schemas/AshkaalFileMetadata"
+                owner:
+                    $ref: "#/components/schemas/AshkaalFileOwner"
+                path:
+                    nullable: true
+                    type: string
+                permissions:
+                    $ref: "#/components/schemas/AshkaalFilePermissions"
+                actions:
+                    $ref: "#/components/schemas/AshkaalFileActions"
+                type:
+                    nullable: true
+                    type: string
+                uuid:
+                    nullable: true
+                    type: string
+            type: object
+        AshkaalNode:
+            nullable: true
+            properties:
+                address:
+                    nullable: true
+                    type: string
+                name:
+                    nullable: true
+                    type: string
+                names:
+                    items:
+                        nullable: true
+                        type: string
+                    nullable: true
+                    type: array
+                port:
+                    nullable: true
+                    type: integer
+            type: object
+        AshkaalFlow:
+            nullable: true
+            properties:
+                uuid:
+                    nullable: true
+                    type: string
+                ip_version:
+                    nullable: true
+                    type: integer
+                proto:
+                    nullable: true
+                    type: string
+                local:
+                    $ref: "#/components/schemas/AshkaalNode"
+                remote:
+                    $ref: "#/components/schemas/AshkaalNode"
+                service_port:
+                    nullable: true
+                    type: integer
+                phase:
+                    $ref: "#/components/schemas/AshkaalPhase"
             type: object
         AshkaalFlowAggregate:
             nullable: true

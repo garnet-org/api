@@ -360,7 +360,6 @@ type Issue struct {
 }
 
 // ExtractNetworkDestination extracts network destination information from the events linked to an issue.
-//
 func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, error) {
 	if len(i.Events) == 0 {
 		return "", "", ErrIssueHasNoNetworkDestination
@@ -372,7 +371,7 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 		if event.Data.Metadata.IsZero() {
 			continue
 		}
-		
+
 		switch event.Data.Metadata.Name {
 		case MetadataNameDropIP:
 			// With jibril-ashkaal v0.1.4+, DropIP events can contain both IP and domain names
@@ -443,25 +442,26 @@ func (i *Issue) ExtractNetworkDestination() (NetworkPolicyRuleType, string, erro
 
 // ExtractIPFromV2Event extracts IP address from V2 event's Background.Flows structure.
 func ExtractIPFromV2Event(event Event) string {
-	if event.Data.Background.Flows.IsZero() {
-		return ""
-	}
-
 	flows := event.Data.Background.Flows
-	if len(flows.Protocols) == 0 {
+	if len(flows) == 0 {
 		return ""
 	}
 
-	// Look through protocols for IP addresses
-	for _, protocol := range flows.Protocols {
-		if len(protocol.Pairs) == 0 {
-			continue
+	for _, flow := range flows {
+		// Most common case: remote address is populated.
+		if flow.Remote.Address != "" {
+			return flow.Remote.Address
 		}
 
-		for _, pair := range protocol.Pairs {
-			// Check remote node for IP address
-			if pair.Nodes.Remote.Address != "" {
-				return pair.Nodes.Remote.Address
+		// Some event producers populate Remote.Name with an IP and leave Address empty.
+		if isIPAddress(flow.Remote.Name) {
+			return flow.Remote.Name
+		}
+
+		// As a last resort, look for any IPs in the DNS resolution chain.
+		for _, name := range flow.Remote.Names {
+			if isIPAddress(name) {
+				return name
 			}
 		}
 	}
@@ -473,39 +473,28 @@ func ExtractIPFromV2Event(event Event) string {
 // With jibril-ashkaal v0.1.4+, ProtocolNode now has both Name (singular) and Names (plural) fields.
 // This function checks both fields and returns the first non-empty domain found.
 func ExtractDomainFromV2Event(event Event) string {
-	if event.Data.Background.Flows.IsZero() {
-		return ""
-	}
-
 	flows := event.Data.Background.Flows
-	if len(flows.Protocols) == 0 {
+	if len(flows) == 0 {
 		return ""
 	}
 
-	// Look through protocols for domain names
-	for _, protocol := range flows.Protocols {
-		if len(protocol.Pairs) == 0 {
-			continue
+	for _, flow := range flows {
+		// Check singular Name field first - this is the original requested domain
+		// In jibril-ashkaal v0.1.4+, this contains the domain that was actually requested
+		if flow.Remote.Name != "" && !isIPAddress(flow.Remote.Name) {
+			return flow.Remote.Name
 		}
 
-		for _, pair := range protocol.Pairs {
-			// Check singular Name field first - this is the original requested domain
-			// In jibril-ashkaal v0.1.4+, this contains the domain that was actually requested
-			if pair.Nodes.Remote.Name != "" && !isIPAddress(pair.Nodes.Remote.Name) {
-				return pair.Nodes.Remote.Name
-			}
-
-			// Fallback to Names array for backward compatibility
-			// Names array contains the DNS resolution chain from resolved IP to original domain:
-			// [IP, CNAME_N, ..., CNAME_1, original_domain]
-			// We want the last non-IP entry (the original requested domain)
-			if len(pair.Nodes.Remote.Names) > 0 {
-				// Iterate backwards to find the last non-IP entry
-				for i := len(pair.Nodes.Remote.Names) - 1; i >= 0; i-- {
-					name := pair.Nodes.Remote.Names[i]
-					if name != "" && !isIPAddress(name) {
-						return name
-					}
+		// Fallback to Names array for backward compatibility
+		// Names array contains the DNS resolution chain from resolved IP to original domain:
+		// [IP, CNAME_N, ..., CNAME_1, original_domain]
+		// We want the last non-IP entry (the original requested domain)
+		if len(flow.Remote.Names) > 0 {
+			// Iterate backwards to find the last non-IP entry
+			for i := len(flow.Remote.Names) - 1; i >= 0; i-- {
+				name := flow.Remote.Names[i]
+				if name != "" && !isIPAddress(name) {
+					return name
 				}
 			}
 		}
@@ -514,7 +503,6 @@ func ExtractDomainFromV2Event(event Event) string {
 	return ""
 }
 
-
 // isIPAddress checks if a string is an IP address (IPv4 or IPv6).
 func isIPAddress(s string) bool {
 	return net.ParseIP(s) != nil
@@ -522,11 +510,17 @@ func isIPAddress(s string) bool {
 
 // formatCIDRAddress ensures an IP address is properly formatted as a CIDR.
 func formatCIDRAddress(ipAddress string) (NetworkPolicyRuleType, string, error) {
-	// Create a CIDR from the IP address if needed
-	if !strings.HasSuffix(ipAddress, "/32") && !strings.Contains(ipAddress, "/") {
-		ipAddress += "/32" // Single IP address
+	ipAddress = strings.TrimSpace(ipAddress)
+	if ipAddress == "" || strings.Contains(ipAddress, "/") {
+		return NetworkPolicyRuleTypeCIDR, ipAddress, nil
 	}
-	return NetworkPolicyRuleTypeCIDR, ipAddress, nil
+
+	// Default to a /32 for single IPv4 addresses, but use /128 for IPv6.
+	if ip := net.ParseIP(ipAddress); ip != nil && ip.To4() == nil {
+		return NetworkPolicyRuleTypeCIDR, ipAddress + "/128", nil
+	}
+
+	return NetworkPolicyRuleTypeCIDR, ipAddress + "/32", nil
 }
 
 // CreateIssue represents the request to create a new issue.
