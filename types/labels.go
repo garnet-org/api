@@ -1,63 +1,67 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
-	"regexp"
+	"log/slog"
 
 	"github.com/garnet-org/api/types/errs"
+	k8scontentvalidation "k8s.io/apimachinery/pkg/api/validate/content"
+	k8sapivalidation "k8s.io/apimachinery/pkg/api/validation"
 )
 
-// Label constraints.
-const (
-	MaxLabelKeyLength   = 63   // Maximum length for label keys
-	MaxLabelValueLength = 1024 // Maximum length for label values
-	MaxLabelsCount      = 64   // Maximum number of labels allowed
-)
+const totalLabelsSizeLimitB = int64(k8sapivalidation.TotalAnnotationSizeLimitB)
 
 // Label error constants.
 var (
-	ErrTooManyLabels     = errs.InvalidArgumentError("too many labels")
-	ErrLabelKeyTooLong   = errs.InvalidArgumentError("label key exceeds maximum length")
-	ErrLabelValueTooLong = errs.InvalidArgumentError("label value exceeds maximum length")
-	ErrInvalidLabelKey   = errs.InvalidArgumentError("invalid label key format")
-	ErrInvalidLabelValue = errs.InvalidArgumentError("invalid label value format")
-)
-
-// Validation regexes.
-var (
-	// ValidLabelKeyRegex matches alphanumeric characters, '-', '_', must start/end with alphanumeric.
-	// Requirements:
-	// - Must start and end with alphanumeric characters.
-	// - Can contain hyphens and underscores in the middle.
-	// - Single character alphanumeric keys are allowed.
-	ValidLabelKeyRegex = regexp.MustCompile(`^[a-zA-Z0-9][-_a-zA-Z0-9]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$`)
-
-	// ValidLabelValueRegex allows more characters but still has controlled format.
-	// Allows alphanumeric chars, hyphens, underscores, periods, forward slashes, spaces.
-	ValidLabelValueRegex = regexp.MustCompile(`^[a-zA-Z0-9][-_a-zA-Z0-9/. ]*$`)
+	ErrInvalidLabels   = errs.InvalidArgumentError("invalid labels")
+	ErrInvalidLabelKey = errs.InvalidArgumentError("invalid label key")
 )
 
 // ValidateLabels validates a map of labels against the defined constraints.
 func ValidateLabels(labels map[string]string) error {
-	if len(labels) > MaxLabelsCount {
-		return ErrTooManyLabels
+	totalSize, err := validateLabelsSize(labels)
+	if err != nil {
+		slog.Debug("label validation failed",
+			"reason", "total_size_exceeded",
+			"total_size", totalSize,
+			"limit", totalLabelsSizeLimitB,
+			"labels", labels,
+		)
+
+		return ErrInvalidLabels
 	}
 
 	for k, v := range labels {
-		// Validate key
-		if len(k) > MaxLabelKeyLength {
-			return ErrLabelKeyTooLong
-		}
-		if !ValidLabelKeyRegex.MatchString(k) {
-			return ErrInvalidLabelKey
-		}
+		if err := validateLabelKey(k); err != nil {
+			slog.Debug("label validation failed",
+				"reason", "invalid_key",
+				"key", k,
+				"value", v,
+			)
 
-		// Validate value
-		if len(v) > MaxLabelValueLength {
-			return ErrLabelValueTooLong
+			return err
 		}
-		if !ValidLabelValueRegex.MatchString(v) {
-			return ErrInvalidLabelValue
-		}
+	}
+
+	return nil
+}
+
+func validateLabelsSize(labels map[string]string) (int64, error) {
+	var totalSize int64
+
+	for key, value := range labels {
+		totalSize += int64(len(key)) + int64(len(value))
+	}
+
+	if totalSize > totalLabelsSizeLimitB {
+		return totalSize, ErrInvalidLabels
+	}
+
+	return totalSize, nil
+}
+
+func validateLabelKey(key string) error {
+	if len(k8scontentvalidation.IsLabelKey(key)) > 0 {
+		return ErrInvalidLabelKey
 	}
 
 	return nil

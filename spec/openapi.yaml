@@ -1361,24 +1361,12 @@ paths:
               examples:
                 invalidLabelKey:
                   value:
-                    error: "invalid label key format"
-                  summary: Invalid label key format
-                invalidLabelValue:
+                    error: "invalid label key"
+                  summary: Invalid label key
+                invalidLabels:
                   value:
-                    error: "invalid label value format"
-                  summary: Invalid label value format
-                tooManyLabels:
-                  value:
-                    error: "too many labels"
-                  summary: Too many labels (exceeds maximum of 64)
-                labelKeyTooLong:
-                  value:
-                    error: "label key exceeds maximum length"
-                  summary: Label key exceeds 63 character maximum
-                labelValueTooLong:
-                  value:
-                    error: "label value exceeds maximum length"
-                  summary: Label value exceeds 1024 character maximum
+                    error: "invalid labels"
+                  summary: Combined labels size exceeds 256 kB
                 missingRequiredFields:
                   value:
                     error: "invalid agent: os is required"
@@ -1417,10 +1405,11 @@ paths:
         - name: labels
           in: query
           description: |
-            Labels for querying agents (e.g., label.environment=production). Labels must follow validation rules:
-            - Label keys must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$
-            - Label values must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9/. ]*$
-            - Invalid labels will result in a 400 Bad Request error with specific validation errors
+            Labels for querying agents (e.g., label.environment=production).
+            Label keys are validated using Kubernetes annotation-key syntax, and values follow Kubernetes annotation semantics.
+            The combined size of all label keys and values must not exceed 256 kB.
+            Annotation-style values may contain spaces and other non-selector characters.
+            Invalid labels return a 400 Bad Request error with one of: invalid labels or invalid label key.
           required: false
           style: form
           explode: true
@@ -1448,24 +1437,12 @@ paths:
               examples:
                 invalidLabelKey:
                   value:
-                    error: "invalid label key format"
-                  summary: Invalid label key format
-                invalidLabelValue:
+                    error: "invalid label key"
+                  summary: Invalid label key
+                invalidLabels:
                   value:
-                    error: "invalid label value format"
-                  summary: Invalid label value format
-                tooManyLabels:
-                  value:
-                    error: "too many labels"
-                  summary: Too many labels (exceeds maximum of 64)
-                labelKeyTooLong:
-                  value:
-                    error: "label key exceeds maximum length"
-                  summary: Label key exceeds 63 character maximum
-                labelValueTooLong:
-                  value:
-                    error: "label value exceeds maximum length"
-                  summary: Label value exceeds 1024 character maximum
+                    error: "invalid labels"
+                  summary: Combined labels size exceeds 256 kB
                 invalidIP:
                   value:
                     error: "invalid ip"
@@ -1504,24 +1481,12 @@ paths:
               examples:
                 invalidLabelKey:
                   value:
-                    error: "invalid label key format"
-                  summary: Invalid label key format
-                invalidLabelValue:
+                    error: "invalid label key"
+                  summary: Invalid label key
+                invalidLabels:
                   value:
-                    error: "invalid label value format"
-                  summary: Invalid label value format
-                tooManyLabels:
-                  value:
-                    error: "too many labels"
-                  summary: Too many labels (exceeds maximum of 64)
-                labelKeyTooLong:
-                  value:
-                    error: "label key exceeds maximum length"
-                  summary: Label key exceeds 63 character maximum
-                labelValueTooLong:
-                  value:
-                    error: "label value exceeds maximum length"
-                  summary: Label value exceeds 1024 character maximum
+                    error: "invalid labels"
+                  summary: Combined labels size exceeds 256 kB
                 invalidClass:
                   value:
                     error: "invalid issue class"
@@ -1608,10 +1573,11 @@ paths:
         - name: label.*
           in: query
           description: |
-            Labels for querying issues (e.g., label.severity=high). Labels must follow validation rules:
-            - Label keys must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$
-            - Label values must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9/. ]*$
-            - Invalid labels will result in a 400 Bad Request error with specific validation errors
+            Labels for querying issues (e.g., label.severity=high).
+            Label keys are validated using Kubernetes annotation-key syntax, and values follow Kubernetes annotation semantics.
+            The combined size of all label keys and values must not exceed 256 kB.
+            Annotation-style values may contain spaces and other non-selector characters.
+            Invalid labels return a 400 Bad Request error with one of: invalid labels or invalid label key.
           required: false
           style: form
           explode: true
@@ -1640,24 +1606,12 @@ paths:
               examples:
                 invalidLabelKey:
                   value:
-                    error: "invalid label key format"
-                  summary: Invalid label key format
-                invalidLabelValue:
+                    error: "invalid label key"
+                  summary: Invalid label key
+                invalidLabels:
                   value:
-                    error: "invalid label value format"
-                  summary: Invalid label value format
-                tooManyLabels:
-                  value:
-                    error: "too many labels"
-                  summary: Too many labels (exceeds maximum of 64)
-                labelKeyTooLong:
-                  value:
-                    error: "label key exceeds maximum length"
-                  summary: Label key exceeds 63 character maximum
-                labelValueTooLong:
-                  value:
-                    error: "label value exceeds maximum length"
-                  summary: Label value exceeds 1024 character maximum
+                    error: "invalid labels"
+                  summary: Combined labels size exceeds 256 kB
         "401":
           description: Unauthorized
         "500":
@@ -1792,24 +1746,12 @@ paths:
                   summary: Cannot remove all events
                 invalidLabelKey:
                   value:
-                    error: "invalid label key format"
-                  summary: Invalid label key format
-                invalidLabelValue:
+                    error: "invalid label key"
+                  summary: Invalid label key
+                invalidLabels:
                   value:
-                    error: "invalid label value format"
-                  summary: Invalid label value format
-                tooManyLabels:
-                  value:
-                    error: "too many labels"
-                  summary: Too many labels (exceeds maximum of 64)
-                labelKeyTooLong:
-                  value:
-                    error: "label key exceeds maximum length"
-                  summary: Label key exceeds 63 character maximum
-                labelValueTooLong:
-                  value:
-                    error: "label value exceeds maximum length"
-                  summary: Label value exceeds 1024 character maximum
+                    error: "invalid labels"
+                  summary: Combined labels size exceeds 256 kB
         "404":
           description: Issue not found
           content:
@@ -3097,24 +3039,12 @@ paths:
                   summary: Cannot remove all events
                 invalidLabelKey:
                   value:
-                    error: "invalid label key format"
-                  summary: Invalid label key format
-                invalidLabelValue:
+                    error: "invalid label key"
+                  summary: Invalid label key
+                invalidLabels:
                   value:
-                    error: "invalid label value format"
-                  summary: Invalid label value format
-                tooManyLabels:
-                  value:
-                    error: "too many labels"
-                  summary: Too many labels (exceeds maximum of 64)
-                labelKeyTooLong:
-                  value:
-                    error: "label key exceeds maximum length"
-                  summary: Label key exceeds 63 character maximum
-                labelValueTooLong:
-                  value:
-                    error: "label value exceeds maximum length"
-                  summary: Label value exceeds 1024 character maximum
+                    error: "invalid labels"
+                  summary: Combined labels size exceeds 256 kB
         "404":
           description: Issue not found
           content:
@@ -5347,17 +5277,10 @@ components:
         type: string
       description: |
         Labels to categorize and organize agents. Labels are subject to the following constraints:
-        - Maximum 64 labels per agent
-        - Label keys: 
-          - Limited to 63 characters maximum
-          - Must start and end with alphanumeric characters
-          - Can include hyphens and underscores in the middle
-          - Must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$
-        - Label values:
-          - Limited to 1024 characters maximum
-          - Must start with alphanumeric characters
-          - Can include alphanumeric characters, hyphens, underscores, periods, forward slashes, and spaces
-          - Must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9/. ]*$
+        - Keys are validated using Kubernetes annotation-key syntax
+        - Values follow Kubernetes annotation semantics and may contain spaces or other non-selector characters
+        - The combined size of all label keys and values must not exceed 256 kB
+        - Invalid input returns one of: invalid labels or invalid label key
       example:
         environment: production
         region: us-west-1
@@ -5694,17 +5617,10 @@ components:
         type: string
       description: |
         Labels to categorize and organize issues. Labels are subject to the following constraints:
-        - Maximum 64 labels per issue
-        - Label keys: 
-          - Limited to 63 characters maximum
-          - Must start and end with alphanumeric characters
-          - Can include hyphens and underscores in the middle
-          - Must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$
-        - Label values:
-          - Limited to 1024 characters maximum
-          - Must start with alphanumeric characters
-          - Can include alphanumeric characters, hyphens, underscores, periods, forward slashes, and spaces
-          - Must match regex: ^[a-zA-Z0-9][-_a-zA-Z0-9/. ]*$
+        - Keys are validated using Kubernetes annotation-key syntax
+        - Values follow Kubernetes annotation semantics and may contain spaces or other non-selector characters
+        - The combined size of all label keys and values must not exceed 256 kB
+        - Invalid input returns one of: invalid labels or invalid label key
       example:
         severity: high
         type: bug
