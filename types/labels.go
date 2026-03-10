@@ -1,8 +1,6 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
-	"log/slog"
-
 	"github.com/garnet-org/api/types/errs"
 	k8scontentvalidation "k8s.io/apimachinery/pkg/api/validate/content"
 	k8sapivalidation "k8s.io/apimachinery/pkg/api/validation"
@@ -18,26 +16,13 @@ var (
 
 // ValidateLabels validates a map of labels against the defined constraints.
 func ValidateLabels(labels map[string]string) error {
-	totalSize, err := validateLabelsSize(labels)
-	if err != nil {
-		slog.Debug("label validation failed",
-			"reason", "total_size_exceeded",
-			"total_size", totalSize,
-			"limit", totalLabelsSizeLimitB,
-			"labels", labels,
-		)
 
+	if err := validateLabelsSize(labels); err != nil {
 		return ErrInvalidLabels
 	}
 
-	for k, v := range labels {
+	for k := range labels {
 		if err := validateLabelKey(k); err != nil {
-			slog.Debug("label validation failed",
-				"reason", "invalid_key",
-				"key", k,
-				"value", v,
-			)
-
 			return err
 		}
 	}
@@ -45,7 +30,7 @@ func ValidateLabels(labels map[string]string) error {
 	return nil
 }
 
-func validateLabelsSize(labels map[string]string) (int64, error) {
+func validateLabelsSize(labels map[string]string) error {
 	var totalSize int64
 
 	for key, value := range labels {
@@ -53,10 +38,10 @@ func validateLabelsSize(labels map[string]string) (int64, error) {
 	}
 
 	if totalSize > totalLabelsSizeLimitB {
-		return totalSize, ErrInvalidLabels
+		return ErrInvalidLabels
 	}
 
-	return totalSize, nil
+	return nil
 }
 
 func validateLabelKey(key string) error {
