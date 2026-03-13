@@ -10,10 +10,9 @@ import (
 
 const (
 	// API endpoint paths.
-	pathNetworkPoliciesMerged     = "/api/v1/network_policies/merged"
-	pathNetworkPoliciesK8sMerged  = "/api/v1/network_policies/k8s/merged"
+	pathNetworkPoliciesMerged    = "/api/v1/network_policies/merged"
+	pathNetworkPoliciesK8sMerged = "/api/v1/network_policies/k8s/merged"
 )
-
 
 // CreateNetworkPolicy creates a new network policy.
 func (c *Client) CreateNetworkPolicy(ctx context.Context, policy types.CreateNetworkPolicy) (types.NetworkPolicyCreated, error) {
@@ -69,7 +68,6 @@ func (c *Client) MergedNetworkPolicy(ctx context.Context, repositoryID, workflow
 
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }
-
 
 // CreateNetworkPolicyRule creates a new rule for a network policy.
 func (c *Client) CreateNetworkPolicyRule(ctx context.Context, policyID string, rule types.CreateNetworkPolicyRule) (types.NetworkPolicyRuleCreated, error) {
@@ -131,7 +129,6 @@ func (c *Client) MergedNetworkPolicyForK8s(ctx context.Context, clusterName, nod
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }
 
-
 // MergedNetworkPolicyForK8sYAML retrieves a merged network policy for a Kubernetes context as pre-formatted YAML.
 func (c *Client) MergedNetworkPolicyForK8sYAML(ctx context.Context, clusterName, nodeName string) ([]byte, error) {
 	q := url.Values{}
@@ -152,7 +149,7 @@ func (c *Client) MergedNetworkPolicyForK8sYAML(ctx context.Context, clusterName,
 }
 
 // MergedNetworkPolicyGithub retrieves a merged network policy for GitHub context.
-func (c *Client) MergedNetworkPolicyGithub(ctx context.Context, repositoryID, workflowName string, format types.PolicyFormat) (interface{}, error) {
+func (c *Client) MergedNetworkPolicyGithub(ctx context.Context, repositoryID, workflowName string, format types.PolicyFormat) (any, error) {
 	q := url.Values{}
 	if repositoryID != "" {
 		q.Set("repository_id", repositoryID)
@@ -178,7 +175,7 @@ func (c *Client) MergedNetworkPolicyGithub(ctx context.Context, repositoryID, wo
 }
 
 // MergedNetworkPolicyK8s retrieves a merged network policy for Kubernetes context.
-func (c *Client) MergedNetworkPolicyK8s(ctx context.Context, clusterName, nodeName string, format types.PolicyFormat) (interface{}, error) {
+func (c *Client) MergedNetworkPolicyK8s(ctx context.Context, clusterName, nodeName string, format types.PolicyFormat) (any, error) {
 	q := url.Values{}
 	if clusterName != "" {
 		q.Set("cluster_name", clusterName)
@@ -202,7 +199,6 @@ func (c *Client) MergedNetworkPolicyK8s(ctx context.Context, clusterName, nodeNa
 	var out types.MergedNetworkPolicy
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }
-
 
 // MergedNetworkPolicyGithubJSON retrieves a merged network policy for GitHub context as JSON.
 func (c *Client) MergedNetworkPolicyGithubJSON(ctx context.Context, repositoryID, workflowName string) (types.MergedNetworkPolicy, error) {

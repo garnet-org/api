@@ -335,7 +335,7 @@ func (c *NetworkPolicyConfig) Validate() error {
 }
 
 // Scan implements the sql.Scanner interface for NetworkPolicyConfig.
-func (c *NetworkPolicyConfig) Scan(value interface{}) error {
+func (c *NetworkPolicyConfig) Scan(value any) error {
 	if value == nil {
 		return nil
 	}
@@ -407,45 +407,44 @@ type NodeNetworkPolicy struct {
 // MergedNetworkPolicy represents a network policy that combines all applicable policies.
 type MergedNetworkPolicy struct {
 	// Legacy format (for backwards compatibility)
-	Config              NetworkPolicyConfig       `json:"config"`
-	Rules               []NetworkPolicyRule       `json:"rules"`
+	Config NetworkPolicyConfig `json:"config"`
+	Rules  []NetworkPolicyRule `json:"rules"`
 
 	// New simplified format
-	Mode                NetworkPolicyMode         `json:"mode"`
-	Policy              NetworkPolicyType         `json:"policy"`
-	Allow               []string                  `json:"allow"`
-	Deny                []string                  `json:"deny"`
-	Resolve             []string                  `json:"resolve"`
+	Mode    NetworkPolicyMode `json:"mode"`
+	Policy  NetworkPolicyType `json:"policy"`
+	Allow   []string          `json:"allow"`
+	Deny    []string          `json:"deny"`
+	Resolve []string          `json:"resolve"`
 
 	// Policy references for traceability
-	SystemGlobalPolicy  *SystemGlobalNetworkPolicy `json:"system_global_policy,omitempty"`
-	GlobalPolicy        *NetworkPolicy            `json:"global_policy,omitempty"`
+	SystemGlobalPolicy *SystemGlobalNetworkPolicy `json:"system_global_policy,omitempty"`
+	GlobalPolicy       *NetworkPolicy             `json:"global_policy,omitempty"`
 
 	// GitHub context policies
-	RepoPolicy          *RepoNetworkPolicy        `json:"repo_policy,omitempty"`
-	WorkflowPolicy      *WorkflowNetworkPolicy    `json:"workflow_policy,omitempty"`
+	RepoPolicy     *RepoNetworkPolicy     `json:"repo_policy,omitempty"`
+	WorkflowPolicy *WorkflowNetworkPolicy `json:"workflow_policy,omitempty"`
 
 	// Kubernetes context policies
-	ClusterPolicy       *ClusterNetworkPolicy     `json:"cluster_policy,omitempty"`
-	NodePolicy          *NodeNetworkPolicy        `json:"node_policy,omitempty"`
+	ClusterPolicy *ClusterNetworkPolicy `json:"cluster_policy,omitempty"`
+	NodePolicy    *NodeNetworkPolicy    `json:"node_policy,omitempty"`
 }
-
 
 // CreateNetworkPolicy represents the request to create a new network policy.
 type CreateNetworkPolicy struct {
-	Scope        NetworkPolicyScope        `json:"scope"`
-	Config       NetworkPolicyConfig       `json:"config"`
-	Rules        []CreateNetworkPolicyRule `json:"rules,omitempty"`
+	Scope  NetworkPolicyScope        `json:"scope"`
+	Config NetworkPolicyConfig       `json:"config"`
+	Rules  []CreateNetworkPolicyRule `json:"rules,omitempty"`
 
 	// GitHub context fields
-	RepositoryID string                    `json:"repository_id,omitempty"`
-	WorkflowName string                    `json:"workflow_name,omitempty"`
+	RepositoryID string `json:"repository_id,omitempty"`
+	WorkflowName string `json:"workflow_name,omitempty"`
 
 	// Kubernetes context fields
-	ClusterName  string                    `json:"cluster_name,omitempty"`
-	NodeName     string                    `json:"node_name,omitempty"`
+	ClusterName string `json:"cluster_name,omitempty"`
+	NodeName    string `json:"node_name,omitempty"`
 
-	ProjectID    string                    `json:"-"` // Populated by the service layer, not exposed in API
+	ProjectID string `json:"-"` // Populated by the service layer, not exposed in API
 }
 
 // Validate ensures the CreateNetworkPolicy request is valid.

@@ -60,9 +60,9 @@ type MCPToolsCapability struct{}
 
 // McpToolDefinition represents a tool definition.
 type McpToolDefinition struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	InputSchema map[string]interface{} `json:"inputSchema"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	InputSchema map[string]any `json:"inputSchema"`
 }
 
 // McpToolCallParams represents tool invocation parameters.
@@ -106,20 +106,20 @@ type McpListEventsResult struct {
 
 // McpIssueSummary represents a summarized issue for list responses.
 type McpIssueSummary struct {
-	ID               string        `json:"id"`
-	Class            IssueClass    `json:"class"`
-	Description      string        `json:"description"`
-	State            IssueState    `json:"state"`
-	Priority         IssuePriority `json:"priority"`
-	Labels           IssueLabels   `json:"labels"`
-	Ignored          bool          `json:"ignored"`
-	CreatedAt        string        `json:"created_at"`
-	UpdatedAt        string        `json:"updated_at"`
-	EventCount       int           `json:"event_count"`
-	IgnoredReason    string        `json:"ignored_reason,omitempty"`
-	IgnoredBy        string        `json:"ignored_by,omitempty"`
-	IgnoredAt        string        `json:"ignored_at,omitempty"`
-	NetworkPolicyID  string        `json:"network_policy_id,omitempty"`
+	ID              string        `json:"id"`
+	Class           IssueClass    `json:"class"`
+	Description     string        `json:"description"`
+	State           IssueState    `json:"state"`
+	Priority        IssuePriority `json:"priority"`
+	Labels          IssueLabels   `json:"labels"`
+	Ignored         bool          `json:"ignored"`
+	CreatedAt       string        `json:"created_at"`
+	UpdatedAt       string        `json:"updated_at"`
+	EventCount      int           `json:"event_count"`
+	IgnoredReason   string        `json:"ignored_reason,omitempty"`
+	IgnoredBy       string        `json:"ignored_by,omitempty"`
+	IgnoredAt       string        `json:"ignored_at,omitempty"`
+	NetworkPolicyID string        `json:"network_policy_id,omitempty"`
 }
 
 // McpListIssuesResult represents the response for list_issues.
@@ -130,22 +130,22 @@ type McpListIssuesResult struct {
 
 // McpIssueDetail represents detailed issue information.
 type McpIssueDetail struct {
-	ID                  string             `json:"id"`
-	Class               IssueClass         `json:"class"`
-	Description         string             `json:"description"`
-	State               IssueState         `json:"state"`
-	Priority            IssuePriority      `json:"priority"`
-	Labels              IssueLabels        `json:"labels"`
-	Ignored             bool               `json:"ignored"`
-	CreatedAt           string             `json:"created_at"`
-	UpdatedAt           string             `json:"updated_at"`
-	IgnoredReason       string             `json:"ignored_reason,omitempty"`
-	IgnoredBy           string             `json:"ignored_by,omitempty"`
-	IgnoredAt           string             `json:"ignored_at,omitempty"`
+	ID                  string              `json:"id"`
+	Class               IssueClass          `json:"class"`
+	Description         string              `json:"description"`
+	State               IssueState          `json:"state"`
+	Priority            IssuePriority       `json:"priority"`
+	Labels              IssueLabels         `json:"labels"`
+	Ignored             bool                `json:"ignored"`
+	CreatedAt           string              `json:"created_at"`
+	UpdatedAt           string              `json:"updated_at"`
+	IgnoredReason       string              `json:"ignored_reason,omitempty"`
+	IgnoredBy           string              `json:"ignored_by,omitempty"`
+	IgnoredAt           string              `json:"ignored_at,omitempty"`
 	PolicyScope         *NetworkPolicyScope `json:"policy_scope,omitempty"`
-	NetworkPolicyID     string             `json:"network_policy_id,omitempty"`
-	NetworkPolicyRuleID string             `json:"network_policy_rule_id,omitempty"`
-	Events              []McpEventSummary  `json:"events"`
+	NetworkPolicyID     string              `json:"network_policy_id,omitempty"`
+	NetworkPolicyRuleID string              `json:"network_policy_rule_id,omitempty"`
+	Events              []McpEventSummary   `json:"events"`
 }
 
 // McpBlockIssueResult represents the response for block_issue.

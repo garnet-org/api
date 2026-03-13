@@ -766,7 +766,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EventV2Page"
+                $ref: "#/components/schemas/LegacyEventV2Page"
         "400":
           description: Invalid request parameters
           content:
@@ -1103,7 +1103,7 @@ paths:
         - UserTokenAuth: []
         - ProjectTokenAuth: []
       summary: Get profile by run ID
-      operationId: profile
+      operationId: profileByRunID
       responses:
         "200":
           description: Profile retrieved successfully
@@ -2596,7 +2596,7 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Webhook"
-                  paginator_info:
+                  pageInfo:
                     $ref: "#/components/schemas/PaginatorInfo"
         "400":
           description: Invalid input
@@ -2789,13 +2789,15 @@ paths:
 
   /api/v1/projects/{project_id}/events:
     get:
+      deprecated: true
       summary: List events for a specific project
       description: |
         Retrieves a paginated list of V2 events for the specified project.
         Supports filtering by agent ID, ashkaal kind, and metadata names, as well as offset-based pagination and sorting.
+        Deprecated: use `/api/v2/projects/{projectID}/events` for cursor-based pagination.
         This endpoint is primarily intended for use by the web UI.
         All events are now stored and returned in V2 format using ashkaal structure.
-      operationId: listProjectEvents
+      operationId: legacyProjectEvents
       security:
         - UserTokenAuth: []
       parameters:
@@ -2854,7 +2856,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EventV2Page"
+                $ref: "#/components/schemas/LegacyEventV2Page"
         "400":
           description: Invalid request parameters
           content:
@@ -2876,6 +2878,269 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v2/projects/{projectID}/events:
+    parameters:
+      - name: projectID
+        in: path
+        description: ID of the project
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List events for a specific project
+      description: |
+        Retrieves a cursor-paginated list of V2 events for the specified project.
+        Supports filtering by agent ID, ashkaal kinds, metadata names, and Kubernetes context fields.
+        Use `first` and `after` to paginate forward, or `last` and `before` to paginate backward.
+        All events are stored and returned in V2 format using ashkaal structure.
+      operationId: projectEvents
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      parameters:
+        - name: agent_id
+          in: query
+          description: Filter events by agent ID
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: kinds
+          in: query
+          description: Filter events by ashkaal kinds. Multiple values can be provided to filter by any of the specified kinds.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/AshkaalKind"
+        - name: names
+          in: query
+          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/MetadataName"
+        - name: kubernetes_clusters
+          in: query
+          description: Filter events by Kubernetes cluster name. Multiple values can be provided.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: kubernetes_namespaces
+          in: query
+          description: Filter events by Kubernetes namespace. Multiple values can be provided.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: kubernetes_nodes
+          in: query
+          description: Filter events by Kubernetes node name. Multiple values can be provided.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: time_start
+          in: query
+          description: Filter events that were created at or after this time (RFC 3339 nano)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          description: Filter events that were created before this time (RFC 3339 nano)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: first
+          in: query
+          description: Number of items to return from the start
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: after
+          in: query
+          description: Cursor for paginating forward
+          required: false
+          schema:
+            type: string
+        - name: last
+          in: query
+          description: Number of items to return from the end
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: before
+          in: query
+          description: Cursor for paginating backward
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved list of events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Events"
+        default:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/agents/{agentID}/events:
+    parameters:
+      - name: agentID
+        in: path
+        description: ID of the agent
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List events for a specific agent
+      description: |
+        Retrieves a cursor-paginated list of V2 events for the specified agent.
+        Supports filtering by ashkaal kinds, metadata names, and Kubernetes context fields.
+        Use `first` and `after` to paginate forward, or `last` and `before` to paginate backward.
+        All events are stored and returned in V2 format using ashkaal structure.
+      operationId: agentEvents
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      parameters:
+        - name: kinds
+          in: query
+          description: Filter events by ashkaal kinds. Multiple values can be provided to filter by any of the specified kinds.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/AshkaalKind"
+        - name: names
+          in: query
+          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/MetadataName"
+        - name: kubernetes_clusters
+          in: query
+          description: Filter events by Kubernetes cluster name. Multiple values can be provided.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: kubernetes_namespaces
+          in: query
+          description: Filter events by Kubernetes namespace. Multiple values can be provided.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: kubernetes_nodes
+          in: query
+          description: Filter events by Kubernetes node name. Multiple values can be provided.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: time_start
+          in: query
+          description: Filter events that were created at or after this time (RFC 3339 nano)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          description: Filter events that were created before this time (RFC 3339 nano)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: first
+          in: query
+          description: Number of items to return from the start
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: after
+          in: query
+          description: Cursor for paginating forward
+          required: false
+          schema:
+            type: string
+        - name: last
+          in: query
+          description: Number of items to return from the end
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: before
+          in: query
+          description: Cursor for paginating backward
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved list of events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Events"
+        default:
           description: Internal server error
           content:
             application/json:
@@ -5474,7 +5739,7 @@ components:
               - $ref: "#/components/schemas/NetworkPolicy"
               - $ref: "#/components/schemas/IssueActionHistory"
               - $ref: "#/components/schemas/Webhook"
-        paginator_info:
+        pageInfo:
           $ref: "#/components/schemas/PaginatorInfo"
 
     PaginatorInfo:
@@ -6598,11 +6863,29 @@ components:
               type: string
               description: The cursor pointing to the last item in the current page
 
-    EventV2Page:
+    LegacyEventV2Page:
       type: object
       description: |
         A paginated list of v2 events with offset-based pagination.
         Contains events returned from the list events endpoints.
+      required:
+        - data
+        - paginatorInfo
+      properties:
+        data:
+          type: array
+          description: The list of v2 events matching the query
+          items:
+            $ref: "#/components/schemas/EventV2"
+        paginatorInfo:
+          $ref: "#/components/schemas/PaginatorInfo"
+          description: Information about the pagination status
+
+    Events:
+      type: object
+      description: |
+        A cursor-paginated list of v2 events.
+        Contains events returned from the cursor-based list events endpoints.
       required:
         - items
         - pageInfo
@@ -6612,8 +6895,8 @@ components:
           description: The list of v2 events matching the query
           items:
             $ref: "#/components/schemas/EventV2"
-        paginator_info:
-          $ref: "#/components/schemas/PaginatorInfo"
+        pageInfo:
+          $ref: "#/components/schemas/CursorPageInfo"
           description: Information about the pagination status
 
     WebhookEnabledIssueClasses:

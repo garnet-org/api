@@ -183,7 +183,7 @@ func (l *IssueLabels) UnmarshalJSON(data []byte) error {
 }
 
 // Scan implements sql.Scanner interface.
-func (l *IssueLabels) Scan(value interface{}) error {
+func (l *IssueLabels) Scan(value any) error {
 	if value == nil {
 		*l = make(IssueLabels)
 		return nil

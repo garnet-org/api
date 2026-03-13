@@ -105,13 +105,7 @@ func (u *UpdateToken) Validate() error {
 	// Validate permissions if provided
 	if len(u.Permissions) > 0 {
 		for _, p := range u.Permissions {
-			valid := false
-			for _, validPerm := range AllPermissions() {
-				if p == validPerm {
-					valid = true
-					break
-				}
-			}
+			valid := slices.Contains(AllPermissions(), p)
 			if !valid {
 				return ErrInvalidPermission
 			}

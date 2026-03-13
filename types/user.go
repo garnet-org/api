@@ -65,7 +65,7 @@ type UserCreated struct {
 	OrganizationID string    `json:"organization_id,omitempty"`
 	ProjectID      string    `json:"project_id,omitempty"`
 	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at,omitempty"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 // Validate validates the CreateUser input.

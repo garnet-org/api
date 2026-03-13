@@ -349,9 +349,9 @@ type DroppedIP struct {
 
 // FullInfo represents the full information of an event.
 type FullInfo struct {
-	Ancestry *[]Process                         `json:"ancestry,omitempty"`
-	Files    *map[string]map[string]interface{} `json:"files,omitempty"`
-	Flows    *[]FlowSimple                      `json:"flows,omitempty"`
+	Ancestry *[]Process                 `json:"ancestry,omitempty"`
+	Files    *map[string]map[string]any `json:"files,omitempty"`
+	Flows    *[]FlowSimple              `json:"flows,omitempty"`
 }
 
 // FlowSimple represents a network flow event.

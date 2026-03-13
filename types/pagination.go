@@ -20,10 +20,10 @@ type Paginator[T any] struct {
 
 // PaginatorInfo contains offset-based pagination metadata.
 type PaginatorInfo struct {
-	Total       int  `json:"total"`       // Total number of items available
-	PerPage     int  `json:"perPage"`     // Number of items shown per page
-	CurrentPage int  `json:"currentPage"` // Current page number (1-based)
-	LastPage    int  `json:"lastPage"`    // Last page number
+	Total       int  `json:"total"`          // Total number of items available
+	PerPage     int  `json:"perPage"`        // Number of items shown per page
+	CurrentPage int  `json:"currentPage"`    // Current page number (1-based)
+	LastPage    int  `json:"lastPage"`       // Last page number
 	From        *int `json:"from,omitempty"` // Index of first item on page (1-based)
 	To          *int `json:"to,omitempty"`   // Index of last item on page (1-based)
 }

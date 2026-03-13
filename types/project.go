@@ -53,7 +53,7 @@ func (c *CreateProject) Validate() error {
 type ProjectCreated struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // UpdateProject represents the data needed to update an existing project.

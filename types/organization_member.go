@@ -38,7 +38,7 @@ type CreateOrganizationMember struct {
 type OrganizationMemberCreated struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Validate validates the CreateOrganizationMember input.

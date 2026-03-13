@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -29,8 +30,64 @@ func (c *Client) Event(ctx context.Context, eventID string) (types.Event, error)
 	return result, nil
 }
 
-// Events retrieves a list of events with optional filters.
-func (c *Client) Events(ctx context.Context, params types.ListEvents) (types.Paginator[types.EventV2], error) {
+func (c *Client) Events(ctx context.Context, in types.ListEvents) (types.CursorPage[types.Event], error) {
+	var out types.CursorPage[types.Event]
+
+	if in.ProjectID == nil && in.AgentID == nil {
+		return out, errors.New("at least one of project_id or agent_id must be provided")
+	}
+
+	q := url.Values{}
+	for _, kind := range in.Kinds {
+		q.Add("kinds", kind.String())
+	}
+
+	for _, name := range in.Names {
+		q.Add("names", name)
+	}
+
+	for _, cluster := range in.KubernetesClusters {
+		q.Add("kubernetes_clusters", cluster)
+	}
+
+	for _, namespace := range in.KubernetesNamespaces {
+		q.Add("kubernetes_namespaces", namespace)
+	}
+
+	for _, node := range in.KubernetesNodes {
+		q.Add("kubernetes_nodes", node)
+	}
+
+	if in.TimeStart != nil {
+		q.Set("time_start", in.TimeStart.Format(time.RFC3339Nano))
+	}
+
+	if in.TimeEnd != nil {
+		q.Set("time_end", in.TimeEnd.Format(time.RFC3339Nano))
+	}
+
+	addCursorPageArgs(q, in.PageArgs)
+
+	var endpoint string
+	if in.ProjectID != nil {
+		endpoint = "/api/v2/projects/" + url.PathEscape(*in.ProjectID) + "/events"
+		if in.AgentID != nil {
+			q.Set("agent_id", *in.AgentID)
+		}
+	} else {
+		endpoint = "/api/v1/agents/" + url.PathEscape(*in.AgentID) + "/events"
+	}
+
+	if len(q) != 0 {
+		endpoint += "?" + q.Encode()
+	}
+
+	return out, c.do(ctx, &out, http.MethodGet, endpoint, nil)
+}
+
+// LegacyEvents uses offset pagination.
+// Deprecated: use [Events].
+func (c *Client) LegacyEvents(ctx context.Context, params types.LegacyListEvents) (types.Paginator[types.EventV2], error) {
 	var out types.Paginator[types.EventV2]
 
 	// Build query parameters

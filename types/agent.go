@@ -71,7 +71,7 @@ func (l *AgentLabels) UnmarshalJSON(data []byte) error {
 }
 
 // Scan implements sql.Scanner interface.
-func (l *AgentLabels) Scan(value interface{}) error {
+func (l *AgentLabels) Scan(value any) error {
 	if value == nil {
 		*l = make(AgentLabels)
 
@@ -405,12 +405,13 @@ func join(strs []string) string {
 		return strs[0]
 	}
 
-	result := strs[0]
+	var result strings.Builder
+	result.WriteString(strs[0])
 	for _, s := range strs[1:] {
-		result += "," + s
+		result.WriteString("," + s)
 	}
 
-	return result
+	return result.String()
 }
 
 type ListAgents struct {

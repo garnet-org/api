@@ -1,6 +1,7 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -97,7 +98,7 @@ type CreateRole struct {
 type RoleCreated struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Validate validates the CreateRole input.
@@ -173,7 +174,7 @@ type CreateMember struct {
 type MemberCreated struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Validate validates the CreateMember input.
@@ -261,10 +262,5 @@ func AllPermissions() []Permission {
 
 // Has checks if a slice of permissions contains a specific permission.
 func Has(permissions []Permission, perm Permission) bool {
-	for _, p := range permissions {
-		if p == perm {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(permissions, perm)
 }

@@ -14,7 +14,9 @@ import (
 	eventkind "github.com/garnet-org/jibril-ashkaal/pkg/kind"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 	"github.com/google/uuid"
+	"github.com/garnet-org/api/id"
 	"github.com/garnet-org/api/types/errs"
+	"github.com/garnet-org/api/validator"
 )
 
 const (
@@ -277,7 +279,6 @@ func isValidAshkaalKind(k eventkind.Kind) bool {
 	}
 }
 
-
 func normalizeAshkaalBaseJSON(b json.RawMessage) (json.RawMessage, bool) {
 	var base any
 	if err := json.Unmarshal(b, &base); err != nil {
@@ -357,7 +358,6 @@ func normalizeLegacyTimeString(s string) (string, bool) {
 
 	return "", false
 }
-
 
 // EventV2 represents a v2 event with full agent details in ashkaal format.
 type EventV2 struct {
@@ -579,16 +579,86 @@ func (w *EventV2Wrapper) ToCreateOrUpdateEventV2() (*CreateOrUpdateEventV2, erro
 	return event, nil
 }
 
-// ListEvents represents the request to list v2 events with pagination and filtering.
+// ListEvents needs to set at least one of ProjectID or AgentID.
 type ListEvents struct {
-	ProjectID string             `json:"-"` // Set internally from context
-	Filters   *ListEventsFilters `json:"filters"`
-	PageArgs  PageArgs           `json:"pageArgs"`
-	Sort      *Sort              `json:"sort,omitempty"`
+	ProjectID            *string
+	AgentID              *string
+	Kinds                []eventkind.Kind
+	Names                []string
+	KubernetesClusters   []string
+	KubernetesNamespaces []string
+	KubernetesNodes      []string
+	TimeStart            *time.Time
+	TimeEnd              *time.Time
+
+	PageArgs CursorPageArgs
+}
+
+func (in *ListEvents) Validate() error {
+	v := validator.New()
+
+	if in.ProjectID == nil && in.AgentID == nil {
+		v.Add("id", "either projectID or agentID must be provided")
+	}
+
+	if in.ProjectID != nil && !id.Valid(*in.ProjectID) {
+		v.Add("projectID", "invalid project ID")
+	}
+
+	if in.AgentID != nil && !id.Valid(*in.AgentID) {
+		v.Add("agentID", "invalid agent ID")
+	}
+
+	for _, kind := range in.Kinds {
+		if kind == "" {
+			v.Add("kind", "kind cannot be empty")
+		}
+	}
+
+	for _, name := range in.Names {
+		if name == "" {
+			v.Add("name", "name cannot be empty")
+		}
+	}
+
+	for _, cluster := range in.KubernetesClusters {
+		if cluster == "" {
+			v.Add("kubernetes_cluster", "cluster name cannot be empty")
+		}
+	}
+
+	for _, namespace := range in.KubernetesNamespaces {
+		if namespace == "" {
+			v.Add("kubernetes_namespace", "namespace cannot be empty")
+		}
+	}
+
+	for _, node := range in.KubernetesNodes {
+		if node == "" {
+			v.Add("kubernetes_node", "node name cannot be empty")
+		}
+	}
+
+	if in.TimeStart != nil && in.TimeEnd != nil && in.TimeStart.After(*in.TimeEnd) {
+		v.Add("timeRange", "timeStart must be before timeEnd")
+	}
+
+	v.Join(in.PageArgs.Validator())
+
+	return v.AsError()
+}
+
+// LegacyListEvents uses offset pagination.
+// Deprecated: use [ListEvents].
+type LegacyListEvents struct {
+	ProjectID string                   `json:"-"` // Set internally from context
+	Filters   *LegacyListEventsFilters `json:"filters"`
+	PageArgs  PageArgs                 `json:"pageArgs"`
+	Sort      *Sort                    `json:"sort,omitempty"`
 }
 
 // Validate checks if the ListEvents is valid.
-func (l *ListEvents) Validate() error {
+func (l *LegacyListEvents) Validate() error {
 	// Validate filters if provided
 	if l.Filters != nil {
 		if err := l.Filters.Validate(); err != nil {
@@ -610,8 +680,8 @@ func (l *ListEvents) Validate() error {
 	return nil
 }
 
-// ListEventsFilters defines the filters for listing v2 events.
-type ListEventsFilters struct {
+// LegacyListEventsFilters defines the filters for listing v2 events.
+type LegacyListEventsFilters struct {
 	// Deprecated: use Kinds instead. Kind is still supported for backward compatibility but will be removed in the future.
 	Kind          *eventkind.Kind  `json:"kind"`
 	Kinds         []eventkind.Kind `json:"kinds"`
@@ -626,7 +696,7 @@ type ListEventsFilters struct {
 }
 
 // Validate checks if the ListEventsFilters are valid.
-func (f *ListEventsFilters) Validate() error {
+func (f *LegacyListEventsFilters) Validate() error {
 	if f.Kind != nil && *f.Kind == "" {
 		return ErrInvalidEventV2Kind
 	}
@@ -661,7 +731,7 @@ func (f *ListEventsFilters) Validate() error {
 }
 
 // IsEmpty checks if the filters are empty.
-func (f *ListEventsFilters) IsEmpty() bool {
+func (f *LegacyListEventsFilters) IsEmpty() bool {
 	return f.Kind == nil && len(f.Kinds) == 0 &&
 		f.AgentID == nil && len(f.MetadataNames) == 0 &&
 		f.Cluster == nil && f.Namespace == nil && f.Node == nil &&
@@ -669,8 +739,8 @@ func (f *ListEventsFilters) IsEmpty() bool {
 }
 
 // DecodeEventFilters decodes URL query parameters into ListEventsFilters.
-func DecodeEventFilters(values url.Values) (*ListEventsFilters, error) {
-	filters := &ListEventsFilters{}
+func DecodeEventFilters(values url.Values) (*LegacyListEventsFilters, error) {
+	filters := &LegacyListEventsFilters{}
 
 	if kindStr := values.Get("filter.kind"); kindStr != "" {
 		k := eventkind.Kind(kindStr)

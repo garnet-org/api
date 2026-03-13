@@ -91,7 +91,6 @@ func (e UnauthorizedError) Is(target error) bool {
 // ConflictError represents an error indicating that a resource already exists.
 type ConflictError string
 
-// ConflictError represents an error indicating that a resource already exists.
 func (e ConflictError) Error() string { return string(e) }
 
 // Is checks if the error is of type ConflictError.

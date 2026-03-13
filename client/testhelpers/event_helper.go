@@ -58,11 +58,11 @@ func (h *EventV2Helper) createFlowEvent(metadataName, defaultNote, defaultDescri
 			Background: ongoing.Background{
 				Flows: []ongoing.Flow{
 					{
-						UUID:      uuid.New().String(),
-						IPVersion:  4,
-						Proto:      config.Protocol,
-						Local:      ongoing.Node{Address: config.LocalIP, Name: config.LocalName, Port: config.SrcPort},
-						Remote:     ongoing.Node{Address: config.RemoteIP, Name: config.RemoteName, Port: config.DstPort},
+						UUID:        uuid.New().String(),
+						IPVersion:   4,
+						Proto:       config.Protocol,
+						Local:       ongoing.Node{Address: config.LocalIP, Name: config.LocalName, Port: config.SrcPort},
+						Remote:      ongoing.Node{Address: config.RemoteIP, Name: config.RemoteName, Port: config.DstPort},
 						ServicePort: config.DstPort,
 					},
 				},

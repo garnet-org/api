@@ -48,7 +48,7 @@ func (c *CreateOrganization) Validate() error {
 type OrganizationCreated struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // UpdateOrganization represents the data needed to update an organization.
