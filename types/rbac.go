@@ -1,7 +1,6 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
-	"slices"
 	"strings"
 	"time"
 
@@ -258,9 +257,4 @@ func PredefinedRoles(_ string) struct {
 // AllPermissions returns all available permissions.
 func AllPermissions() []Permission {
 	return []Permission{PermCreate, PermRead, PermUpdate, PermDelete, PermList}
-}
-
-// Has checks if a slice of permissions contains a specific permission.
-func Has(permissions []Permission, perm Permission) bool {
-	return slices.Contains(permissions, perm)
 }

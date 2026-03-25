@@ -121,12 +121,3 @@ func (e PermissionDeniedError) Is(target error) bool {
 	}
 	return false
 }
-
-func Is(err error) bool {
-	return errors.Is(err, NotFound) ||
-		errors.Is(err, Unauthorized) ||
-		errors.Is(err, InvalidArgument) ||
-		errors.Is(err, InternalServer) ||
-		errors.Is(err, Conflict) ||
-		errors.Is(err, PermissionDenied)
-}
