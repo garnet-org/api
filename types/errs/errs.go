@@ -1,4 +1,4 @@
-// Package errs contains the error types returned by the jibril-server.
+// Package errs contains the error types returned by the control-plane.
 package errs
 
 import "errors"

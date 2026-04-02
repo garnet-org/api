@@ -1,4 +1,4 @@
-// Package types contains all the required clients for marshal/unmarshal requests and responses from/to jibril-server.
+// Package types contains all the required clients for marshal/unmarshal requests and responses from/to control-plane.
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (

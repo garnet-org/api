@@ -1,12 +1,12 @@
-// Package types contains all the required clients for marshal/unmarshal requests and responses from/to jibril-server.
+// Package types contains all the required clients for marshal/unmarshal requests and responses from/to control-plane.
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
 	"time"
 
+	"github.com/garnet-org/api/types/errs"
 	"github.com/garnet-org/jibril-ashkaal/pkg/kind"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
-	"github.com/garnet-org/api/types/errs"
 )
 
 const (

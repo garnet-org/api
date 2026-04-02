@@ -8,12 +8,12 @@ import (
 	"slices"
 	"time"
 
-	eventkind "github.com/garnet-org/jibril-ashkaal/pkg/kind"
-	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
-	"github.com/google/uuid"
 	"github.com/garnet-org/api/id"
 	"github.com/garnet-org/api/types/errs"
 	"github.com/garnet-org/api/validator"
+	eventkind "github.com/garnet-org/jibril-ashkaal/pkg/kind"
+	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
+	"github.com/google/uuid"
 )
 
 const (

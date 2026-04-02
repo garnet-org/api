@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 	"github.com/garnet-org/api/id"
 	"github.com/garnet-org/api/validator"
+	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 )
 
 type Profile struct {

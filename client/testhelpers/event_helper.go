@@ -4,10 +4,10 @@ package testhelpers
 import (
 	"time"
 
+	"github.com/garnet-org/api/types"
 	"github.com/garnet-org/jibril-ashkaal/pkg/kind"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 	"github.com/google/uuid"
-	"github.com/garnet-org/api/types"
 )
 
 // EventV2Helper provides helper methods for creating V2 events in tests.
