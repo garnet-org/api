@@ -5,6 +5,8 @@ import (
 	"math"
 	"net/url"
 	"strconv"
+
+	"github.com/garnet-org/api/types/errs"
 )
 
 const (
@@ -36,31 +38,26 @@ type PageArgs struct {
 
 // DecodePageArgs extracts PageArgs from URL query parameters.
 // Supports: ?page=1&perPage=20.
-func DecodePageArgs(v url.Values) PageArgs {
-	var page *int
-	p := v.Get("page")
-	if p != "" {
-		pp, err := strconv.Atoi(p)
+func DecodePageArgs(v url.Values) (PageArgs, error) {
+	var pageArgs PageArgs
+
+	if s := v.Get("page"); s != "" {
+		n, err := strconv.Atoi(s)
 		if err != nil {
-			panic(err)
+			return pageArgs, errs.InvalidArgumentError("invalid page")
 		}
-		page = &pp
+		pageArgs.Page = &n
 	}
 
-	var perPage *int
-	pp := v.Get("perPage")
-	if pp != "" {
-		ppp, err := strconv.Atoi(pp)
+	if s := v.Get("perPage"); s != "" {
+		n, err := strconv.Atoi(s)
 		if err != nil {
-			panic(err)
+			return pageArgs, errs.InvalidArgumentError("invalid perPage")
 		}
-		perPage = &ppp
+		pageArgs.PerPage = &n
 	}
 
-	return PageArgs{
-		Page:    page,
-		PerPage: perPage,
-	}
+	return pageArgs, nil
 }
 
 // Order is a type for sorting order.
