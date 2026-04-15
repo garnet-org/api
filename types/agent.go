@@ -143,14 +143,14 @@ type AgentKubernetesContext struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Validate checks if the AgentKubernetesContext has all required fields set
+// Validator checks if the AgentKubernetesContext has all required fields set
 // and validates that fields conform to Kubernetes naming conventions.
-func (c *AgentKubernetesContext) Validate() error {
+func (c *AgentKubernetesContext) Validator() *validator.Validator {
 	v := validator.New()
 
 	if c == nil {
 		v.Add("kubernetes_context", "kubernetes context is required")
-		return v.AsError()
+		return v
 	}
 
 	// Validate cluster name
@@ -174,7 +174,11 @@ func (c *AgentKubernetesContext) Validate() error {
 		}
 	}
 
-	return v.AsError()
+	return v
+}
+
+func (c *AgentKubernetesContext) Validate() error {
+	return c.Validator().AsError()
 }
 
 // Agent represents the stored agent model.
@@ -237,38 +241,32 @@ func (c *CreateAgent) Validate() error {
 		return ErrInvalidAgentType
 	}
 
-	var errs []string
+	v := validator.New()
+
 	if c.OS == "" {
-		errs = append(errs, "os is required")
+		v.Add("os", "os is required")
 	}
 
 	if c.Arch == "" {
-		errs = append(errs, "arch is required")
+		v.Add("arch", "arch is required")
 	}
 
 	if c.Hostname == "" {
-		errs = append(errs, "hostname is required")
+		v.Add("hostname", "hostname is required")
 	}
 
 	if c.Version == "" {
-		errs = append(errs, "version is required")
-	}
-
-	ip := net.ParseIP(c.IP)
-	if ip == nil {
-		errs = append(errs, "invalid ip")
+		v.Add("version", "version is required")
 	}
 
 	if c.IP == "" {
-		errs = append(errs, "ip is required")
+		v.Add("ip", "ip is required")
+	} else if ip := net.ParseIP(c.IP); ip == nil {
+		v.Add("ip", "invalid ip")
 	}
 
 	if c.MachineID == "" {
-		errs = append(errs, "machine_id is required")
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("invalid agent: %s", join(errs))
+		v.Add("machine_id", "machine_id is required")
 	}
 
 	// Validate labels
@@ -280,26 +278,25 @@ func (c *CreateAgent) Validate() error {
 	switch c.Kind {
 	case AgentKindGithub:
 		if c.GithubContext == nil {
-			return errors.New("github context is required for github agents")
+			v.Add("github_context", "github context is required for github agents")
+		} else {
+			v.Join(c.GithubContext.Validator())
 		}
-		return c.GithubContext.Validate()
 	case AgentKindKubernetes:
 		if c.KubernetesContext == nil {
-			return errors.New("kubernetes context is required for kubernetes agents")
+			v.Add("kubernetes_context", "kubernetes context is required for kubernetes agents")
+		} else {
+			v.Join(c.KubernetesContext.Validator())
 		}
-		return c.KubernetesContext.Validate()
 	case AgentKindVanilla:
 		if c.VanillaContext == nil {
-			return errors.New("vanilla context is required for vanilla agents")
+			v.Add("vanilla_context", "vanilla context is required for vanilla agents")
+		} else {
+			v.Join(c.VanillaContext.Validator())
 		}
-		return c.VanillaContext.Validate()
 	}
 
-	if c.GithubContext == nil && c.KubernetesContext == nil && c.VanillaContext == nil {
-		return errors.New("at least one context is required")
-	}
-
-	return nil
+	return v.AsError()
 }
 
 // AgentCreated represents the response after creating an agent.
@@ -327,91 +324,68 @@ type UpdateAgent struct {
 func (a *UpdateAgent) Validate() error { //nolint:gocognit,gocyclo
 	if a.OS == nil && a.Arch == nil && a.Hostname == nil &&
 		a.Version == nil && a.IP == nil && a.MachineID == nil && a.Kind == nil {
-		return errors.New("at least one field is required")
+		return errs.InvalidArgumentError("at least one field is required")
 	}
 
-	var errs []string
+	v := validator.New()
 
 	if a.OS != nil && *a.OS == "" {
-		errs = append(errs, "os valid but empty")
+		v.Add("os", "os valid but empty")
 	}
 
 	if a.Arch != nil && *a.Arch == "" {
-		errs = append(errs, "arch valid but empty")
+		v.Add("arch", "arch valid but empty")
 	}
 
 	if a.Hostname != nil && *a.Hostname == "" {
-		errs = append(errs, "hostname valid but empty")
+		v.Add("hostname", "hostname valid but empty")
 	}
 
 	if a.Version != nil && *a.Version == "" {
-		errs = append(errs, "version valid but empty")
+		v.Add("version", "version valid but empty")
 	}
 
 	if a.IP != nil && *a.IP == "" {
-		errs = append(errs, "ip valid but empty")
+		v.Add("ip", "ip valid but empty")
 	} else if a.IP != nil {
 		ip := net.ParseIP(*a.IP)
 		if ip == nil {
-			errs = append(errs, "invalid ip format")
+			v.Add("ip", "invalid ip format")
 		}
 	}
 
 	if a.MachineID != nil && *a.MachineID == "" {
-		errs = append(errs, "machine_id valid but empty")
+		v.Add("machine_id", "machine_id valid but empty")
 	}
 
 	if a.Kind != nil {
 		if !a.Kind.IsValid() {
-			errs = append(errs, "invalid agent kind")
+			v.Add("kind", "invalid agent kind")
 		}
 
 		switch *a.Kind {
 		case AgentKindGithub:
 			if a.GithubContext == nil {
-				errs = append(errs, "github context is required")
-			} else if err := a.GithubContext.Validate(); err != nil {
-				errs = append(errs, "invalid github context: "+err.Error())
+				v.Add("github_context", "github context is required")
+			} else {
+				v.Join(a.GithubContext.Validator())
 			}
 		case AgentKindKubernetes:
 			if a.KubernetesContext == nil {
-				errs = append(errs, "kubernetes context is required")
-			} else if err := a.KubernetesContext.Validate(); err != nil {
-				errs = append(errs, "invalid kubernetes context: "+err.Error())
+				v.Add("kubernetes_context", "kubernetes context is required")
+			} else {
+				v.Join(a.KubernetesContext.Validator())
 			}
 		case AgentKindVanilla:
 			if a.VanillaContext == nil {
-				errs = append(errs, "vanilla context is required")
-			} else if err := a.VanillaContext.Validate(); err != nil {
-				errs = append(errs, "invalid vanilla context: "+err.Error())
+				v.Add("vanilla_context", "vanilla context is required")
+			} else {
+				v.Join(a.VanillaContext.Validator())
 			}
 		}
 	}
 
-	if len(errs) > 0 {
-		return fmt.Errorf("invalid update agent: %s", join(errs))
-	}
-
-	return nil
-}
-
-// Helper function to join error messages.
-func join(strs []string) string {
-	if len(strs) == 0 {
-		return ""
-	}
-
-	if len(strs) == 1 {
-		return strs[0]
-	}
-
-	var result strings.Builder
-	result.WriteString(strs[0])
-	for _, s := range strs[1:] {
-		result.WriteString("," + s)
-	}
-
-	return result.String()
+	return v.AsError()
 }
 
 type ListAgents struct {

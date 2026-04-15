@@ -1,8 +1,9 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/garnet-org/api/validator"
 )
 
 // AgentVanillaContext represents the context of a vanilla agent (plain linux for example).
@@ -14,20 +15,17 @@ type AgentVanillaContext struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Validate checks if the AgentVanillaContext has all required fields set.
-func (v *AgentVanillaContext) Validate() error {
-	var errs []string
+// Validator checks if the AgentVanillaContext has all required fields set.
+func (v *AgentVanillaContext) Validator() *validator.Validator {
+	validation := validator.New()
 
 	if v.Job == "" {
-		errs = append(errs, "job is required")
+		validation.Add("job", "job is required")
 	}
 
 	if v.RunnerOS == "" {
-		errs = append(errs, "runner_os is required")
+		validation.Add("runner_os", "runner_os is required")
 	}
 
-	if len(errs) > 0 {
-		return fmt.Errorf("validation errors: %v", errs)
-	}
-	return nil
+	return validation
 }

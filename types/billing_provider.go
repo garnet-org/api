@@ -53,12 +53,6 @@ type VerifiedPolarWebhook struct {
 	PolarPayload   json.RawMessage `json:"polarPayload"`
 }
 
-type CreatePolarWebhookEvent struct {
-	PolarEventID   string
-	PolarEventKind string
-	PolarPayload   json.RawMessage
-}
-
 type CreateBillingUsageOutboxItem struct {
 	ProjectID        string
 	MetricKey        string

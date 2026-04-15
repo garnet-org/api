@@ -1,8 +1,9 @@
 package types //nolint:revive // Package name is intentionally descriptive
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/garnet-org/api/validator"
 )
 
 // AgentGithubContext is the context of the event that happened in the GitHub.
@@ -37,32 +38,28 @@ type AgentGithubContext struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
-// Validate checks if the AgentGithubContext has all required fields set.
-func (g *AgentGithubContext) Validate() error {
-	var errs []string
+// Validator checks if the AgentGithubContext has all required fields set.
+func (g *AgentGithubContext) Validator() *validator.Validator {
+	v := validator.New()
 
 	if g.Job == "" {
-		errs = append(errs, "job is required")
+		v.Add("job", "job is required")
 	}
 
 	if g.RunID == "" {
-		errs = append(errs, "run_id is required")
+		v.Add("run_id", "run_id is required")
 	}
 
 	if g.Workflow == "" {
-		errs = append(errs, "workflow is required")
+		v.Add("workflow", "workflow is required")
 	}
 
 	// Validate repository information
 	if g.Repository == "" {
-		errs = append(errs, "repository is required")
+		v.Add("repository", "repository is required")
 	}
 
-	if len(errs) > 0 {
-		return fmt.Errorf("invalid github context: %s", join(errs))
-	}
-
-	return nil
+	return v
 }
 
 // GitHubContext is an alias for AgentGithubContext to maintain backwards compatibility.
