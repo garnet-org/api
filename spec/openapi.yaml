@@ -861,6 +861,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+        "403":
+          description: Profile limit exceeded for the current billing period
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Missing or invalid agent token
           content:
@@ -3574,6 +3580,173 @@ paths:
         "500":
           description: Internal server error
 
+  /api/v1/projects/{project_id}/billing:
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: Get billing status for a specific project
+      description: |
+        Retrieves the current billing plan, provider subscription state, billing window,
+        and metric usage for the specified project.
+      operationId: billingByPath
+      parameters:
+        - name: project_id
+          in: path
+          description: Project ID to get billing status for
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Project billing status found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Billing"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Project or billing account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+
+  /api/v1/projects/{project_id}/billing/checkout:
+    post:
+      security:
+        - UserTokenAuth: []
+      summary: Create a billing checkout session for a specific project
+      description: |
+        Creates a provider checkout session to start or renew the paid subscription
+        for the specified project.
+      operationId: createBillingCheckoutByPath
+      parameters:
+        - name: project_id
+          in: path
+          description: Project ID to create a billing checkout for
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillingCheckoutCreate"
+      responses:
+        "201":
+          description: Billing checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingCheckoutSession"
+        "422":
+          description: Billing checkout validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Project already has an active paid subscription or billing is bypassed for this project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+
+  /api/v1/projects/{project_id}/billing/portal:
+    post:
+      security:
+        - UserTokenAuth: []
+      summary: Create a billing portal session for a specific project
+      description: |
+        Creates a provider customer portal session for the specified project.
+      operationId: createBillingPortalByPath
+      parameters:
+        - name: project_id
+          in: path
+          description: Project ID to create a billing portal session for
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillingPortalCreate"
+      responses:
+        "201":
+          description: Billing portal session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingPortalSession"
+        "422":
+          description: Billing portal validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Billing customer is not available for this project or billing is bypassed for this project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+
+  /api/v1/payments/polar/webhook:
+    post:
+      security: []
+      summary: Receive Polar billing webhooks
+      description: |
+        Receives Polar webhook events, verifies their signature, persists them idempotently,
+        and reconciles project billing state.
+      operationId: handlePolarBillingWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "202":
+          description: Webhook accepted
+        "401":
+          description: Invalid webhook signature
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+
   /api/v1/projects/{project_id}/tokens:
     post:
       security:
@@ -4628,6 +4801,22 @@ components:
         error:
           type: string
           example: "invalid event kind"
+
+    ValidationError:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+          example: There were validation errors
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
 
     # Project Setting Error Types
     InvalidProjectSettingKey:
@@ -6717,6 +6906,158 @@ components:
           type: integer
         workflow_count:
           type: integer
+
+    BillingMetricDetails:
+      type: object
+      required:
+        - key
+        - displayName
+        - aggregation
+        - includedQuantity
+        - usedQuantity
+        - remainingQuantity
+        - overageUnitAmountCents
+        - currency
+        - isEnforced
+      properties:
+        key:
+          type: string
+        displayName:
+          type: string
+        aggregation:
+          type: string
+        includedQuantity:
+          type: integer
+          format: int64
+        usedQuantity:
+          type: integer
+          format: int64
+        remainingQuantity:
+          type: integer
+          format: int64
+        overageUnitAmountCents:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        isEnforced:
+          type: boolean
+
+    BillingMetrics:
+      type: object
+      required:
+        - profileRuns
+      properties:
+        profileRuns:
+          $ref: "#/components/schemas/BillingMetricDetails"
+
+    Billing:
+      type: object
+      required:
+        - projectID
+        - provider
+        - plan
+        - polarStatus
+        - externalCustomerID
+        - polarCustomerID
+        - polarSubscriptionID
+        - polarProductID
+        - currentPeriodStart
+        - currentPeriodEnd
+        - cancelAtPeriodEnd
+        - canceledAt
+        - metrics
+      properties:
+        projectID:
+          type: string
+          format: uuid
+        provider:
+          type: string
+          example: polar
+        plan:
+          type: string
+          enum:
+            - free
+            - bypassed
+            - paid
+        polarStatus:
+          type: string
+          nullable: true
+        externalCustomerID:
+          type: string
+        polarCustomerID:
+          type: string
+          nullable: true
+        polarSubscriptionID:
+          type: string
+          nullable: true
+        polarProductID:
+          type: string
+          nullable: true
+        currentPeriodStart:
+          type: string
+          format: date-time
+        currentPeriodEnd:
+          type: string
+          format: date-time
+        cancelAtPeriodEnd:
+          type: boolean
+        canceledAt:
+          type: string
+          format: date-time
+          nullable: true
+        metrics:
+          $ref: "#/components/schemas/BillingMetrics"
+
+    BillingCheckoutCreate:
+      type: object
+      required:
+        - successURL
+      properties:
+        successURL:
+          type: string
+          format: uri
+        returnURL:
+          type: string
+          format: uri
+          nullable: true
+        locale:
+          type: string
+          nullable: true
+
+    BillingCheckoutSession:
+      type: object
+      required:
+        - url
+        - expiresAt
+      properties:
+        url:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+
+    BillingPortalCreate:
+      type: object
+      properties:
+        returnURL:
+          type: string
+          format: uri
+          nullable: true
+
+    BillingPortalSession:
+      type: object
+      required:
+        - url
+        - expiresAt
+      properties:
+        url:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
 
     ProjectSetting:
       type: object
