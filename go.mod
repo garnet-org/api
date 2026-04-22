@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/garnet-org/jibril-ashkaal v1.2.1
 	github.com/google/uuid v1.6.0
-	k8s.io/apimachinery v0.35.3
+	k8s.io/apimachinery v0.35.4
 )
 
 require (
