@@ -695,14 +695,16 @@ paths:
             $ref: "#/components/schemas/AshkaalKind"
         - name: filter.kinds
           in: query
-          description: Filter events by ashkaal kinds. Multiple values can be provided to filter by any of the specified kinds.
+          description: Filter events by ashkaal kinds. Multiple values can be provided to
+            filter by any of the specified kinds.
           schema:
             type: array
             items:
               $ref: "#/components/schemas/AshkaalKind"
         - name: filter.metadata.name
           in: query
-          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          description: Filter events by metadata name. Multiple values can be provided to
+            filter by any of the specified metadata names.
           required: false
           style: form
           explode: true
@@ -1090,6 +1092,162 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/profiles/{profileID}/links:
+    parameters:
+      - name: profileID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      security:
+        - UserTokenAuth: []
+      summary: Create a profile link
+      description: |
+        Creates a new shareable link for the specified profile.
+      operationId: createProfileLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProfileLink"
+      responses:
+        "201":
+          description: Profile link created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatedProfileLink"
+        default:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: List profile links
+      description: |
+        Returns an offset-paginated list of links for the specified profile.
+      operationId: listProfileLinks
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: Profile links retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileLinkPage"
+        default:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/profile_links/{linkID}:
+    parameters:
+      - name: linkID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      security:
+        - UserTokenAuth: []
+      summary: Get a profile link by ID
+      description: |
+        Returns a single profile link by its ID.
+      operationId: getProfileLink
+      responses:
+        "200":
+          description: Profile link retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileLink"
+        default:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      security:
+        - UserTokenAuth: []
+      summary: Update a profile link
+      description: |
+        Updates profile link fields such as description, expiration, or revocation state.
+      operationId: updateProfileLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileLink"
+      responses:
+        "200":
+          description: Profile link updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileLink"
+        default:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - UserTokenAuth: []
+      summary: Delete a profile link
+      description: |
+        Deletes the specified profile link.
+      operationId: deleteProfileLink
+      responses:
+        "204":
+          description: Profile link deleted successfully
+        default:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/public_profiles/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      security: []
+      summary: Get a public profile by link token
+      description: |
+        Resolves a public profile link token and returns the linked profile.
+      operationId: publicProfile
+      responses:
+        "200":
+          description: Public profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        default:
+          description: Internal server error
           content:
             application/json:
               schema:
@@ -2187,7 +2345,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: ["jibril"]
+            enum: [ "jibril" ]
       responses:
         "200":
           description: Merged network policy
@@ -2237,7 +2395,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: ["jibril"]
+            enum: [ "jibril" ]
       responses:
         "200":
           description: Merged network policy for Kubernetes context
@@ -2828,7 +2986,8 @@ paths:
             $ref: "#/components/schemas/AshkaalKind"
         - name: filter.metadata.name
           in: query
-          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          description: Filter events by metadata name. Multiple values can be provided to
+            filter by any of the specified metadata names.
           required: false
           style: form
           explode: true
@@ -2921,7 +3080,8 @@ paths:
             format: uuid
         - name: kinds
           in: query
-          description: Filter events by ashkaal kinds. Multiple values can be provided to filter by any of the specified kinds.
+          description: Filter events by ashkaal kinds. Multiple values can be provided to
+            filter by any of the specified kinds.
           required: false
           style: form
           explode: true
@@ -2931,7 +3091,8 @@ paths:
               $ref: "#/components/schemas/AshkaalKind"
         - name: names
           in: query
-          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          description: Filter events by metadata name. Multiple values can be provided to
+            filter by any of the specified metadata names.
           required: false
           style: form
           explode: true
@@ -2941,7 +3102,8 @@ paths:
               $ref: "#/components/schemas/MetadataName"
         - name: kubernetes_clusters
           in: query
-          description: Filter events by Kubernetes cluster name. Multiple values can be provided.
+          description: Filter events by Kubernetes cluster name. Multiple values can be
+            provided.
           required: false
           style: form
           explode: true
@@ -2951,7 +3113,8 @@ paths:
               type: string
         - name: kubernetes_namespaces
           in: query
-          description: Filter events by Kubernetes namespace. Multiple values can be provided.
+          description: Filter events by Kubernetes namespace. Multiple values can be
+            provided.
           required: false
           style: form
           explode: true
@@ -2961,7 +3124,8 @@ paths:
               type: string
         - name: kubernetes_nodes
           in: query
-          description: Filter events by Kubernetes node name. Multiple values can be provided.
+          description: Filter events by Kubernetes node name. Multiple values can be
+            provided.
           required: false
           style: form
           explode: true
@@ -3049,7 +3213,8 @@ paths:
       parameters:
         - name: kinds
           in: query
-          description: Filter events by ashkaal kinds. Multiple values can be provided to filter by any of the specified kinds.
+          description: Filter events by ashkaal kinds. Multiple values can be provided to
+            filter by any of the specified kinds.
           required: false
           style: form
           explode: true
@@ -3059,7 +3224,8 @@ paths:
               $ref: "#/components/schemas/AshkaalKind"
         - name: names
           in: query
-          description: Filter events by metadata name. Multiple values can be provided to filter by any of the specified metadata names.
+          description: Filter events by metadata name. Multiple values can be provided to
+            filter by any of the specified metadata names.
           required: false
           style: form
           explode: true
@@ -3069,7 +3235,8 @@ paths:
               $ref: "#/components/schemas/MetadataName"
         - name: kubernetes_clusters
           in: query
-          description: Filter events by Kubernetes cluster name. Multiple values can be provided.
+          description: Filter events by Kubernetes cluster name. Multiple values can be
+            provided.
           required: false
           style: form
           explode: true
@@ -3079,7 +3246,8 @@ paths:
               type: string
         - name: kubernetes_namespaces
           in: query
-          description: Filter events by Kubernetes namespace. Multiple values can be provided.
+          description: Filter events by Kubernetes namespace. Multiple values can be
+            provided.
           required: false
           style: form
           explode: true
@@ -3089,7 +3257,8 @@ paths:
               type: string
         - name: kubernetes_nodes
           in: query
-          description: Filter events by Kubernetes node name. Multiple values can be provided.
+          description: Filter events by Kubernetes node name. Multiple values can be
+            provided.
           required: false
           style: form
           explode: true
@@ -3662,7 +3831,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "409":
-          description: Project already has an active paid subscription or billing is bypassed for this project
+          description: Project already has an active paid subscription or billing is
+            bypassed for this project
           content:
             application/json:
               schema:
@@ -3712,7 +3882,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
         "409":
-          description: Billing customer is not available for this project or billing is bypassed for this project
+          description: Billing customer is not available for this project or billing is
+            bypassed for this project
           content:
             application/json:
               schema:
@@ -4422,7 +4593,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: ["jibril"]
+            enum: [ "jibril" ]
       responses:
         "200":
           description: Merged network policy for the specified project
@@ -4492,7 +4663,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: ["jibril"]
+            enum: [ "jibril" ]
       responses:
         "200":
           description: Merged network policy for Kubernetes context
@@ -4764,7 +4935,8 @@ components:
         format: int32
         minimum: 0
         default: 10
-        description: Maximum number of items to return per page. Use 0 to return all items without pagination.
+        description: Maximum number of items to return per page. Use 0 to return all
+          items without pagination.
         example: 10
 
   securitySchemes:
@@ -4772,13 +4944,15 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT Bearer token obtained through Auth0 authentication for user authorization
+      description: JWT Bearer token obtained through Auth0 authentication for user
+        authorization
 
     UserTokenAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT Bearer token obtained through Auth0 authentication with role-based permissions
+      description: JWT Bearer token obtained through Auth0 authentication with
+        role-based permissions
 
     AgentTokenAuth:
       type: apiKey
@@ -4827,7 +5001,7 @@ components:
       properties:
         error:
           type: string
-          enum: ["invalid project setting key"]
+          enum: [ "invalid project setting key" ]
 
     InvalidProjectSettingValue:
       type: object
@@ -4837,7 +5011,7 @@ components:
       properties:
         error:
           type: string
-          enum: ["invalid project setting value"]
+          enum: [ "invalid project setting value" ]
 
     ProjectSettingNotFound:
       type: object
@@ -4847,7 +5021,7 @@ components:
       properties:
         error:
           type: string
-          enum: ["project setting not found"]
+          enum: [ "project setting not found" ]
 
     UnauthorizedProjectSetting:
       type: object
@@ -4857,7 +5031,7 @@ components:
       properties:
         error:
           type: string
-          enum: ["permission denied for project setting"]
+          enum: [ "permission denied for project setting" ]
 
     # Issue Class Error Types
     InvalidIssueClass:
@@ -4868,11 +5042,11 @@ components:
       properties:
         error:
           type: string
-          enum: ["invalid issue class"]
+          enum: [ "invalid issue class" ]
 
     Permission:
       type: string
-      enum: [create, read, update, delete, list]
+      enum: [ create, read, update, delete, list ]
       description: |
         A permission that can be assigned to a token or role.
         - create: Allows creating new resources
@@ -4993,7 +5167,7 @@ components:
             A user cannot create a token with permissions they don't have themselves.
           items:
             $ref: "#/components/schemas/Permission"
-          example: ["read", "list"]
+          example: [ "read", "list" ]
 
     TokenCreated:
       type: object
@@ -5050,7 +5224,7 @@ components:
             A user cannot update a token to have permissions they don't have themselves.
           items:
             $ref: "#/components/schemas/Permission"
-          example: ["read", "list"]
+          example: [ "read", "list" ]
 
     TokenUpdated:
       type: object
@@ -5080,7 +5254,8 @@ components:
 
     PermissionDeniedError:
       type: object
-      description: Error returned when a user attempts to perform an action they don't have permission for
+      description: Error returned when a user attempts to perform an action they don't
+        have permission for
       allOf:
         - $ref: "#/components/schemas/AuthorizationError"
       properties:
@@ -5133,7 +5308,8 @@ components:
 
     EventV2CreatedOrUpdated:
       type: object
-      description: Response returned when a v2 event (ashkaal format) is successfully created or updated
+      description: Response returned when a v2 event (ashkaal format) is successfully
+        created or updated
       properties:
         id:
           type: string
@@ -5165,7 +5341,8 @@ components:
           description: Type of ashkaal event (flows, detections, infos, netpolicy)
         data:
           $ref: "#/components/schemas/AshkaalBase"
-          description: Ashkaal ongoing Base structure containing event metadata and background data
+          description: Ashkaal ongoing Base structure containing event metadata and
+            background data
 
     EventV2:
       type: object
@@ -5191,7 +5368,8 @@ components:
           description: Type of ashkaal event (flows, detections, infos, netpolicy)
         data:
           $ref: "#/components/schemas/AshkaalBase"
-          description: Ashkaal ongoing Base structure containing event metadata and background data
+          description: Ashkaal ongoing Base structure containing event metadata and
+            background data
         created_at:
           type: string
           format: date-time
@@ -5252,6 +5430,114 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    CreateProfileLink:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 255
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreatedProfileLink:
+      type: object
+      required:
+        - id
+        - createdAt
+        - plainTextToken
+      properties:
+        id:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        plainTextToken:
+          type: string
+
+    UpdateProfileLink:
+      type: object
+      properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 255
+        clearDescription:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        clearExpiresAt:
+          type: boolean
+        revoke:
+          type: boolean
+
+    ProfileLink:
+      type: object
+      required:
+        - id
+        - profileID
+        - description
+        - createdBy
+        - createdAt
+        - updatedAt
+        - usageCount
+        - expiresAt
+        - lastUsedAt
+        - revokedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        profileID:
+          type: string
+          format: uuid
+        description:
+          type: string
+          nullable: true
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        usageCount:
+          type: integer
+          format: int64
+          minimum: 0
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ProfileLinkPage:
+      type: object
+      required:
+        - data
+        - paginatorInfo
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileLink"
+        paginatorInfo:
+          $ref: "#/components/schemas/PaginatorInfo"
 
     ProfilePage:
       type: object
@@ -5784,7 +6070,8 @@ components:
           description: Kubernetes-specific context (present when kind is kubernetes)
         active:
           type: boolean
-          description: Whether the agent is currently active (dynamically calculated based on last_seen timestamp)
+          description: Whether the agent is currently active (dynamically calculated based
+            on last_seen timestamp)
         last_seen:
           type: string
           format: date-time
@@ -5890,7 +6177,9 @@ components:
           description: Unique identifier for the agent.
         agent_token:
           type: string
-          description: JWT token to be used for agent authentication. This token should be passed in the X-Agent-Token header for authenticated agent operations like event ingestion.
+          description: JWT token to be used for agent authentication. This token should be
+            passed in the X-Agent-Token header for authenticated agent
+            operations like event ingestion.
 
     Page:
       type: object
@@ -6092,7 +6381,8 @@ components:
           description: Unique identifier for the issue
         class:
           $ref: "#/components/schemas/IssueClass"
-          description: Classification of the issue (e.g., network_exfiltration, crypto_miner)
+          description: Classification of the issue (e.g., network_exfiltration,
+            crypto_miner)
         description:
           type: string
           description: Human-readable description of the issue
@@ -6188,7 +6478,8 @@ components:
         event_ids:
           type: array
           minItems: 1
-          description: Array of event IDs to associate with this issue (at least one is required)
+          description: Array of event IDs to associate with this issue (at least one is
+            required)
           items:
             type: string
             format: uuid
@@ -6224,7 +6515,9 @@ components:
           nullable: true
         event_ids:
           type: array
-          description: Array of event IDs to associate with this issue. If provided, it cannot be empty as issues must always have at least one event. If not provided, existing events will remain unchanged.
+          description: Array of event IDs to associate with this issue. If provided, it
+            cannot be empty as issues must always have at least one event. If
+            not provided, existing events will remain unchanged.
           minItems: 1
           items:
             type: string
@@ -6378,7 +6671,11 @@ components:
         - workflow
         - cluster
         - node
-      description: Scope level of the network policy. Global scope applies to all contexts, repo scope applies to specific repositories, workflow scope applies to specific CI/CD workflows, cluster scope applies to specific Kubernetes clusters, and node scope applies to specific Kubernetes nodes.
+      description: Scope level of the network policy. Global scope applies to all
+        contexts, repo scope applies to specific repositories, workflow scope
+        applies to specific CI/CD workflows, cluster scope applies to specific
+        Kubernetes clusters, and node scope applies to specific Kubernetes
+        nodes.
 
     NetworkPolicyType:
       type: string
@@ -6653,19 +6950,19 @@ components:
           properties:
             cidr_mode:
               type: string
-              enum: [both, alert, enforce, bypass]
+              enum: [ both, alert, enforce, bypass ]
               description: CIDR mode in Jibril format (both, alert, enforce, bypass)
             cidr_policy:
               type: string
-              enum: [allow, deny]
+              enum: [ allow, deny ]
               description: CIDR policy type
             resolve_mode:
               type: string
-              enum: [both, alert, enforce, bypass]
+              enum: [ both, alert, enforce, bypass ]
               description: Resolve mode in Jibril format (both, alert, enforce, bypass)
             resolve_policy:
               type: string
-              enum: [allow, deny]
+              enum: [ allow, deny ]
               description: Resolve policy type
             rules:
               type: array
@@ -6678,9 +6975,9 @@ components:
                         description: CIDR rule value
                       policy:
                         type: string
-                        enum: [allow, deny]
+                        enum: [ allow, deny ]
                         description: Rule action
-                    required: [cidr, policy]
+                    required: [ cidr, policy ]
                   - type: object
                     properties:
                       domain:
@@ -6688,9 +6985,9 @@ components:
                         description: Domain rule value
                       policy:
                         type: string
-                        enum: [allow, deny]
+                        enum: [ allow, deny ]
                         description: Rule action
-                    required: [domain, policy]
+                    required: [ domain, policy ]
 
     WebhookCreate:
       type: object
@@ -7077,7 +7374,8 @@ components:
           description: Unique identifier for the project setting
         key:
           type: string
-          description: The setting key, which determines what aspect of the project is being configured
+          description: The setting key, which determines what aspect of the project is
+            being configured
           example: "webhook_enabled_issue_classes"
         value:
           type: object
@@ -7110,7 +7408,7 @@ components:
           description: |
             The setting value, which must be a valid JSON value.
             The structure depends on the key being set.
-          example: { "classes": ["network_exfiltration", "crypto_miner"] }
+          example: { "classes": [ "network_exfiltration", "crypto_miner" ] }
 
     ProjectSettingUpdate:
       type: object
@@ -7124,7 +7422,7 @@ components:
           description: |
             The new setting value, which must be a valid JSON value.
             The structure depends on the key being updated.
-          example: { "classes": ["network_exfiltration"] }
+          example: { "classes": [ "network_exfiltration" ] }
 
     ProjectSettingCreated:
       type: object
@@ -7255,4 +7553,4 @@ components:
             - empty array: No classes are enabled
           items:
             $ref: "#/components/schemas/IssueClass"
-          example: ["network_exfiltration", "crypto_miner"]
+          example: [ "network_exfiltration", "crypto_miner" ]
