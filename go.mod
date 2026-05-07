@@ -3,7 +3,7 @@ module github.com/garnet-org/api
 go 1.26.0
 
 require (
-	github.com/garnet-org/jibril-ashkaal v1.2.1
+	github.com/garnet-org/jibril-ashkaal v1.3.0
 	github.com/google/uuid v1.6.0
 	k8s.io/apimachinery v0.36.0
 )
@@ -21,7 +21,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260505163821-33341827b392 // indirect
-	k8s.io/utils v0.0.0-20260319190234-28399d86e0b5 // indirect
+	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.0 // indirect
