@@ -688,6 +688,7 @@ components:
           $ref: "#/components/schemas/AshkaalDirection"
       type: object
     AshkaalNetTelemetry:
+      nullable: true
       properties:
         egress:
           $ref: "#/components/schemas/AshkaalDirectionNetTelemetry"
@@ -695,10 +696,6 @@ components:
           $ref: "#/components/schemas/AshkaalDirectionNetTelemetry"
         local:
           $ref: "#/components/schemas/AshkaalDirectionNetTelemetry"
-      required:
-        - egress
-        - ingress
-        - local
       type: object
     AshkaalNode:
       properties:
@@ -906,6 +903,7 @@ components:
         - uuid
       type: object
     AshkaalProfile:
+      nullable: true
       properties:
         assertions:
           items:
@@ -936,8 +934,6 @@ components:
           type: string
         uuid:
           type: string
-      required:
-        - telemetry
       type: object
     AshkaalProfileDetection:
       properties:
@@ -1171,6 +1167,6 @@ components:
       type: object
 info:
   title: Ashkaal Types
-  version: 1.3.0
+  version: 1.3.1
 openapi: 3.0.3
 paths: {}
