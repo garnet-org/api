@@ -31,9 +31,6 @@ const (
 
 	// ErrMissingUpdateField is returned when no fields are provided for update.
 	ErrMissingUpdateField = errs.InvalidArgumentError("at least one field to update is required")
-
-	// ErrUnauthorizedRole is returned when the user does not have permission for the role.
-	ErrUnauthorizedRole = errs.UnauthorizedError("permission denied")
 )
 
 // Permission defines a permission string type.
@@ -55,6 +52,10 @@ const (
 	// PermList is a permission to list resources.
 	PermList Permission = "list"
 )
+
+func AllPermissions() []Permission {
+	return []Permission{PermCreate, PermRead, PermUpdate, PermDelete, PermList}
+}
 
 // Resource defines a resource type that can be protected.
 type Resource string
@@ -252,9 +253,4 @@ func PredefinedRoles(_ string) struct {
 			Predefined:  true,
 		},
 	}
-}
-
-// AllPermissions returns all available permissions.
-func AllPermissions() []Permission {
-	return []Permission{PermCreate, PermRead, PermUpdate, PermDelete, PermList}
 }

@@ -12,8 +12,7 @@ import (
 const MaxProfileLinkDescriptionLength = 255
 
 var (
-	ErrProfileLinkNotFound           = errs.NotFoundError("profile link not found")
-	ErrUnauthorizedProfileLinkAccess = errs.UnauthorizedError("permission denied for profile link access")
+	ErrProfileLinkNotFound = errs.NotFoundError("profile link not found")
 )
 
 type ProfileLink struct {
@@ -82,6 +81,7 @@ type CreatedProfileLink struct {
 }
 
 type UpdateProfileLink struct {
+	LinkID           string     `json:"-"`
 	Description      *string    `json:"description"`
 	ClearDescription bool       `json:"clearDescription"`
 	ExpiresAt        *time.Time `json:"expiresAt"`
@@ -91,6 +91,11 @@ type UpdateProfileLink struct {
 
 func (in *UpdateProfileLink) Validate() error {
 	v := validator.New()
+
+	if !id.Valid(in.LinkID) {
+		v.Add("linkID", "invalid linkID format")
+	}
+
 	hasDescription := in.Description != nil
 
 	if !hasDescription && !in.ClearDescription && in.ExpiresAt == nil && !in.ClearExpiresAt && !in.Revoke {

@@ -6,6 +6,8 @@ components:
           type: string
         class_id:
           type: string
+        description:
+          type: string
         evidence:
           items:
             $ref: "#/components/schemas/AshkaalEvidence"
@@ -63,6 +65,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/AshkaalBackgroundValue"
       nullable: true
+      type: object
     AshkaalBackgroundValue:
       properties:
         ancestry:
@@ -88,6 +91,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/AshkaalBaseValue"
       nullable: true
+      type: object
     AshkaalBaseValue:
       properties:
         attenuator:
@@ -610,6 +614,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/AshkaalMetadataValue"
       nullable: true
+      type: object
     AshkaalMetadataValue:
       properties:
         description:
@@ -786,6 +791,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/AshkaalProcessValue"
       nullable: true
+      type: object
     AshkaalProcessTree:
       properties:
         ancestry:

@@ -15,11 +15,10 @@ const (
 
 // Project token error constants.
 const (
-	ErrInvalidTokenName        = errs.InvalidArgumentError("invalid token name")
-	ErrTokenNameTooLong        = errs.InvalidArgumentError("token name exceeds maximum length")
-	ErrTokenNotFound           = errs.NotFoundError("token not found")
-	ErrTokenExists             = errs.ConflictError("token already exists")
-	ErrUnauthorizedTokenAccess = errs.UnauthorizedError("permission denied for token access")
+	ErrInvalidTokenName = errs.InvalidArgumentError("invalid token name")
+	ErrTokenNameTooLong = errs.InvalidArgumentError("token name exceeds maximum length")
+	ErrTokenNotFound    = errs.NotFoundError("token not found")
+	ErrTokenExists      = errs.ConflictError("token already exists")
 )
 
 // Token represents a project API token.
@@ -38,9 +37,9 @@ type Token struct {
 
 // CreateToken represents the request to create a new token.
 type CreateToken struct {
+	ProjectID   string       `json:"-"`
 	Name        string       `json:"name"`
 	Permissions []Permission `json:"permissions"`
-	ProjectID   string       `json:"-"` // Populated by the service layer, not exposed in API
 	UserID      string       `json:"-"` // Populated by the service layer, not exposed in API
 	Hash        string       `json:"-"` // Hash of the JWT token, populated by the service layer
 }
@@ -123,6 +122,6 @@ type TokenUpdated struct {
 
 // ListTokens represents the request to list tokens.
 type ListTokens struct {
+	ProjectID string   `json:"-"`
 	PageArgs  PageArgs `json:"-"` // For pagination
-	ProjectID string   `json:"-"` // Populated by the service layer
 }

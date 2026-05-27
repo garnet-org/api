@@ -7,7 +7,7 @@ import (
 	"github.com/garnet-org/api/types/errs"
 )
 
-var ErrInvalidPolarWebhookSignature = errs.UnauthorizedError("invalid polar webhook signature")
+const ErrInvalidPolarWebhookSignature = errs.PermissionDeniedError("invalid polar webhook signature")
 
 type BillingCheckout struct {
 	ProductID          string                  `json:"productID"`

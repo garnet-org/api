@@ -11,9 +11,6 @@ var (
 	// ErrWebhookNotFound returns when a webhook is not found.
 	ErrWebhookNotFound = errs.NotFoundError("webhook not found")
 
-	// ErrUnauthorizedWebhookAccess returns when there is an unauthorized access to a webhook.
-	ErrUnauthorizedWebhookAccess = errs.UnauthorizedError("permission denied for webhook access")
-
 	// ErrWebHookInvalidKind returns when a webhook already exists.
 	ErrWebHookInvalidKind = errs.InvalidArgumentError("invalid webhook kind")
 )
@@ -43,9 +40,11 @@ const (
 
 // WebhookCreate represents a webhook configuration.
 type WebhookCreate struct {
-	Kind WebhookKind `json:"kind"`
-	Name string      `json:"name"`
-	URL  string      `json:"url"`
+	// ProjectID might be empty.
+	ProjectID string      `json:"project_id"`
+	Kind      WebhookKind `json:"kind"`
+	Name      string      `json:"name"`
+	URL       string      `json:"url"`
 }
 
 func isValidURL(testURL string) bool {
@@ -92,6 +91,8 @@ type WebhookCreated struct {
 
 // WebhookList represents a list of webhooks.
 type WebhookList struct {
+	// ProjectID might be empty.
+	ProjectID string `json:"-"`
 	PageArgs
 }
 

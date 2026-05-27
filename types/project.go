@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	// ErrUnauthorizedProject is returned when a user does not have permission to access a project.
-	ErrUnauthorizedProject = errs.UnauthorizedError("permission denied")
 
 	// ErrInvalidProjectName is returned when the project name is invalid.
 	ErrInvalidProjectName = errs.InvalidArgumentError("invalid project name")

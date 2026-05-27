@@ -523,7 +523,8 @@ func (in *ListEvents) Validate() error {
 // LegacyListEvents uses offset pagination.
 // Deprecated: use [ListEvents].
 type LegacyListEvents struct {
-	ProjectID string                   `json:"-"` // Set internally from context
+	// ProjectID might be empty.
+	ProjectID string                   `json:"-"`
 	Filters   *LegacyListEventsFilters `json:"filters"`
 	PageArgs  PageArgs                 `json:"pageArgs"`
 	Sort      *Sort                    `json:"sort,omitempty"`

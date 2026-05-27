@@ -6,7 +6,9 @@ import (
 	"net"
 	"time"
 
+	"github.com/garnet-org/api/id"
 	"github.com/garnet-org/api/types/errs"
+	"github.com/garnet-org/api/validator"
 )
 
 // PolicyFormat represents the output format for merged network policies.
@@ -60,9 +62,6 @@ const (
 	// ErrInvalidNetworkPolicyRuleID is returned when the rule ID is invalid or missing.
 	ErrInvalidNetworkPolicyRuleID = errs.InvalidArgumentError("invalid network policy rule ID")
 
-	// ErrUnauthorizedNetworkPolicy is returned when a user attempts to modify or view a policy without proper permissions.
-	ErrUnauthorizedNetworkPolicy = errs.UnauthorizedError("permission denied")
-
 	// ErrNetworkPolicyNotFound is returned when the specified network policy could not be found.
 	ErrNetworkPolicyNotFound = errs.NotFoundError("network policy not found")
 
@@ -75,6 +74,28 @@ const (
 	// ErrNetworkPolicyRuleAlreadyExists is returned when a rule already exists in the policy and duplicates are not allowed.
 	ErrNetworkPolicyRuleAlreadyExists = errs.ConflictError("network policy rule already exists")
 )
+
+type ListNetworkPolicies struct {
+	// ProjectID might be empty.
+	ProjectID string
+	Scope     NetworkPolicyScope
+}
+
+func (in *ListNetworkPolicies) Validate() error {
+	v := validator.New()
+
+	if in.ProjectID != "" {
+		if !id.Valid(in.ProjectID) {
+			v.Add("project_id", "invalid project id")
+		}
+	}
+
+	if !in.Scope.IsValid() {
+		v.Add("scope", "invalid network policy scope")
+	}
+
+	return v.AsError()
+}
 
 // NetworkPolicyScope represents the possible scopes of a network policy.
 type NetworkPolicyScope string
@@ -353,7 +374,7 @@ func (c *NetworkPolicyConfig) Scan(value any) error {
 // NetworkPolicy represents the base network policy model.
 type NetworkPolicy struct {
 	ID        string              `json:"id"`
-	ProjectID string              `json:"-"` // Not exposed in API
+	ProjectID *string             `json:"-"`
 	Scope     NetworkPolicyScope  `json:"scope"`
 	Config    NetworkPolicyConfig `json:"config"`
 	Rules     []NetworkPolicyRule `json:"rules"`
@@ -396,12 +417,61 @@ type ClusterNetworkPolicy struct {
 	ClusterName string `json:"cluster_name"`
 }
 
+type RetrieveClusterNetworkPolicy struct {
+	// ProjectID might be empty.
+	ProjectID   string
+	ClusterName string
+}
+
+func (in *RetrieveClusterNetworkPolicy) Validate() error {
+	v := validator.New()
+
+	if in.ProjectID != "" {
+		if !id.Valid(in.ProjectID) {
+			v.Add("project_id", "invalid project id")
+		}
+	}
+
+	if in.ClusterName == "" {
+		v.Add("cluster_name", "cluster name is required")
+	}
+
+	return v.AsError()
+}
+
 // NodeNetworkPolicy represents a network policy with Kubernetes node scope.
 type NodeNetworkPolicy struct {
 	NetworkPolicy
 
 	ClusterName string `json:"cluster_name"`
 	NodeName    string `json:"node_name"`
+}
+
+type RetrieveNodeNetworkPolicy struct {
+	// ProjectID might be empty.
+	ProjectID   string
+	ClusterName string
+	NodeName    string
+}
+
+func (in *RetrieveNodeNetworkPolicy) Validate() error {
+	v := validator.New()
+
+	if in.ProjectID != "" {
+		if !id.Valid(in.ProjectID) {
+			v.Add("project_id", "invalid project id")
+		}
+	}
+
+	if in.ClusterName == "" {
+		v.Add("cluster_name", "cluster name is required")
+	}
+
+	if in.NodeName == "" {
+		v.Add("node_name", "node name is required")
+	}
+
+	return v.AsError()
 }
 
 // MergedNetworkPolicy represents a network policy that combines all applicable policies.
@@ -430,6 +500,20 @@ type MergedNetworkPolicy struct {
 	NodePolicy    *NodeNetworkPolicy    `json:"node_policy,omitempty"`
 }
 
+type RetrieveMergedNetworkPolicyGithub struct {
+	// ProjectID might be empty.
+	ProjectID    string
+	RepositoryID string
+	WorkflowName string
+}
+
+type RetrieveMergedNetworkPolicyForK8s struct {
+	// ProjectID might be empty.
+	ProjectID   string
+	ClusterName string
+	NodeName    string
+}
+
 // CreateNetworkPolicy represents the request to create a new network policy.
 type CreateNetworkPolicy struct {
 	Scope  NetworkPolicyScope        `json:"scope"`
@@ -444,6 +528,7 @@ type CreateNetworkPolicy struct {
 	ClusterName string `json:"cluster_name,omitempty"`
 	NodeName    string `json:"node_name,omitempty"`
 
+	// ProjectID might be empty.
 	ProjectID string `json:"-"` // Populated by the service layer, not exposed in API
 }
 

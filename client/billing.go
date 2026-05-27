@@ -13,14 +13,14 @@ func (c *Client) Billing(ctx context.Context, projectID string) (types.Billing, 
 	return out, c.do(ctx, &out, "GET", path, nil)
 }
 
-func (c *Client) CreateBillingCheckout(ctx context.Context, projectID string, in types.BillingCheckoutCreate) (types.BillingSession, error) {
+func (c *Client) CreateBillingCheckout(ctx context.Context, in types.BillingCheckoutCreate) (types.BillingSession, error) {
 	var out types.BillingSession
-	path := "/api/v1/projects/" + url.PathEscape(projectID) + "/billing/checkout"
+	path := "/api/v1/projects/" + url.PathEscape(in.ProjectID) + "/billing/checkout"
 	return out, c.do(ctx, &out, "POST", path, in)
 }
 
-func (c *Client) CreateBillingPortal(ctx context.Context, projectID string, in types.BillingPortalCreate) (types.BillingSession, error) {
+func (c *Client) CreateBillingPortal(ctx context.Context, in types.BillingPortalCreate) (types.BillingSession, error) {
 	var out types.BillingSession
-	path := "/api/v1/projects/" + url.PathEscape(projectID) + "/billing/portal"
+	path := "/api/v1/projects/" + url.PathEscape(in.ProjectID) + "/billing/portal"
 	return out, c.do(ctx, &out, "POST", path, in)
 }

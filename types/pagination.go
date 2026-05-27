@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/garnet-org/api/types/errs"
+	"github.com/garnet-org/api/validator"
 )
 
 const (
@@ -34,6 +35,30 @@ type PaginatorInfo struct {
 type PageArgs struct {
 	Page    *int `json:"page,omitempty"`    // Page number (1-based)
 	PerPage *int `json:"perPage,omitempty"` // Items per page
+}
+
+func (args *PageArgs) Validator() *validator.Validator {
+	v := validator.New()
+
+	if args.Page != nil {
+		if *args.Page < 1 {
+			v.Add("page", "page must be greater than or equal to 1")
+		}
+	}
+
+	if args.PerPage != nil {
+		if *args.PerPage < 1 {
+			v.Add("perPage", "perPage must be greater than or equal to 1")
+		} else if *args.PerPage > 200 {
+			v.Add("perPage", "perPage must be less than or equal to 200")
+		}
+	}
+
+	return v
+}
+
+func (args *PageArgs) Validate() error {
+	return args.Validator().AsError()
 }
 
 // DecodePageArgs extracts PageArgs from URL query parameters.

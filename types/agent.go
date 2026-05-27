@@ -27,9 +27,6 @@ const (
 	// AgentKindVanilla represents a vanilla agent.
 	AgentKindVanilla AgentKind = "vanilla"
 
-	// ErrUnauthorizedAgent is returned when the user does not have permission to access the agent.
-	ErrUnauthorizedAgent = errs.UnauthorizedError("permission denied")
-
 	// ErrAgentNotFound is returned when the agent is not found.
 	ErrAgentNotFound = errs.NotFoundError("agent not found")
 )
@@ -462,9 +459,10 @@ func (in *ListAgents) Validate() error {
 type LegacyListAgents struct {
 	PageArgs
 
-	Labels    AgentLabels   `json:"labels,omitempty"`
-	Filters   *AgentFilters `json:"filters,omitempty"`
-	ProjectID string        `json:"project_id,omitempty"` // ProjectID for filtering
+	Labels  AgentLabels   `json:"labels,omitempty"`
+	Filters *AgentFilters `json:"filters,omitempty"`
+	// ProjectID might be empty.
+	ProjectID string `json:"project_id,omitempty"` // ProjectID for filtering
 }
 
 // Validate checks if the ListAgents has all required fields set.

@@ -132,9 +132,10 @@ type Billing struct {
 }
 
 type BillingCheckoutCreate struct {
-	SuccessURL string  `json:"successURL" db:"success_url"`
-	ReturnURL  *string `json:"returnURL" db:"return_url"`
-	Locale     *string `json:"locale" db:"locale"`
+	ProjectID  string  `json:"-"`
+	SuccessURL string  `json:"successURL"`
+	ReturnURL  *string `json:"returnURL"`
+	Locale     *string `json:"locale"`
 }
 
 func (in *BillingCheckoutCreate) Validate() error {
@@ -178,7 +179,8 @@ type BillingSession struct {
 }
 
 type BillingPortalCreate struct {
-	ReturnURL *string `json:"returnURL" db:"return_url"`
+	ProjectID string  `json:"-"`
+	ReturnURL *string `json:"returnURL"`
 }
 
 func (in *BillingPortalCreate) Validate() error {

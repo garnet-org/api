@@ -3,7 +3,7 @@ module github.com/garnet-org/api
 go 1.26.0
 
 require (
-	github.com/garnet-org/jibril-ashkaal v1.3.1
+	github.com/garnet-org/jibril-ashkaal v1.3.2
 	github.com/google/uuid v1.6.0
 	k8s.io/apimachinery v0.36.1
 )

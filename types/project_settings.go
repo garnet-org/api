@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/garnet-org/api/types/errs"
+	"github.com/garnet-org/api/validator"
 )
 
 // Project settings error constants.
@@ -14,7 +15,6 @@ const (
 	ErrProjectSettingNotFound      = errs.NotFoundError("project setting not found")
 	ErrInvalidProjectSettingKey    = errs.InvalidArgumentError("invalid project setting key")
 	ErrInvalidProjectSettingValue  = errs.InvalidArgumentError("invalid project setting value")
-	ErrUnauthorizedProjectSetting  = errs.UnauthorizedError("permission denied for project setting")
 	ErrProjectSettingAlreadyExists = errs.ConflictError("project setting already exists")
 )
 
@@ -57,10 +57,32 @@ type ProjectSetting struct {
 	UpdatedAt time.Time       `json:"updated_at"`
 }
 
+type RetrieveProjectSetting struct {
+	// ProjectID might be empty.
+	ProjectID string `json:"-"`
+	Key       string `json:"key"`
+}
+
+func (in *RetrieveProjectSetting) Validate() error {
+	v := validator.New()
+
+	if in.Key == "" {
+		v.Add("key", "key is required")
+	} else if len(in.Key) > MaxProjectSettingKeyLength {
+		v.Add("key", "key exceeds maximum length")
+	} else if !ProjectSettingKey(in.Key).IsValid() {
+		v.Add("key", "invalid project setting key")
+	}
+
+	return v.AsError()
+}
+
 // ProjectSettingCreate represents a request to create a project setting.
 type ProjectSettingCreate struct {
-	Key   string          `json:"key"`
-	Value json.RawMessage `json:"value"`
+	// ProjectID might be empty.
+	ProjectID string          `json:"-"`
+	Key       string          `json:"key"`
+	Value     json.RawMessage `json:"value"`
 }
 
 // Validate checks if the ProjectSettingCreate has all required fields set.
@@ -86,16 +108,40 @@ func (c *ProjectSettingCreate) Validate() error {
 
 // ProjectSettingUpdate represents a request to update a project setting.
 type ProjectSettingUpdate struct {
-	Value json.RawMessage `json:"value"`
+	// ProjectID might be empty.
+	ProjectID string          `json:"-"`
+	Key       string          `json:"-"`
+	Value     json.RawMessage `json:"value"`
 }
 
 // Validate checks if the ProjectSettingUpdate has all required fields set.
-func (u *ProjectSettingUpdate) Validate() error {
-	if len(u.Value) == 0 {
-		return ErrInvalidProjectSettingValue
+func (in *ProjectSettingUpdate) Validate() error {
+	v := validator.New()
+
+	if in.Key == "" {
+		v.Add("key", "key is required")
+	} else if len(in.Key) > MaxProjectSettingKeyLength {
+		v.Add("key", "key exceeds maximum length")
+	} else if !ProjectSettingKey(in.Key).IsValid() {
+		v.Add("key", "invalid project setting key")
 	}
 
-	return nil
+	if len(in.Value) == 0 {
+		v.Add("value", "value is required")
+	}
+
+	if in.Key == ProjectSettingKeyWebhookEnabledIssueClasses.String() {
+		var classes WebhookEnabledIssueClasses
+		if err := json.Unmarshal(in.Value, &classes); err != nil {
+			v.Add("value", "invalid value for webhook_enabled_issue_classes")
+		}
+
+		if err := classes.Validate(); err != nil {
+			v.Add("value", err.Error())
+		}
+	}
+
+	return v.AsError()
 }
 
 // ProjectSettingCreated represents a response to creating a project setting.
@@ -115,9 +161,32 @@ type ProjectSettingUpdated struct {
 
 // ListProjectSettings represents the query parameters for listing project settings.
 type ListProjectSettings struct {
+	// ProjectID might be empty.
+	ProjectID string `json:"-"`
 	PageArgs
+}
 
-	ProjectID string `json:"-"` // Set internally, not from user input
+func (in *ListProjectSettings) Validate() error {
+	return in.PageArgs.Validate()
+}
+
+type DeleteProjectSetting struct {
+	ProjectID string `json:"-"`
+	Key       string `json:"-"`
+}
+
+func (in *DeleteProjectSetting) Validate() error {
+	v := validator.New()
+
+	if in.Key == "" {
+		v.Add("key", "key is required")
+	} else if len(in.Key) > MaxProjectSettingKeyLength {
+		v.Add("key", "key exceeds maximum length")
+	} else if !ProjectSettingKey(in.Key).IsValid() {
+		v.Add("key", "invalid project setting key")
+	}
+
+	return v.AsError()
 }
 
 // WebhookEnabledIssueClasses represents the enabled issue classes for webhooks.

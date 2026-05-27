@@ -6,19 +6,33 @@ import "errors"
 var PermanentFailure = errors.New("permanent failure")
 
 const (
+	// Unauthenticated is returned when authentication fails.
+	Unauthenticated = UnauthenticatedError("unauthenticated")
 	// InvalidArgument is returned when an invalid argument is provided.
 	InvalidArgument = InvalidArgumentError("invalid argument")
-	// InternalServer is returned when an internal server error occurs.
-	InternalServer = InternalServerError("internal server error")
 	// NotFound is returned when a resource is not found.
 	NotFound = NotFoundError("not found")
-	// Unauthorized is returned when a user is not authorized to perform an action.
-	Unauthorized = UnauthorizedError("unauthorized")
 	// Conflict is returned when a resource already exists.
-	Conflict = ConflictError("resource already exists")
+	Conflict = ConflictError("conflict")
 	// PermissionDenied is returned when a user does not have permission to perform an action.
 	PermissionDenied = PermissionDeniedError("permission denied")
+	// InternalServer is returned when an internal server error occurs.
+	InternalServer = InternalServerError("internal server error")
 )
+
+type UnauthenticatedError string
+
+func (e UnauthenticatedError) Error() string { return string(e) }
+
+func (e UnauthenticatedError) Is(target error) bool {
+	if target == Unauthenticated {
+		return true // All UnauthenticatedError types should match ErrUnauthenticated
+	}
+	if target, ok := target.(UnauthenticatedError); ok {
+		return e == target
+	}
+	return false
+}
 
 // InvalidArgumentError is returned when an invalid argument is provided.
 type InvalidArgumentError string
@@ -66,23 +80,6 @@ func (e NotFoundError) Is(target error) bool {
 		return true
 	}
 	if target, ok := target.(NotFoundError); ok {
-		return e == target
-	}
-	return false
-}
-
-// UnauthorizedError represents an error indicating that the user is not authorized to perform a certain action.
-type UnauthorizedError string
-
-// Error implements the error interface for UnauthorizedError.
-func (e UnauthorizedError) Error() string { return string(e) }
-
-// Is checks if the error is of type UnauthorizedError.
-func (e UnauthorizedError) Is(target error) bool {
-	if target == Unauthorized {
-		return true // All UnauthorizedError types should match ErrUnauthorized
-	}
-	if target, ok := target.(UnauthorizedError); ok {
 		return e == target
 	}
 	return false

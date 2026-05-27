@@ -76,12 +76,6 @@ const (
 	// ErrInvalidEventID is returned when the event ID provided is invalid or does not exist.
 	ErrInvalidEventID = errs.InvalidArgumentError("invalid event ID")
 
-	// ErrUnauthorizedEvents is returned when the user does not have permission to access or modify events.
-	ErrUnauthorizedEvents = errs.UnauthorizedError("permission denied")
-
-	// ErrUnauthorizedIssue is returned when the user does not have permission to access or modify the issue.
-	ErrUnauthorizedIssue = errs.UnauthorizedError("permission denied")
-
 	// ErrInvalidAgentKind is returned when the agent kind is invalid or unsupported.
 	ErrInvalidAgentKind = errs.InvalidArgumentError("invalid agent kind")
 
@@ -525,6 +519,8 @@ func formatCIDRAddress(ipAddress string) (NetworkPolicyRuleType, string, error) 
 
 // CreateIssue represents the request to create a new issue.
 type CreateIssue struct {
+	// ProjectID might be empty.
+	ProjectID   string        `json:"-"` // Set internally from context
 	Class       IssueClass    `json:"class"`
 	Description string        `json:"description"`
 	State       IssueState    `json:"state"`
@@ -710,6 +706,7 @@ type IssueActionHistory struct {
 
 // ListIssues represents the request to list issues with filtering and pagination.
 type ListIssues struct {
+	// ProjectID might be empty.
 	ProjectID      string        `json:"-"` // Set internally from context
 	Labels         IssueLabels   `json:"labels,omitempty"`
 	Filters        *IssueFilters `json:"filters,omitempty"`
