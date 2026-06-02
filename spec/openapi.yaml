@@ -842,6 +842,13 @@ paths:
           required: false
           schema:
             type: string
+        - name: run_attempt
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
         - name: time_start
           in: query
           required: false
@@ -935,6 +942,13 @@ paths:
           required: false
           schema:
             type: string
+        - name: run_attempt
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
         - name: time_start
           in: query
           required: false
@@ -5338,6 +5352,7 @@ components:
         - repo
         - job
         - runID
+        - runAttempt
         - data
         - createdAt
         - updatedAt
@@ -5356,6 +5371,9 @@ components:
           type: string
         runID:
           type: string
+        runAttempt:
+          type: integer
+          format: int64
         data:
           $ref: "./ashkaal.yaml#/components/schemas/AshkaalProfile"
         createdAt:

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/garnet-org/api/types"
@@ -39,6 +40,9 @@ func (c *Client) Profiles(ctx context.Context, in types.ListProfiles) (types.Cur
 	}
 	if in.RunID != nil {
 		q.Set("run_id", *in.RunID)
+	}
+	if in.RunAttempt != nil {
+		q.Set("run_attempt", strconv.FormatInt(*in.RunAttempt, 10))
 	}
 	if in.TimeStart != nil {
 		q.Set("time_start", in.TimeStart.Format(time.RFC3339Nano))

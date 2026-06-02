@@ -11,15 +11,16 @@ import (
 )
 
 type Profile struct {
-	ID        string          `json:"id"`
-	AgentID   string          `json:"agentID" db:"agent_id"`
-	GithubOrg string          `json:"githubOrg" db:"github_org"`
-	Repo      string          `json:"repo"`
-	Job       string          `json:"job"`
-	RunID     string          `json:"runID" db:"run_id"`
-	Data      ongoing.Profile `json:"data"`
-	CreatedAt time.Time       `json:"createdAt" db:"created_at"`
-	UpdatedAt time.Time       `json:"updatedAt" db:"updated_at"`
+	ID         string          `json:"id"`
+	AgentID    string          `json:"agentID" db:"agent_id"`
+	GithubOrg  string          `json:"githubOrg" db:"github_org"`
+	Repo       string          `json:"repo"`
+	Job        string          `json:"job"`
+	RunID      string          `json:"runID" db:"run_id"`
+	RunAttempt int64           `json:"runAttempt" db:"run_attempt"`
+	Data       ongoing.Profile `json:"data"`
+	CreatedAt  time.Time       `json:"createdAt" db:"created_at"`
+	UpdatedAt  time.Time       `json:"updatedAt" db:"updated_at"`
 }
 
 type CreateProfile struct {
@@ -59,6 +60,15 @@ func (in CreateProfile) RunID() string {
 	return in.Profile.Scenarios.GitHub.RunID
 }
 
+func (in CreateProfile) RunAttempt() int64 {
+	runAttempt, err := strconv.ParseInt(strings.TrimSpace(in.Profile.Scenarios.GitHub.RunAttempt), 10, 64)
+	if err != nil || runAttempt <= 0 {
+		return 1
+	}
+
+	return runAttempt
+}
+
 func (in *CreateProfile) Validate() error {
 	v := validator.New()
 
@@ -80,19 +90,29 @@ func (in *CreateProfile) Validate() error {
 		v.Add("run_id", "run_id must be a positive integer")
 	}
 
+	runAttempt := strings.TrimSpace(in.Profile.Scenarios.GitHub.RunAttempt)
+	if runAttempt == "" {
+		v.Add("run_attempt", "run_attempt is required in github scenario")
+	} else if attempt, err := strconv.ParseInt(runAttempt, 10, 64); err != nil {
+		v.Add("run_attempt", "run_attempt must be a valid integer")
+	} else if attempt <= 0 {
+		v.Add("run_attempt", "run_attempt must be a positive integer")
+	}
+
 	return v.AsError()
 }
 
 type ListProfiles struct {
-	AgentID   *string
-	ProjectID *string
-	GitHubOrg *string
-	Repo      *string
-	Job       *string
-	RunID     *string
-	TimeStart *time.Time
-	TimeEnd   *time.Time
-	PageArgs  CursorPageArgs
+	AgentID    *string
+	ProjectID  *string
+	GitHubOrg  *string
+	Repo       *string
+	Job        *string
+	RunID      *string
+	RunAttempt *int64
+	TimeStart  *time.Time
+	TimeEnd    *time.Time
+	PageArgs   CursorPageArgs
 }
 
 func (in *ListProfiles) Validate() error {
@@ -141,6 +161,10 @@ func (in *ListProfiles) Validate() error {
 		} else if id <= 0 {
 			v.Add("run_id", "run_id must be a positive integer")
 		}
+	}
+
+	if in.RunAttempt != nil && *in.RunAttempt <= 0 {
+		v.Add("run_attempt", "run_attempt must be a positive integer")
 	}
 
 	if in.TimeStart != nil && in.TimeEnd != nil && in.TimeStart.After(*in.TimeEnd) {
