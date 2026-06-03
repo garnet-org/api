@@ -65,7 +65,7 @@ func (c *Client) Profile(ctx context.Context, profileID string) (types.Profile, 
 	return out, c.do(ctx, &out, http.MethodGet, path, nil)
 }
 
-// ProfileByRunID should not be used anymore since runID is no unique.
+// ProfileByRunID should not be used anymore since runID is not unique.
 // Deprecated: use [Profile] or [Profiles] with the run_id filter instead.
 func (c *Client) ProfileByRunID(ctx context.Context, runID string) (types.Profile, error) {
 	var out types.Profile
