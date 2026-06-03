@@ -36,7 +36,7 @@ func (in CreateProfile) AgentID() string {
 	return in.agentID
 }
 
-func (in CreateProfile) GithubOrg() string {
+func (in CreateProfile) GitHubOrg() string {
 	org, _, ok := strings.Cut(in.Profile.Scenarios.GitHub.Repository, "/")
 	if !ok {
 		return ""
@@ -76,7 +76,7 @@ func (in *CreateProfile) Validate() error {
 		v.Add("repo", "repo is required in github scenario")
 	}
 
-	if in.GithubOrg() == "" {
+	if in.GitHubOrg() == "" {
 		v.Add("github_org", "github_org is required in github scenario")
 	}
 	if in.Job() == "" {
