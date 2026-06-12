@@ -421,6 +421,175 @@ paths:
                 type: string
               description: URL to Auth0's logout endpoint
 
+  /api/v1/device-authorizations:
+    post:
+      summary: Create a device authorization request
+      description: |
+        Starts a device authorization flow and returns a one-time device code
+        with polling metadata.
+
+        No authentication is required to access this endpoint.
+      operationId: createDeviceAuthorization
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDeviceAuthorization"
+      responses:
+        "201":
+          description: Device authorization created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceAuthorizationCreated"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Conflict creating authorization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/device-authorizations/{deviceCode}:
+    parameters:
+      - name: deviceCode
+        in: path
+        description: Device authorization code
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Poll device authorization status
+      description: |
+        Returns the current status of a device authorization request.
+        When status is approved, a project token is returned at most once.
+
+        No authentication is required to access this endpoint.
+      operationId: getDeviceAuthorizationStatus
+      security: []
+      responses:
+        "200":
+          description: Device authorization status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceAuthorizationState"
+        "400":
+          description: Invalid device code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Device authorization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/device-authorizations/{deviceCode}/approve:
+    parameters:
+      - name: deviceCode
+        in: path
+        description: Device authorization code
+        required: true
+        schema:
+          type: string
+    post:
+      summary: Approve device authorization
+      description: |
+        Approves a pending device authorization and binds it to a project.
+
+        Required authentication: user token (JWT).
+      operationId: approveDeviceAuthorization
+      security:
+        - UserTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveDeviceAuthorization"
+      responses:
+        "204":
+          description: Device authorization approved
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Device authorization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Device authorization cannot be approved in current state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/device-authorizations/{deviceCode}/reject:
+    parameters:
+      - name: deviceCode
+        in: path
+        description: Device authorization code
+        required: true
+        schema:
+          type: string
+    post:
+      summary: Reject device authorization
+      description: |
+        Rejects a pending device authorization.
+
+        Required authentication: user token (JWT).
+      operationId: rejectDeviceAuthorization
+      security:
+        - UserTokenAuth: []
+      responses:
+        "204":
+          description: Device authorization rejected
+        "400":
+          description: Invalid device code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Device authorization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Device authorization cannot be rejected in current state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/me:
     get:
       security:
@@ -5104,6 +5273,82 @@ components:
           type: string
           description: Name of the user's default project
           example: "Default Project"
+
+    CreateDeviceAuthorization:
+      type: object
+      additionalProperties: false
+      description: Request body for creating a device authorization.
+
+    DeviceAuthorizationStatus:
+      type: string
+      enum:
+        - pending
+        - approved
+        - rejected
+        - expired
+
+    DeviceAuthorizationCreated:
+      type: object
+      required:
+        - deviceCode
+        - verificationURI
+        - verificationURIComplete
+        - status
+        - expiresAt
+        - pollIntervalSeconds
+      properties:
+        deviceCode:
+          type: string
+        verificationURI:
+          type: string
+          format: uri
+        verificationURIComplete:
+          type: string
+          format: uri
+        status:
+          $ref: "#/components/schemas/DeviceAuthorizationStatus"
+        expiresAt:
+          type: string
+          format: date-time
+        pollIntervalSeconds:
+          type: integer
+          format: int32
+          minimum: 1
+
+    DeviceAuthorizationState:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/DeviceAuthorizationStatus"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        projectID:
+          type: string
+          format: uuid
+          nullable: true
+        tokenKind:
+          type: string
+          nullable: true
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        projectToken:
+          type: string
+          nullable: true
+
+    ApproveDeviceAuthorization:
+      type: object
+      required:
+        - projectID
+      properties:
+        projectID:
+          type: string
+          format: uuid
 
     CreateToken:
       type: object
