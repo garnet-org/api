@@ -142,20 +142,31 @@ func (s NetworkPolicyScope) IsValid() bool {
 type NetworkPolicyCIDRMode string
 
 const (
-	// NetworkPolicyCIDRModeAlert represents alert mode - detections are logged but not blocked.
-	NetworkPolicyCIDRModeAlert NetworkPolicyCIDRMode = "alert"
+	// NetworkPolicyCIDRModeLog represents log mode - detections are logged but not blocked.
+	NetworkPolicyCIDRModeLog NetworkPolicyCIDRMode = "log"
+
+	// NetworkPolicyCIDRModeMonitor is an interchangeable alias for NetworkPolicyCIDRModeLog.
+	// Both values are accepted, but log is the canonical emitted value.
+	NetworkPolicyCIDRModeMonitor NetworkPolicyCIDRMode = "monitor"
 
 	// NetworkPolicyCIDRModeEnforce represents enforce mode - detections are blocked.
 	NetworkPolicyCIDRModeEnforce NetworkPolicyCIDRMode = "enforce"
 
-	// NetworkPolicyCIDRModeBoth represents both alert and enforce mode.
+	// NetworkPolicyCIDRModeAlert is an interchangeable alias for NetworkPolicyCIDRModeLog.
+	// Both values are accepted for compatibility.
+	NetworkPolicyCIDRModeAlert NetworkPolicyCIDRMode = "alert"
+
+	// NetworkPolicyCIDRModeBlock is an interchangeable alias for NetworkPolicyCIDRModeEnforce.
+	NetworkPolicyCIDRModeBlock NetworkPolicyCIDRMode = "block"
+
+	// NetworkPolicyCIDRModeBoth is an interchangeable alias for NetworkPolicyCIDRModeEnforce.
 	NetworkPolicyCIDRModeBoth NetworkPolicyCIDRMode = "both"
 
-	// NetworkPolicyCIDRModeIPv4 is deprecated: Use NetworkPolicyCIDRModeAlert instead.
-	NetworkPolicyCIDRModeIPv4 = NetworkPolicyCIDRModeAlert
+	// NetworkPolicyCIDRModeIPv4 is an interchangeable alias for NetworkPolicyCIDRModeLog.
+	NetworkPolicyCIDRModeIPv4 NetworkPolicyCIDRMode = "ipv4"
 
-	// NetworkPolicyCIDRModeIPv6 is deprecated: Use NetworkPolicyCIDRModeEnforce instead.
-	NetworkPolicyCIDRModeIPv6 = NetworkPolicyCIDRModeEnforce
+	// NetworkPolicyCIDRModeIPv6 is an interchangeable alias for NetworkPolicyCIDRModeEnforce.
+	NetworkPolicyCIDRModeIPv6 NetworkPolicyCIDRMode = "ipv6"
 )
 
 // String returns the string representation of the NetworkPolicyCIDRMode.
@@ -166,7 +177,9 @@ func (m NetworkPolicyCIDRMode) String() string {
 // IsValid checks if the NetworkPolicyCIDRMode is valid.
 func (m NetworkPolicyCIDRMode) IsValid() bool {
 	switch m {
-	case NetworkPolicyCIDRModeAlert, NetworkPolicyCIDRModeEnforce, NetworkPolicyCIDRModeBoth:
+	case NetworkPolicyCIDRModeLog, NetworkPolicyCIDRModeMonitor, NetworkPolicyCIDRModeAlert,
+		NetworkPolicyCIDRModeEnforce, NetworkPolicyCIDRModeBlock, NetworkPolicyCIDRModeBoth,
+		NetworkPolicyCIDRModeIPv4, NetworkPolicyCIDRModeIPv6:
 		return true
 	}
 	return false
@@ -233,13 +246,22 @@ const (
 	// NetworkPolicyModeBypass means no enforcement - all traffic allowed.
 	NetworkPolicyModeBypass NetworkPolicyMode = "bypass"
 
-	// NetworkPolicyModeAlert means log violations but allow traffic.
-	NetworkPolicyModeAlert NetworkPolicyMode = "alert"
+	// NetworkPolicyModeLog means log violations but allow traffic.
+	NetworkPolicyModeLog NetworkPolicyMode = "log"
+
+	// NetworkPolicyModeMonitor is an interchangeable alias for NetworkPolicyModeLog.
+	NetworkPolicyModeMonitor NetworkPolicyMode = "monitor"
 
 	// NetworkPolicyModeEnforce means block violations.
 	NetworkPolicyModeEnforce NetworkPolicyMode = "enforce"
 
-	// NetworkPolicyModeBoth means alert AND enforce (log and block).
+	// NetworkPolicyModeAlert is an interchangeable alias for NetworkPolicyModeLog.
+	NetworkPolicyModeAlert NetworkPolicyMode = "alert"
+
+	// NetworkPolicyModeBlock is an interchangeable alias for NetworkPolicyModeEnforce.
+	NetworkPolicyModeBlock NetworkPolicyMode = "block"
+
+	// NetworkPolicyModeBoth is an interchangeable alias for NetworkPolicyModeEnforce.
 	NetworkPolicyModeBoth NetworkPolicyMode = "both"
 )
 
@@ -251,7 +273,8 @@ func (m NetworkPolicyMode) String() string {
 // IsValid checks if the NetworkPolicyMode is valid.
 func (m NetworkPolicyMode) IsValid() bool {
 	switch m {
-	case NetworkPolicyModeBypass, NetworkPolicyModeAlert, NetworkPolicyModeEnforce, NetworkPolicyModeBoth:
+	case NetworkPolicyModeBypass, NetworkPolicyModeLog, NetworkPolicyModeMonitor, NetworkPolicyModeAlert,
+		NetworkPolicyModeEnforce, NetworkPolicyModeBlock, NetworkPolicyModeBoth:
 		return true
 	}
 	return false
@@ -541,7 +564,7 @@ func (c *CreateNetworkPolicy) Validate() error {
 
 	// Set defaults for config if not provided
 	if c.Config.CIDRMode == "" {
-		c.Config.CIDRMode = NetworkPolicyCIDRModeEnforce
+		c.Config.CIDRMode = NetworkPolicyCIDRModeLog
 	}
 	if c.Config.CIDRPolicy == "" {
 		c.Config.CIDRPolicy = NetworkPolicyTypeAllow
@@ -716,13 +739,12 @@ func applyPolicy(merged *MergedNetworkPolicy, policy *NetworkPolicy) {
 // This populates the Mode, Policy, Allow, Deny, and Resolve fields.
 func populateSimplifiedFormat(merged *MergedNetworkPolicy) {
 	// Convert CIDRMode to simplified Mode
-	// The mode determines enforcement behavior across both CIDR and domain resolution
+	// The mode determines enforcement behavior across both CIDR and domain resolution.
+	// Canonical output uses log/enforce, while monitor/block/both remain accepted aliases.
 	switch merged.Config.CIDRMode {
-	case NetworkPolicyCIDRModeBoth:
-		merged.Mode = NetworkPolicyModeBoth
-	case NetworkPolicyCIDRModeIPv4:
-		merged.Mode = NetworkPolicyModeAlert
-	case NetworkPolicyCIDRModeIPv6:
+	case NetworkPolicyCIDRModeLog, NetworkPolicyCIDRModeMonitor, NetworkPolicyCIDRModeAlert, NetworkPolicyCIDRModeIPv4:
+		merged.Mode = NetworkPolicyModeLog
+	case NetworkPolicyCIDRModeEnforce, NetworkPolicyCIDRModeBlock, NetworkPolicyCIDRModeBoth, NetworkPolicyCIDRModeIPv6:
 		merged.Mode = NetworkPolicyModeEnforce
 	default:
 		merged.Mode = NetworkPolicyModeBypass
@@ -861,7 +883,7 @@ func GetMergedNetworkPolicyForK8s(systemGlobal *SystemGlobalNetworkPolicy, globa
 // GetDefaultNetworkPolicyConfig returns a default network policy configuration.
 func GetDefaultNetworkPolicyConfig() NetworkPolicyConfig {
 	return NetworkPolicyConfig{
-		CIDRMode:      NetworkPolicyCIDRModeEnforce,
+		CIDRMode:      NetworkPolicyCIDRModeLog,
 		CIDRPolicy:    NetworkPolicyTypeAllow,
 		ResolveMode:   NetworkPolicyResolveModsBypass,
 		ResolvePolicy: NetworkPolicyTypeAllow,
