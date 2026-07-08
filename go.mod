@@ -3,7 +3,7 @@ module github.com/garnet-org/api
 go 1.26.0
 
 require (
-	github.com/garnet-org/jibril-ashkaal v1.3.2
+	github.com/garnet-org/jibril-ashkaal v1.4.0
 	github.com/google/uuid v1.6.0
 	k8s.io/apimachinery v0.36.2
 )
@@ -16,7 +16,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/net v0.56.0 // indirect
+	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
