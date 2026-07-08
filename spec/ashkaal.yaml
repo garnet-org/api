@@ -1002,6 +1002,11 @@ components:
           type: string
         job:
           type: string
+        job_index:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
         ref:
           type: string
         ref_name:

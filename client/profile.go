@@ -44,6 +44,9 @@ func (c *Client) Profiles(ctx context.Context, in types.ListProfiles) (types.Cur
 	if in.RunAttempt != nil {
 		q.Set("run_attempt", strconv.FormatInt(*in.RunAttempt, 10))
 	}
+	if in.JobIndex != nil {
+		q.Set("job_index", strconv.FormatUint(uint64(*in.JobIndex), 10))
+	}
 	if in.TimeStart != nil {
 		q.Set("time_start", in.TimeStart.Format(time.RFC3339Nano))
 	}

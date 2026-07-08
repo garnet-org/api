@@ -16,7 +16,7 @@ info:
 
     The API implements a Role-Based Access Control (RBAC) system with granular permissions:
     - `create`: Allows creating new resources
-    - `read`: Allows reading/viewing existing resources  
+    - `read`: Allows reading/viewing existing resources
     - `update`: Allows modifying existing resources
     - `delete`: Allows removing resources
     - `list`: Allows listing multiple resources
@@ -1018,6 +1018,14 @@ paths:
             type: integer
             format: int64
             minimum: 1
+        - name: job_index
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+            maximum: 4294967295
         - name: time_start
           in: query
           required: false
@@ -1118,6 +1126,14 @@ paths:
             type: integer
             format: int64
             minimum: 1
+        - name: job_index
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+            maximum: 4294967295
         - name: time_start
           in: query
           required: false
@@ -1610,8 +1626,8 @@ paths:
         - BearerAuth: []
       summary: Create a new agent
       description: |
-        Create a new agent and generate an authentication token for it. Note: Network policies are not 
-        included in the creation response. To get network policies for the agent, use the dedicated 
+        Create a new agent and generate an authentication token for it. Note: Network policies are not
+        included in the creation response. To get network policies for the agent, use the dedicated
         network policy endpoints after creation.
       operationId: createAgent
       requestBody:
@@ -1665,7 +1681,7 @@ paths:
         - BearerAuth: []
       summary: Query agents returning list of agents
       description: |
-        Query and retrieve a paginated list of agents. Network policies are not included in the 
+        Query and retrieve a paginated list of agents. Network policies are not included in the
         agent list response for performance reasons.
       operationId: legacyAgents
       parameters:
@@ -5619,6 +5635,12 @@ components:
         runAttempt:
           type: integer
           format: int64
+        jobIndex:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          nullable: true
         data:
           $ref: "./ashkaal.yaml#/components/schemas/AshkaalProfile"
         createdAt:
@@ -7325,6 +7347,10 @@ components:
         - repository
         - repository_id
       properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the GitHub context record
         action:
           type: string
           description: GitHub Action being executed
@@ -7340,6 +7366,12 @@ components:
         job:
           type: string
           description: Name of the job being executed
+        job_index:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: Optional matrix index for the job instance (when running in a job matrix)
         ref:
           type: string
           description: Git reference that triggered the workflow
@@ -7364,15 +7396,50 @@ components:
         repository_owner_id:
           type: string
           description: ID of the repository owner
+        run_attempt:
+          type: string
+          description: Attempt number for the current workflow run
         run_id:
           type: string
           description: Unique identifier for the workflow run
+        run_number:
+          type: string
+          description: Run number of the workflow in the repository
+        runner_arch:
+          type: string
+          description: Runner architecture
+        runner_os:
+          type: string
+          description: Runner operating system
+        server_url:
+          type: string
+          description: GitHub server URL
+        sha:
+          type: string
+          description: Commit SHA
+        triggering_actor:
+          type: string
+          description: User that initiated this run (may differ from actor)
         workflow:
           type: string
           description: Name of the workflow
         workflow_ref:
           type: string
           description: Reference to the workflow file
+        workflow_sha:
+          type: string
+          description: SHA of the workflow file revision
+        workspace:
+          type: string
+          description: Workspace path on runner
+        created_at:
+          type: string
+          format: date-time
+          description: When the context was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the context was last updated
 
     AgentKubernetesContext:
       type: object

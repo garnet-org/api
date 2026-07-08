@@ -14,6 +14,7 @@ type AgentGithubContext struct {
 	ActorID           string    `json:"actor_id"`
 	EventName         string    `json:"event_name"`
 	Job               string    `json:"job"`
+	JobIndex          *uint32   `json:"job_index,omitempty"`
 	Ref               string    `json:"ref"`
 	RefName           string    `json:"ref_name"`
 	RefProtected      bool      `json:"ref_protected"`

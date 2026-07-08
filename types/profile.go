@@ -18,6 +18,7 @@ type Profile struct {
 	Job        string          `json:"job"`
 	RunID      string          `json:"runID" db:"run_id"`
 	RunAttempt int64           `json:"runAttempt" db:"run_attempt"`
+	JobIndex   *uint32         `json:"jobIndex,omitempty" db:"job_index"`
 	Data       ongoing.Profile `json:"data"`
 	CreatedAt  time.Time       `json:"createdAt" db:"created_at"`
 	UpdatedAt  time.Time       `json:"updatedAt" db:"updated_at"`
@@ -69,6 +70,10 @@ func (in CreateProfile) RunAttempt() int64 {
 	return runAttempt
 }
 
+func (in CreateProfile) JobIndex() *uint32 {
+	return in.Profile.Scenarios.GitHub.JobIndex
+}
+
 func (in *CreateProfile) Validate() error {
 	v := validator.New()
 
@@ -110,6 +115,7 @@ type ListProfiles struct {
 	Job        *string
 	RunID      *string
 	RunAttempt *int64
+	JobIndex   *uint32
 	TimeStart  *time.Time
 	TimeEnd    *time.Time
 	PageArgs   CursorPageArgs
