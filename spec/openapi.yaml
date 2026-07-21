@@ -1203,7 +1203,13 @@ paths:
         - BearerAuth: []
         - UserTokenAuth: []
         - ProjectTokenAuth: []
+        - {}
       summary: Get profile by its ID
+      description: |
+        Returns the profile identified by its unique ID. Profiles whose GitHub
+        repository is currently public are also served without authorization;
+        every other unauthorized case returns the same error so profiles
+        cannot be enumerated.
       operationId: profile
       responses:
         "200":
@@ -1220,6 +1226,12 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: Upstream GitHub API failure while checking repository visibility
           content:
             application/json:
               schema:

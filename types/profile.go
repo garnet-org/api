@@ -6,9 +6,15 @@ import (
 	"time"
 
 	"github.com/garnet-org/api/id"
+	"github.com/garnet-org/api/types/errs"
 	"github.com/garnet-org/api/validator"
 	"github.com/garnet-org/jibril-ashkaal/pkg/ongoing"
 )
+
+// ErrPublicProfileNotFound marks every denied public profile lookup (unknown
+// profile, private or unresolvable repository) so callers cannot enumerate
+// which profiles exist.
+var ErrPublicProfileNotFound = errs.NotFoundError("public profile not found")
 
 type Profile struct {
 	ID         string          `json:"id"`

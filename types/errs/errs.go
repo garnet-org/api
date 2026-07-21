@@ -18,6 +18,8 @@ const (
 	PermissionDenied = PermissionDeniedError("permission denied")
 	// InternalServer is returned when an internal server error occurs.
 	InternalServer = InternalServerError("internal server error")
+	// Unavailable is returned when an upstream dependency fails.
+	Unavailable = UnavailableError("service unavailable")
 )
 
 type UnauthenticatedError string
@@ -96,6 +98,23 @@ func (e ConflictError) Is(target error) bool {
 		return true // All ConflictError types should match ErrConflict
 	}
 	if target, ok := target.(ConflictError); ok {
+		return e == target
+	}
+	return false
+}
+
+// UnavailableError represents an error indicating that an upstream dependency failed.
+type UnavailableError string
+
+// Error implements the error interface for UnavailableError.
+func (e UnavailableError) Error() string { return string(e) }
+
+// Is checks if the error is of type UnavailableError.
+func (e UnavailableError) Is(target error) bool {
+	if target == Unavailable {
+		return true // All UnavailableError types should match Unavailable
+	}
+	if target, ok := target.(UnavailableError); ok {
 		return e == target
 	}
 	return false
