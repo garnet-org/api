@@ -20,7 +20,7 @@ const (
 // GitHubCommentOutboxItem represents one pending GitHub comment outbox record.
 type GitHubCommentOutboxItem struct {
 	ID               string                              `json:"id" db:"id"`
-	ProjectID        string                              `json:"projectID" db:"project_id"`
+	ProjectID        *string                             `json:"projectID,omitempty" db:"project_id"`
 	PayloadKind      GitHubCommentOutboxPayloadKind      `json:"payloadKind" db:"payload_kind"`
 	SourceEntityKind GitHubCommentOutboxSourceEntityKind `json:"sourceEntityKind" db:"source_entity_kind"`
 	SourceEntityID   string                              `json:"sourceEntityID" db:"source_entity_id"`
@@ -33,7 +33,7 @@ type GitHubCommentOutboxItem struct {
 }
 
 type CreateGitHubCommentOutboxItem struct {
-	ProjectID        string
+	ProjectID        *string
 	PayloadKind      GitHubCommentOutboxPayloadKind
 	SourceEntityKind GitHubCommentOutboxSourceEntityKind
 	SourceEntityID   string

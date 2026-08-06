@@ -1635,7 +1635,8 @@ paths:
   /api/v1/agents:
     post:
       security:
-        - BearerAuth: []
+        - ProjectTokenAuth: []
+        - WorkflowTokenAuth: []
       summary: Create a new agent
       description: |
         Create a new agent and generate an authentication token for it. Note: Network policies are not
@@ -2464,7 +2465,14 @@ paths:
     get:
       security:
         - BearerAuth: []
+        - ProjectTokenAuth: []
+        - WorkflowTokenAuth: []
       summary: Get merged network policy for a specific context
+      description: |
+        Retrieves the merged network policy for the project inferred from the token.
+
+        Workflow tokens require the `network_policies:read` scope. Since a workflow token is not
+        bound to a project, it receives the system global policy only.
       operationId: getMergedNetworkPolicy
       parameters:
         - name: repository_id
@@ -2997,6 +3005,43 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
+  /api/v1/github/oidc/exchange:
+    post:
+      security: []
+      summary: Exchange a GitHub Actions OIDC token for a workflow token
+      operationId: exchangeGitHubOIDC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitHubOIDCExchange"
+      responses:
+        "200":
+          description: Workflow token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitHubOIDCExchangeCreated"
+        "400":
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Invalid or unverifiable GitHub OIDC token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: GitHub OIDC exchange is disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/github_webhook:
     post:
       security: []
@@ -4711,6 +4756,7 @@ paths:
     get:
       security:
         - UserTokenAuth: []
+        - ProjectTokenAuth: []
       summary: Get merged network policy for a specific project
       description: |
         Retrieves the merged network policy for the specified project.
@@ -5120,6 +5166,12 @@ components:
       name: X-Project-Token
       description: Project API token for programmatic access with customizable permissions
 
+    WorkflowTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Workflow-Token
+      description: Workflow token issued by GitHub OIDC exchange for workflow-scoped operations
+
   schemas:
     Error:
       type: object
@@ -5314,6 +5366,74 @@ components:
         - approved
         - rejected
         - expired
+
+    GitHubOIDCExchange:
+      type: object
+      required:
+        - idToken
+      properties:
+        idToken:
+          type: string
+          description: GitHub Actions OIDC ID token from token.actions.githubusercontent.com
+
+    GitHubRunClaims:
+      type: object
+      required:
+        - repositoryID
+        - repositoryOwnerID
+        - runID
+        - runAttempt
+        - repositoryVisibility
+      properties:
+        repositoryID:
+          type: string
+        repository:
+          type: string
+        repositoryOwnerID:
+          type: string
+        repositoryOwner:
+          type: string
+        repositoryVisibility:
+          type: string
+          enum:
+            - public
+            - private
+            - internal
+        runID:
+          type: string
+        runAttempt:
+          type: string
+        runNumber:
+          type: string
+        sha:
+          type: string
+        ref:
+          type: string
+        actorID:
+          type: string
+        eventName:
+          type: string
+        workflowRef:
+          type: string
+        jobWorkflowRef:
+          type: string
+        runnerEnvironment:
+          type: string
+
+    GitHubOIDCExchangeCreated:
+      type: object
+      required:
+        - workflowToken
+        - expiresAt
+        - github
+      properties:
+        workflowToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        github:
+          $ref: "#/components/schemas/GitHubRunClaims"
 
     DeviceAuthorizationCreated:
       type: object
@@ -5640,6 +5760,10 @@ components:
           type: string
         repo:
           type: string
+        githubRepositoryID:
+          type: integer
+          format: int64
+          nullable: true
         job:
           type: string
         runID:
@@ -6281,7 +6405,21 @@ components:
           description: Unique identifier for the agent
         project_id:
           type: string
-          description: Project the agent belongs to
+          nullable: true
+          description: Project the agent belongs to. Null for unbound GitHub OIDC agents.
+        github_details_verified:
+          type: boolean
+          description: Whether the GitHub details on this agent were verified via GitHub OIDC.
+        github_repository_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Verified GitHub repository ID when available.
+        github_repository_owner_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Verified GitHub repository owner ID when available.
         os:
           type: string
           description: Operating system (e.g., linux, darwin, windows)

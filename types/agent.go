@@ -180,31 +180,42 @@ func (c *AgentKubernetesContext) Validate() error {
 
 // Agent represents the stored agent model.
 type Agent struct {
-	ID                string                  `json:"id"`
-	ProjectID         string                  `json:"project_id"`
-	OS                string                  `json:"os"`
-	Arch              string                  `json:"arch"`
-	Hostname          string                  `json:"hostname"`
-	Version           string                  `json:"version"`
-	IP                string                  `json:"ip"`
-	MachineID         string                  `json:"machine_id"`
-	Labels            AgentLabels             `json:"labels"`
-	Kind              AgentKind               `json:"kind"`
-	ContextID         string                  `json:"context_id"`
-	GithubContext     *AgentGithubContext     `json:"github_context,omitempty"`
-	KubernetesContext *AgentKubernetesContext `json:"kubernetes_context,omitempty"`
-	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
-	NetworkPolicy     *MergedNetworkPolicy    `json:"network_policy,omitempty"`
-	Active            bool                    `json:"active"`
-	LastSeen          time.Time               `json:"last_seen"`
-	CreatedAt         time.Time               `json:"created_at"`
-	UpdatedAt         time.Time               `json:"updated_at"`
+	ID                      string                  `json:"id"`
+	ProjectID               *string                 `json:"project_id,omitempty"`
+	GitHubDetailsVerified   bool                    `json:"github_details_verified" db:"github_details_verified"`
+	GitHubRepositoryID      *int64                  `json:"github_repository_id,omitempty"`
+	GitHubRepositoryOwnerID *int64                  `json:"github_repository_owner_id,omitempty"`
+	OS                      string                  `json:"os"`
+	Arch                    string                  `json:"arch"`
+	Hostname                string                  `json:"hostname"`
+	Version                 string                  `json:"version"`
+	IP                      string                  `json:"ip"`
+	MachineID               string                  `json:"machine_id"`
+	Labels                  AgentLabels             `json:"labels"`
+	Kind                    AgentKind               `json:"kind"`
+	ContextID               string                  `json:"context_id"`
+	GithubContext           *AgentGithubContext     `json:"github_context,omitempty"`
+	KubernetesContext       *AgentKubernetesContext `json:"kubernetes_context,omitempty"`
+	VanillaContext          *AgentVanillaContext    `json:"vanilla_context,omitempty"`
+	NetworkPolicy           *MergedNetworkPolicy    `json:"network_policy,omitempty"`
+	Active                  bool                    `json:"active"`
+	LastSeen                time.Time               `json:"last_seen"`
+	CreatedAt               time.Time               `json:"created_at"`
+	UpdatedAt               time.Time               `json:"updated_at"`
 }
 
 // CreateAgent represents the request to create a new agent.
 type CreateAgent struct {
 	// projectID is populated by decoding the JWT token.
-	projectID string
+	projectID *string
+
+	// workflowToken is set when the request is authenticated via X-Workflow-Token.
+	workflowToken *WorkflowToken
+
+	githubDetailsVerified   bool
+	githubRepositoryID      *int64
+	githubRepositoryOwnerID *int64
+
 	OS        string      `json:"os"`
 	Arch      string      `json:"arch"`
 	Hostname  string      `json:"hostname"`
@@ -221,12 +232,48 @@ type CreateAgent struct {
 
 // SetProjectID sets the project ID for the agent.
 func (c *CreateAgent) SetProjectID(projectID string) {
-	c.projectID = projectID
+	projectIDCopy := projectID
+	c.projectID = &projectIDCopy
 }
 
-// ProjectID returns the project ID associated with the agent.
-func (c *CreateAgent) ProjectID() string {
+func (c *CreateAgent) ClearProjectID() {
+	c.projectID = nil
+}
+
+func (c *CreateAgent) SetGitHubDetailsVerified(verified bool) {
+	c.githubDetailsVerified = verified
+}
+
+func (c *CreateAgent) GitHubDetailsVerified() bool {
+	return c.githubDetailsVerified
+}
+
+func (c *CreateAgent) SetGitHubRepositoryID(repositoryID *int64) {
+	c.githubRepositoryID = repositoryID
+}
+
+func (c *CreateAgent) GitHubRepositoryID() *int64 {
+	return c.githubRepositoryID
+}
+
+func (c *CreateAgent) SetGitHubRepositoryOwnerID(repositoryOwnerID *int64) {
+	c.githubRepositoryOwnerID = repositoryOwnerID
+}
+
+func (c *CreateAgent) GitHubRepositoryOwnerID() *int64 {
+	return c.githubRepositoryOwnerID
+}
+
+func (c *CreateAgent) ProjectID() *string {
 	return c.projectID
+}
+
+func (c *CreateAgent) SetWorkflowToken(t WorkflowToken) {
+	c.workflowToken = &t
+}
+
+func (c *CreateAgent) WorkflowToken() *WorkflowToken {
+	return c.workflowToken
 }
 
 // ErrInvalidAgentType is returned when the agent kind is invalid.

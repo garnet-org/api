@@ -17,17 +17,18 @@ import (
 var ErrPublicProfileNotFound = errs.NotFoundError("public profile not found")
 
 type Profile struct {
-	ID         string          `json:"id"`
-	AgentID    string          `json:"agentID" db:"agent_id"`
-	GithubOrg  string          `json:"githubOrg" db:"github_org"`
-	Repo       string          `json:"repo"`
-	Job        string          `json:"job"`
-	RunID      string          `json:"runID" db:"run_id"`
-	RunAttempt int64           `json:"runAttempt" db:"run_attempt"`
-	JobIndex   *uint32         `json:"jobIndex,omitempty" db:"job_index"`
-	Data       ongoing.Profile `json:"data"`
-	CreatedAt  time.Time       `json:"createdAt" db:"created_at"`
-	UpdatedAt  time.Time       `json:"updatedAt" db:"updated_at"`
+	ID                 string          `json:"id"`
+	AgentID            string          `json:"agentID" db:"agent_id"`
+	GithubOrg          string          `json:"githubOrg" db:"github_org"`
+	Repo               string          `json:"repo"`
+	GitHubRepositoryID *int64          `json:"githubRepositoryID,omitempty" db:"github_repository_id"`
+	Job                string          `json:"job"`
+	RunID              string          `json:"runID" db:"run_id"`
+	RunAttempt         int64           `json:"runAttempt" db:"run_attempt"`
+	JobIndex           *uint32         `json:"jobIndex,omitempty" db:"job_index"`
+	Data               ongoing.Profile `json:"data"`
+	CreatedAt          time.Time       `json:"createdAt" db:"created_at"`
+	UpdatedAt          time.Time       `json:"updatedAt" db:"updated_at"`
 }
 
 type CreateProfile struct {
