@@ -60,6 +60,14 @@ func (in CreateProfile) Repo() string {
 	return repo
 }
 
+func (in CreateProfile) GitHubRef() string {
+	return in.Profile.Scenarios.GitHub.Ref
+}
+
+func (in CreateProfile) GitHubSHA() string {
+	return in.Profile.Scenarios.GitHub.SHA
+}
+
 func (in CreateProfile) Job() string {
 	return in.Profile.Scenarios.GitHub.Job
 }
