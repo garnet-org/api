@@ -41,6 +41,9 @@ const (
 
 	// TokenTypeProject indicates a project authentication token.
 	TokenTypeProject
+
+	// TokenTypeWorkflow indicates a workflow token issued by the GitHub OIDC exchange.
+	TokenTypeWorkflow
 )
 
 // New creates a new client with the specified base URL and authentication token.
@@ -98,6 +101,14 @@ func (c *Client) WithProjectToken(token string) *Client {
 	return client
 }
 
+// WithWorkflowToken configures the client to use a workflow token for authentication.
+func (c *Client) WithWorkflowToken(token string) *Client {
+	client := c.Clone()
+	client.AuthToken = token
+	client.TokenType = TokenTypeWorkflow
+	return client
+}
+
 // SetAuth is a generic method to set both the token and type at once.
 func (c *Client) SetAuth(token string, tokenType TokenType) {
 	c.AuthToken = token
@@ -135,6 +146,8 @@ func (c *Client) do(ctx context.Context, out any, method, path string, body any)
 			req.Header.Set("X-Agent-Token", c.AuthToken)
 		case TokenTypeProject:
 			req.Header.Set("X-Project-Token", c.AuthToken)
+		case TokenTypeWorkflow:
+			req.Header.Set("X-Workflow-Token", c.AuthToken)
 		case TokenTypeNone:
 			// No headers added for TokenTypeNone
 		}
@@ -201,6 +214,8 @@ func (c *Client) doRaw(ctx context.Context, path string) ([]byte, error) {
 			req.Header.Set("X-Agent-Token", c.AuthToken)
 		case TokenTypeProject:
 			req.Header.Set("X-Project-Token", c.AuthToken)
+		case TokenTypeWorkflow:
+			req.Header.Set("X-Workflow-Token", c.AuthToken)
 		case TokenTypeNone:
 			// No headers added for TokenTypeNone
 		}
