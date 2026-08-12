@@ -1091,6 +1091,7 @@ paths:
           type: string
     get:
       security:
+        - {}
         - BearerAuth: []
         - UserTokenAuth: []
         - ProjectTokenAuth: []
@@ -1273,6 +1274,7 @@ paths:
                 $ref: "#/components/schemas/Error"
     get:
       security:
+        - {}
         - UserTokenAuth: []
       summary: List profile links
       description: |
@@ -1490,6 +1492,7 @@ paths:
   /api/v1/agents/{id}:
     get:
       security:
+        - {}
         - BearerAuth: []
       summary: Get agent by ID
       description: |
@@ -3005,6 +3008,170 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           description: Internal server error
+  /api/v1/projects/{projectID}/github/connect:
+    parameters:
+      - name: projectID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Start GitHub connect flow for a project
+      description: |
+        Redirects to GitHub's App installation page. Connecting requires a real
+        GitHub authorization: the callback records which installations, and
+        therefore which repositories, the user actually controls.
+      operationId: connectProjectGitHub
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+      parameters:
+        - name: redirect_uri
+          in: query
+          required: false
+          description: Where to return the user after connecting. Must match the Garnet platform origin.
+          schema:
+            type: string
+            format: uri
+      responses:
+        "302":
+          description: Redirect to GitHub authorization or installation page
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/github/callback:
+    get:
+      security: []
+      summary: GitHub OAuth callback for project connect
+      operationId: githubConnectCallback
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect back to Garnet platform after synchronization
+        "401":
+          description: Invalid or expired state/code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/projects/{projectID}/github/links:
+    parameters:
+      - name: projectID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List GitHub links configured for a project
+      operationId: projectGitHubLinks
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
+      responses:
+        "200":
+          description: List of links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectGitHubLink"
+    post:
+      summary: Create a project GitHub link
+      description: |
+        Claims a GitHub owner or repository for the project. The caller must have
+        authorized the corresponding GitHub App installation through the connect
+        flow; otherwise the request is rejected and the user must reconnect.
+      operationId: createProjectGitHubLink
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectGitHubLink"
+      responses:
+        "201":
+          description: Link created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectGitHubLink"
+        "409":
+          description: Link already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/projects/{projectID}/github/available_repositories:
+    parameters:
+      - name: projectID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: List repositories the current user can link for this project
+      operationId: availableGitHubRepositories
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+      responses:
+        "200":
+          description: Available repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableGitHubRepository"
+
+  /api/v1/github/links/{linkID}:
+    parameters:
+      - name: linkID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      summary: Delete a project GitHub link
+      operationId: deleteProjectGitHubLink
+      security:
+        - BearerAuth: []
+        - UserTokenAuth: []
+      responses:
+        "204":
+          description: Link deleted
+        "404":
+          description: Link not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /api/v1/github/oidc/exchange:
     post:
       security: []
@@ -3047,20 +3214,37 @@ paths:
       security: []
       summary: GitHub App webhook receiver
       description: |
-        Receives webhook events from GitHub App installations.
-        This endpoint processes workflow_run completion events to post
-        comments on pull requests when security scans complete.
+        Receives GitHub App webhook events and updates the GitHub connection cache.
+
+        Supported event/action groups:
+        - `installation`: `created`, `deleted`, `suspend`, `unsuspend`
+        - `installation_repositories`: `added`, `removed`
+        - `repository`: `renamed`, `publicized`, `privatized`, `transferred`, `deleted`
       operationId: githubWebhook
       parameters:
-        - name: X-Github-Event
+        - name: X-GitHub-Event
           in: header
           description: GitHub event type
           required: true
           schema:
             type: string
-            example: workflow_run
+            example: installation
+        - name: X-Hub-Signature-256
+          in: header
+          description: HMAC-SHA256 signature of the raw request body (`sha256=<hex>`)
+          required: true
+          schema:
+            type: string
+            example: sha256=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        - name: X-GitHub-Delivery
+          in: header
+          description: Unique GitHub webhook delivery ID used for deduplication
+          required: true
+          schema:
+            type: string
+            example: 8d6f6f80-64f4-11ef-8c5a-6bd9d87b8888
       requestBody:
-        description: GitHub webhook payload
+        description: Raw GitHub webhook JSON payload
         required: true
         content:
           application/json:
@@ -3068,12 +3252,22 @@ paths:
               type: object
               description: GitHub webhook event payload
       responses:
-        "200":
-          description: Webhook processed successfully (non-workflow_run events)
         "202":
-          description: Workflow completion accepted for background processing
-        "400":
+          description: Webhook accepted and queued for asynchronous processing
+        "401":
+          description: Missing or invalid webhook signature
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
           description: Invalid webhook payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: GitHub webhook is not configured
           content:
             application/json:
               schema:
@@ -3390,6 +3584,11 @@ paths:
           type: string
           format: uuid
     get:
+      security:
+        - {}
+        - BearerAuth: []
+        - UserTokenAuth: []
+        - ProjectTokenAuth: []
       summary: List events for a specific agent
       description: |
         Retrieves a cursor-paginated list of V2 events for the specified agent.
@@ -3397,10 +3596,6 @@ paths:
         Use `first` and `after` to paginate forward, or `last` and `before` to paginate backward.
         All events are stored and returned in V2 format using ashkaal structure.
       operationId: agentEvents
-      security:
-        - BearerAuth: []
-        - UserTokenAuth: []
-        - ProjectTokenAuth: []
       parameters:
         - name: kinds
           in: query
@@ -5435,6 +5630,102 @@ components:
         github:
           $ref: "#/components/schemas/GitHubRunClaims"
 
+    CreateProjectGitHubLink:
+      type: object
+      required:
+        - scope
+      properties:
+        scope:
+          type: string
+          description: |
+            `owner` claims every repository under a GitHub owner and requires
+            `githubOwnerID`. `repository` claims a single repository and requires
+            `githubRepositoryID`; its owner is resolved server-side.
+          enum:
+            - owner
+            - repository
+        githubOwnerID:
+          type: integer
+          format: int64
+          description: Required for `owner` scope, ignored otherwise.
+        githubRepositoryID:
+          type: integer
+          format: int64
+          description: Required for `repository` scope, ignored otherwise.
+
+    ProjectGitHubLink:
+      type: object
+      required:
+        - id
+        - projectID
+        - scope
+        - githubOwnerID
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectID:
+          type: string
+          format: uuid
+        scope:
+          type: string
+          enum:
+            - owner
+            - repository
+        githubOwnerID:
+          type: integer
+          format: int64
+        githubRepositoryID:
+          type: integer
+          format: int64
+          nullable: true
+        createdBy:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    AvailableGitHubRepository:
+      type: object
+      required:
+        - githubRepositoryID
+        - githubOwnerID
+        - githubOwnerLogin
+        - githubRepositoryName
+        - githubVisibility
+      properties:
+        githubRepositoryID:
+          type: integer
+          format: int64
+        githubOwnerID:
+          type: integer
+          format: int64
+        githubOwnerLogin:
+          type: string
+        githubRepositoryName:
+          type: string
+        githubVisibility:
+          type: string
+          enum:
+            - public
+            - private
+            - internal
+        githubInstallationID:
+          type: integer
+          format: int64
+          nullable: true
+
     DeviceAuthorizationCreated:
       type: object
       required:
@@ -5743,6 +6034,7 @@ components:
         - agentID
         - githubOrg
         - repo
+        - github_details_verified
         - job
         - runID
         - runAttempt
@@ -5764,6 +6056,9 @@ components:
           type: integer
           format: int64
           nullable: true
+        github_details_verified:
+          type: boolean
+          description: Whether the GitHub details on this profile were verified via GitHub OIDC.
         job:
           type: string
         runID:
