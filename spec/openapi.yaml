@@ -1635,6 +1635,46 @@ paths:
         "500":
           description: Internal server error
 
+  /api/v1/agent/stopped:
+    post:
+      security:
+        - AgentTokenAuth: []
+      summary: Signal that an agent run stopped without a usable profile
+      description: |
+        Accepts a best-effort signal from the agent action when a run stops and no usable profile can be produced.
+        This endpoint is idempotent by `(agent, runID, runAttempt, job)`.
+        The current implementation acknowledges the payload and defers business handling.
+      operationId: agentStopped
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentStopped"
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Invalid JSON body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized (missing or invalid agent token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedAgent"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "500":
+          description: Internal server error
+
   /api/v1/agents:
     post:
       security:
@@ -6023,6 +6063,67 @@ components:
           type: string
           format: date-time
           description: When the v2 event was last updated
+
+    AgentStopped:
+      type: object
+      required:
+        - reason
+        - profileState
+        - runID
+      properties:
+        reason:
+          type: string
+          enum: [run_cancelled, crashed, flush_timeout, stopped_cleanly]
+        profileState:
+          type: string
+          enum: [present, missing, empty, invalid]
+        detail:
+          type: string
+          nullable: true
+        runID:
+          type: string
+          description: GitHub run id
+        runAttempt:
+          type: string
+          nullable: true
+          description: GitHub run attempt
+        job:
+          type: string
+          nullable: true
+          description: GitHub job name
+        jobStatus:
+          type: string
+          nullable: true
+          enum: [cancelled, failure]
+        jobStatusSource:
+          type: string
+          nullable: true
+          enum: [github_api]
+        jibril:
+          $ref: "#/components/schemas/AgentStoppedJibril"
+
+    AgentStoppedJibril:
+      type: object
+      properties:
+        activeState:
+          type: string
+          nullable: true
+          description: systemd ActiveState
+        result:
+          type: string
+          nullable: true
+          description: systemd Result
+        execMainStatus:
+          type: integer
+          format: int64
+          nullable: true
+        stopOutcome:
+          type: string
+          nullable: true
+          enum: [completed, timed_out]
+        forceStopped:
+          type: boolean
+          nullable: true
 
     CreateProfile:
       $ref: "./ashkaal.yaml#/components/schemas/AshkaalProfile"
