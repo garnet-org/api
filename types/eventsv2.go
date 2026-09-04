@@ -184,21 +184,9 @@ var (
 
 // CreateOrUpdateEventV2 is used for creating or updating v2 events in ashkaal format.
 type CreateOrUpdateEventV2 struct {
-	ID string `json:"id"`
-	// agentID is populated from JWT token
-	agentID string         `json:"-"`
-	Kind    eventkind.Kind `json:"kind"`
-	Data    ongoing.Base   `json:"data"`
-}
-
-// AgentID returns the ID of the agent that created or updated the event.
-func (e CreateOrUpdateEventV2) AgentID() string {
-	return e.agentID
-}
-
-// SetAgentID sets the ID of the agent that created or updated the event.
-func (e *CreateOrUpdateEventV2) SetAgentID(agentID string) {
-	e.agentID = agentID
+	ID   string         `json:"id"`
+	Kind eventkind.Kind `json:"kind"`
+	Data ongoing.Base   `json:"data"`
 }
 
 // Validate checks if the CreateOrUpdateEventV2 is valid.
@@ -267,20 +255,9 @@ type EventV2CreatedOrUpdated struct {
 // CreateOrUpdateDropIPEventV2 represents a DropIP event in v2 format.
 type CreateOrUpdateDropIPEventV2 struct {
 	ID        string         `json:"id"`
-	agentID   string         `json:"-"`
 	Data      ongoing.DropIP `json:"data"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
-}
-
-// AgentID returns the ID of the agent that created or updated the event.
-func (e CreateOrUpdateDropIPEventV2) AgentID() string {
-	return e.agentID
-}
-
-// SetAgentID sets the ID of the agent that created or updated the event.
-func (e *CreateOrUpdateDropIPEventV2) SetAgentID(agentID string) {
-	e.agentID = agentID
 }
 
 // Validate checks if the CreateOrUpdateDropIPEventV2 is valid.
@@ -299,20 +276,9 @@ func (e *CreateOrUpdateDropIPEventV2) Validate() error {
 // CreateOrUpdateNetworkFlowEventV2 represents a NetworkFlow event in v2 format.
 type CreateOrUpdateNetworkFlowEventV2 struct {
 	ID        string              `json:"id"`
-	agentID   string              `json:"-"`
 	Data      ongoing.NetworkFlow `json:"data"`
 	CreatedAt time.Time           `json:"createdAt"`
 	UpdatedAt time.Time           `json:"updatedAt"`
-}
-
-// AgentID returns the ID of the agent that created or updated the event.
-func (e CreateOrUpdateNetworkFlowEventV2) AgentID() string {
-	return e.agentID
-}
-
-// SetAgentID sets the ID of the agent that created or updated the event.
-func (e *CreateOrUpdateNetworkFlowEventV2) SetAgentID(agentID string) {
-	e.agentID = agentID
 }
 
 // Validate checks if the CreateOrUpdateNetworkFlowEventV2 is valid.
@@ -331,20 +297,9 @@ func (e *CreateOrUpdateNetworkFlowEventV2) Validate() error {
 // CreateOrUpdateExecutionEventV2 represents an Execution event in v2 format.
 type CreateOrUpdateExecutionEventV2 struct {
 	ID        string            `json:"id"`
-	agentID   string            `json:"-"`
 	Data      ongoing.Execution `json:"data"`
 	CreatedAt time.Time         `json:"createdAt"`
 	UpdatedAt time.Time         `json:"updatedAt"`
-}
-
-// AgentID returns the ID of the agent that created or updated the event.
-func (e CreateOrUpdateExecutionEventV2) AgentID() string {
-	return e.agentID
-}
-
-// SetAgentID sets the ID of the agent that created or updated the event.
-func (e *CreateOrUpdateExecutionEventV2) SetAgentID(agentID string) {
-	e.agentID = agentID
 }
 
 // Validate checks if the CreateOrUpdateExecutionEventV2 is valid.
@@ -363,20 +318,9 @@ func (e *CreateOrUpdateExecutionEventV2) Validate() error {
 // CreateOrUpdateFileAccessEventV2 represents a FileAccess event in v2 format.
 type CreateOrUpdateFileAccessEventV2 struct {
 	ID        string             `json:"id"`
-	agentID   string             `json:"-"`
 	Data      ongoing.FileAccess `json:"data"`
 	CreatedAt time.Time          `json:"createdAt"`
 	UpdatedAt time.Time          `json:"updatedAt"`
-}
-
-// AgentID returns the ID of the agent that created or updated the event.
-func (e CreateOrUpdateFileAccessEventV2) AgentID() string {
-	return e.agentID
-}
-
-// SetAgentID sets the ID of the agent that created or updated the event.
-func (e *CreateOrUpdateFileAccessEventV2) SetAgentID(agentID string) {
-	e.agentID = agentID
 }
 
 // Validate checks if the CreateOrUpdateFileAccessEventV2 is valid.
@@ -696,12 +640,10 @@ func (t EventActionType) IsValid() bool {
 
 // EventAction represents an action to be performed on an event.
 type EventAction struct {
-	ActionType       EventActionType       `json:"action_type"` // block
-	Scope            NetworkPolicyScope    `json:"scope"`       // global, repo, workflow, cluster, or node
-	Reason           string                `json:"reason"`      // User-provided reason for the action
-	UserID           *string               `json:"-"`           // ID of the user who performed the action
-	DestinationType  NetworkPolicyRuleType `json:"-"`           // Domain or CIDR
-	DestinationValue string                `json:"-"`           // The actual domain or IP CIDR
+	EventID    string             `json:"-"`
+	ActionType EventActionType    `json:"action_type"` // block
+	Scope      NetworkPolicyScope `json:"scope"`       // global, repo, workflow, cluster, or node
+	Reason     string             `json:"reason"`      // User-provided reason for the action
 }
 
 // Validate ensures the EventAction is valid.

@@ -33,16 +33,7 @@ type Profile struct {
 }
 
 type CreateProfile struct {
-	agentID string
 	ongoing.Profile
-}
-
-func (in *CreateProfile) SetAgentID(agentID string) {
-	in.agentID = agentID
-}
-
-func (in CreateProfile) AgentID() string {
-	return in.agentID
 }
 
 func (in CreateProfile) GitHubOrg() string {

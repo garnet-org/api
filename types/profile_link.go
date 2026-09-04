@@ -30,10 +30,8 @@ type ProfileLink struct {
 
 type CreateProfileLink struct {
 	ProfileID   string     `json:"-"`
-	CreatedBy   string     `json:"-"`
 	Description *string    `json:"description"`
 	ExpiresAt   *time.Time `json:"expiresAt"`
-	TokenHash   []byte     `json:"-"`
 }
 
 func (in *CreateProfileLink) Validate() error {
@@ -41,10 +39,6 @@ func (in *CreateProfileLink) Validate() error {
 
 	if !id.Valid(in.ProfileID) {
 		v.Add("profileID", "invalid profileID format")
-	}
-
-	if !id.Valid(in.CreatedBy) {
-		v.Add("createdBy", "invalid createdBy format")
 	}
 
 	if in.Description != nil {
@@ -65,10 +59,6 @@ func (in *CreateProfileLink) Validate() error {
 			v.Add("expiresAt", "expiresAt must be in the future")
 		}
 		*in.ExpiresAt = expiresAt
-	}
-
-	if len(in.TokenHash) == 0 {
-		v.Add("tokenHash", "tokenHash is required")
 	}
 
 	return v.AsError()

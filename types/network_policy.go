@@ -630,7 +630,8 @@ type NetworkPolicyCreated struct {
 
 // UpdateNetworkPolicy represents the request to update an existing network policy.
 type UpdateNetworkPolicy struct {
-	Config *NetworkPolicyConfig `json:"config"`
+	PolicyID string               `json:"-"`
+	Config   *NetworkPolicyConfig `json:"config"`
 }
 
 // Validate ensures the UpdateNetworkPolicy request is valid.
@@ -657,10 +658,11 @@ type NetworkPolicyUpdated struct {
 // CreateNetworkPolicyRule represents the request to create a new network policy rule.
 // The PolicyID is populated by the service layer.
 type CreateNetworkPolicyRule struct {
-	Type    NetworkPolicyRuleType `json:"type"`
-	Value   string                `json:"value"`
-	Action  NetworkPolicyType     `json:"action"`
-	EventID string                `json:"event_id,omitempty"`
+	PolicyID string                `json:"-"`
+	Type     NetworkPolicyRuleType `json:"type"`
+	Value    string                `json:"value"`
+	Action   NetworkPolicyType     `json:"action"`
+	EventID  string                `json:"event_id,omitempty"`
 }
 
 // Validate ensures the CreateNetworkPolicyRule request is valid.
@@ -683,6 +685,7 @@ type NetworkPolicyRuleCreated struct {
 
 // UpdateNetworkPolicyRule represents the request to update an existing network policy rule.
 type UpdateNetworkPolicyRule struct {
+	RuleID string             `json:"-"`
 	Value  *string            `json:"value,omitempty"`
 	Action *NetworkPolicyType `json:"action,omitempty"`
 }

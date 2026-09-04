@@ -8,8 +8,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fxamacker/cbor/v2 v2.9.3 h1:oQBnFATpNdY8gJHTndDDv5Xl4QqNaz51G5LLEPhng3Q=
 github.com/fxamacker/cbor/v2 v2.9.3/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
-github.com/garnet-org/jibril-ashkaal v1.4.0 h1:9yQaAStutVjgWEMZ06J6IcQlVUkS1q8ohlbJfSla/hk=
-github.com/garnet-org/jibril-ashkaal v1.4.0/go.mod h1:yAVXGnoAM6sein6/anTLXjuAaPlbiDKwntLnb79Jias=
+github.com/garnet-org/jibril-ashkaal v1.5.0 h1:zoVWa0J54UeXKgo/a3NETZtuVdrQAzabzHtsWR8oIfE=
+github.com/garnet-org/jibril-ashkaal v1.5.0/go.mod h1:yAVXGnoAM6sein6/anTLXjuAaPlbiDKwntLnb79Jias=
 github.com/go-logr/logr v1.4.4 h1:tG4xh9yMsRCAiodLVTxyrkzSZ9+o0L1Kg/+cPVcbP/8=
 github.com/go-logr/logr v1.4.4/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=

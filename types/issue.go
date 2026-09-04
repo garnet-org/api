@@ -571,14 +571,15 @@ type IssueCreated struct {
 
 // UpdateIssue represents the request to update an existing issue.
 type UpdateIssue struct {
-	Class               *IssueClass         `json:"class,omitempty"`
-	Description         *string             `json:"description,omitempty"`
-	State               *IssueState         `json:"state,omitempty"`
-	Priority            *IssuePriority      `json:"priority,omitempty"`
-	Labels              *IssueLabels        `json:"labels,omitempty"`
-	Ignored             *bool               `json:"ignored,omitempty"`
-	IgnoredReason       *string             `json:"ignored_reason,omitempty"`
-	IgnoredBy           *string             `json:"-"`                                // For internal use only, not exposed in API
+	IssueID       string         `json:"-"`
+	Class         *IssueClass    `json:"class,omitempty"`
+	Description   *string        `json:"description,omitempty"`
+	State         *IssueState    `json:"state,omitempty"`
+	Priority      *IssuePriority `json:"priority,omitempty"`
+	Labels        *IssueLabels   `json:"labels,omitempty"`
+	Ignored       *bool          `json:"ignored,omitempty"`
+	IgnoredReason *string        `json:"ignored_reason,omitempty"`
+
 	Reason              *string             `json:"reason,omitempty"`                 // Reason for state change
 	EventIDs            []string            `json:"event_ids,omitempty"`              // Event IDs to add to the issue
 	PolicyScope         *NetworkPolicyScope `json:"policy_scope,omitempty"`           // Network policy scope
@@ -649,12 +650,10 @@ type IssueUpdated struct {
 
 // IssueAction represents an action to be performed on an issue.
 type IssueAction struct {
-	ActionType       IssueActionType       `json:"action_type"` // allow or block
-	Scope            NetworkPolicyScope    `json:"scope"`       // global, repo, or workflow
-	Reason           string                `json:"reason"`      // User-provided reason for the action
-	UserID           *string               `json:"-"`           // ID of the user who performed the action
-	DestinationType  NetworkPolicyRuleType `json:"-"`           // Domain or CIDR
-	DestinationValue string                `json:"-"`           // The actual domain or IP CIDR
+	IssueID    string             `json:"-"`
+	ActionType IssueActionType    `json:"action_type"` // allow or block
+	Scope      NetworkPolicyScope `json:"scope"`       // global, repo, or workflow
+	Reason     string             `json:"reason"`      // User-provided reason for the action
 }
 
 // Validate ensures the IssueAction is valid.

@@ -206,16 +206,6 @@ type Agent struct {
 
 // CreateAgent represents the request to create a new agent.
 type CreateAgent struct {
-	// projectID is populated by decoding the JWT token.
-	projectID *string
-
-	// workflowToken is set when the request is authenticated via X-Workflow-Token.
-	workflowToken *WorkflowToken
-
-	githubDetailsVerified   bool
-	githubRepositoryID      *int64
-	githubRepositoryOwnerID *int64
-
 	OS        string      `json:"os"`
 	Arch      string      `json:"arch"`
 	Hostname  string      `json:"hostname"`
@@ -228,52 +218,6 @@ type CreateAgent struct {
 	GithubContext     *AgentGithubContext     `json:"github_context,omitempty"`
 	KubernetesContext *AgentKubernetesContext `json:"kubernetes_context,omitempty"`
 	VanillaContext    *AgentVanillaContext    `json:"vanilla_context,omitempty"`
-}
-
-// SetProjectID sets the project ID for the agent.
-func (c *CreateAgent) SetProjectID(projectID string) {
-	projectIDCopy := projectID
-	c.projectID = &projectIDCopy
-}
-
-func (c *CreateAgent) ClearProjectID() {
-	c.projectID = nil
-}
-
-func (c *CreateAgent) SetGitHubDetailsVerified(verified bool) {
-	c.githubDetailsVerified = verified
-}
-
-func (c *CreateAgent) GitHubDetailsVerified() bool {
-	return c.githubDetailsVerified
-}
-
-func (c *CreateAgent) SetGitHubRepositoryID(repositoryID *int64) {
-	c.githubRepositoryID = repositoryID
-}
-
-func (c *CreateAgent) GitHubRepositoryID() *int64 {
-	return c.githubRepositoryID
-}
-
-func (c *CreateAgent) SetGitHubRepositoryOwnerID(repositoryOwnerID *int64) {
-	c.githubRepositoryOwnerID = repositoryOwnerID
-}
-
-func (c *CreateAgent) GitHubRepositoryOwnerID() *int64 {
-	return c.githubRepositoryOwnerID
-}
-
-func (c *CreateAgent) ProjectID() *string {
-	return c.projectID
-}
-
-func (c *CreateAgent) SetWorkflowToken(t WorkflowToken) {
-	c.workflowToken = &t
-}
-
-func (c *CreateAgent) WorkflowToken() *WorkflowToken {
-	return c.workflowToken
 }
 
 // ErrInvalidAgentType is returned when the agent kind is invalid.
@@ -352,6 +296,7 @@ type AgentCreated struct {
 
 // UpdateAgent represents the request to update an existing agent.
 type UpdateAgent struct {
+	AgentID           string                  `json:"-"`
 	OS                *string                 `json:"os,omitempty"`
 	Arch              *string                 `json:"arch,omitempty"`
 	Hostname          *string                 `json:"hostname,omitempty"`

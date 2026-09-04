@@ -17,11 +17,10 @@ const (
 // GitHubOwnerID is resolved server-side for repository scope, so it is not part
 // of the request body for that scope.
 type CreateProjectGitHubLink struct {
-	ProjectID          string  `json:"-"`
-	Scope              string  `json:"scope"`
-	GitHubOwnerID      *int64  `json:"githubOwnerID,omitempty"`
-	GitHubRepositoryID *int64  `json:"githubRepositoryID,omitempty"`
-	CreatedBy          *string `json:"-"`
+	ProjectID          string `json:"-"`
+	Scope              string `json:"scope"`
+	GitHubOwnerID      *int64 `json:"githubOwnerID,omitempty"`
+	GitHubRepositoryID *int64 `json:"githubRepositoryID,omitempty"`
 }
 
 func (in CreateProjectGitHubLink) Validate() error {
@@ -33,10 +32,6 @@ func (in CreateProjectGitHubLink) Validate() error {
 	if in.GitHubOwnerID == nil || *in.GitHubOwnerID <= 0 {
 		v.Add("githubOwnerID", "githubOwnerID is required")
 	}
-	if in.CreatedBy != nil && !id.Valid(*in.CreatedBy) {
-		v.Add("createdBy", "invalid createdBy")
-	}
-
 	switch in.Scope {
 	case GitHubLinkScopeOwner:
 		if in.GitHubRepositoryID != nil {

@@ -98,9 +98,10 @@ type WebhookList struct {
 
 // WebhookUpdate represents a webhook update request.
 type WebhookUpdate struct {
-	Name *string      `json:"name,omitempty"`
-	Kind *WebhookKind `json:"kind,omitempty"`
-	URL  *string      `json:"url,omitempty"`
+	WebhookID string       `json:"-"`
+	Name      *string      `json:"name,omitempty"`
+	Kind      *WebhookKind `json:"kind,omitempty"`
+	URL       *string      `json:"url,omitempty"`
 }
 
 // Validate checks if the WebhookUpdate fields are valid.

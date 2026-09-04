@@ -40,8 +40,6 @@ type CreateToken struct {
 	ProjectID   string       `json:"-"`
 	Name        string       `json:"name"`
 	Permissions []Permission `json:"permissions"`
-	UserID      string       `json:"-"` // Populated by the service layer, not exposed in API
-	Hash        string       `json:"-"` // Hash of the JWT token, populated by the service layer
 }
 
 // Validate ensures the CreateToken request is valid.
@@ -79,6 +77,7 @@ type TokenCreated struct {
 
 // UpdateToken represents the request to update an existing token.
 type UpdateToken struct {
+	TokenID     string       `json:"-"`
 	Name        *string      `json:"name,omitempty"`
 	Permissions []Permission `json:"permissions,omitempty"`
 }
