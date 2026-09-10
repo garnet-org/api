@@ -1,7 +1,6 @@
 package types
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/garnet-org/api/validator"
@@ -59,20 +58,15 @@ func (s AgentStoppedJobStatus) IsValid() bool {
 	}
 }
 
-type AgentStoppedJobStatusSource string
+// AgentStoppedSource names who told us the run stopped. It is never part of a
+// request: the agent speaks for itself, and GitHub speaks for the agents that
+// never got to.
+type AgentStoppedSource string
 
 const (
-	AgentStoppedJobStatusSourceGitHubAPI AgentStoppedJobStatusSource = "github_api"
+	AgentStoppedSourceAgent         AgentStoppedSource = "agent"
+	AgentStoppedSourceGitHubWebhook AgentStoppedSource = "github_webhook"
 )
-
-func (s AgentStoppedJobStatusSource) IsValid() bool {
-	switch s {
-	case AgentStoppedJobStatusSourceGitHubAPI:
-		return true
-	default:
-		return false
-	}
-}
 
 type AgentStoppedStopOutcome string
 
@@ -90,16 +84,15 @@ func (s AgentStoppedStopOutcome) IsValid() bool {
 	}
 }
 
+// AgentStopped is what an agent reports when its run ends. It says only what
+// the agent alone knows; which run it belongs to is already known from the
+// agent itself.
 type AgentStopped struct {
-	Reason          AgentStoppedReason           `json:"reason"`
-	ProfileState    AgentStoppedProfileState     `json:"profileState"`
-	Detail          *string                      `json:"detail,omitempty"`
-	RunID           string                       `json:"runID"`
-	RunAttempt      *string                      `json:"runAttempt,omitempty"`
-	Job             *string                      `json:"job,omitempty"`
-	JobStatus       *AgentStoppedJobStatus       `json:"jobStatus,omitempty"`
-	JobStatusSource *AgentStoppedJobStatusSource `json:"jobStatusSource,omitempty"`
-	Jibril          *AgentStoppedJibril          `json:"jibril,omitempty"`
+	Reason       AgentStoppedReason       `json:"reason"`
+	ProfileState AgentStoppedProfileState `json:"profileState"`
+	Detail       *string                  `json:"detail,omitempty"`
+	JobStatus    *AgentStoppedJobStatus   `json:"jobStatus,omitempty"`
+	Jibril       *AgentStoppedJibril      `json:"jibril,omitempty"`
 }
 
 type AgentStoppedJibril struct {
@@ -121,33 +114,6 @@ func (in *AgentStopped) Validate() error {
 		v.Add("profileState", "profileState must be one of present, missing, empty, invalid")
 	}
 
-	in.RunID = strings.TrimSpace(in.RunID)
-	if in.RunID == "" {
-		v.Add("runID", "runID is required")
-	} else if runID, err := strconv.ParseInt(in.RunID, 10, 64); err != nil || runID <= 0 {
-		v.Add("runID", "runID must be a positive integer")
-	}
-
-	if in.RunAttempt != nil {
-		runAttempt := strings.TrimSpace(*in.RunAttempt)
-		if runAttempt == "" {
-			in.RunAttempt = nil
-		} else if attempt, err := strconv.ParseInt(runAttempt, 10, 64); err != nil || attempt <= 0 {
-			v.Add("runAttempt", "runAttempt must be a positive integer")
-		} else {
-			in.RunAttempt = &runAttempt
-		}
-	}
-
-	if in.Job != nil {
-		job := strings.TrimSpace(*in.Job)
-		if job == "" {
-			in.Job = nil
-		} else {
-			in.Job = &job
-		}
-	}
-
 	if in.Detail != nil {
 		detail := strings.TrimSpace(*in.Detail)
 		if detail == "" {
@@ -159,10 +125,6 @@ func (in *AgentStopped) Validate() error {
 
 	if in.JobStatus != nil && !in.JobStatus.IsValid() {
 		v.Add("jobStatus", "jobStatus must be one of cancelled, failure")
-	}
-
-	if in.JobStatusSource != nil && !in.JobStatusSource.IsValid() {
-		v.Add("jobStatusSource", "jobStatusSource must be one of github_api")
 	}
 
 	if in.Jibril != nil {

@@ -10,8 +10,9 @@ type GitHubCommentOutboxPayloadKind string
 type GitHubCommentOutboxSourceEntityKind string
 
 const (
-	GitHubCommentOutboxPayloadKindPendingPRCommitComment GitHubCommentOutboxPayloadKind = "pending_pr_commit_comment"
-	GitHubCommentOutboxPayloadKindPRCommitComment        GitHubCommentOutboxPayloadKind = "pr_commit_comment"
+	GitHubCommentOutboxPayloadKindPending GitHubCommentOutboxPayloadKind = "pending_pr_commit_comment"
+	GitHubCommentOutboxPayloadKindProfile GitHubCommentOutboxPayloadKind = "pr_commit_comment"
+	GitHubCommentOutboxPayloadKindStopped GitHubCommentOutboxPayloadKind = "stopped_pr_commit_comment"
 
 	GitHubCommentOutboxSourceEntityKindAgent   GitHubCommentOutboxSourceEntityKind = "agent"
 	GitHubCommentOutboxSourceEntityKindProfile GitHubCommentOutboxSourceEntityKind = "profile"
@@ -40,7 +41,9 @@ type CreateGitHubCommentOutboxItem struct {
 	Payload          any
 }
 
-type GitHubPendingPRCommitCommentOutboxPayload struct {
+// AgentPendingOutboxPayload is stored when an agent checks in, to trigger the
+// initial "still recording" pull-request comment.
+type AgentPendingOutboxPayload struct {
 	AgentID   string `json:"agentID"`
 	Owner     string `json:"owner"`
 	Repo      string `json:"repo"`
@@ -48,10 +51,22 @@ type GitHubPendingPRCommitCommentOutboxPayload struct {
 	CommitSHA string `json:"commitSHA"`
 }
 
-type GitHubPRCommitCommentOutboxPayload struct {
+// ProfileOutboxPayload is stored when a profile arrives, to trigger the final
+// pull-request comment with the recorded behaviour.
+type ProfileOutboxPayload struct {
 	ProfileID  string `json:"profileID"`
 	Owner      string `json:"owner"`
 	Repo       string `json:"repo"`
 	PRNumber   int    `json:"prNumber"`
 	ProfileSHA string `json:"profileSHA"`
+}
+
+// AgentStoppedOutboxPayload is stored when an agent's run ends without a
+// profile, to refresh the pull-request comment so it no longer waits forever.
+type AgentStoppedOutboxPayload struct {
+	AgentID   string `json:"agentID"`
+	Owner     string `json:"owner"`
+	Repo      string `json:"repo"`
+	PRNumber  int    `json:"prNumber"`
+	CommitSHA string `json:"commitSHA"`
 }

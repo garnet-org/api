@@ -202,6 +202,21 @@ type Agent struct {
 	LastSeen                time.Time               `json:"last_seen"`
 	CreatedAt               time.Time               `json:"created_at"`
 	UpdatedAt               time.Time               `json:"updated_at"`
+
+	// Stop of the agent's run, as reported by the agent itself or, when it
+	// never got to, by GitHub. Unset while the run is still believed to be
+	// recording.
+	StoppedAt           *time.Time                `json:"stopped_at,omitempty" db:"stopped_at"`
+	StoppedSource       *AgentStoppedSource       `json:"stopped_source,omitempty" db:"stopped_source"`
+	StoppedReason       *AgentStoppedReason       `json:"stopped_reason,omitempty" db:"stopped_reason"`
+	StoppedProfileState *AgentStoppedProfileState `json:"stopped_profile_state,omitempty" db:"stopped_profile_state"`
+	StoppedDetail       *string                   `json:"stopped_detail,omitempty" db:"stopped_detail"`
+	StoppedJobStatus    *AgentStoppedJobStatus    `json:"stopped_job_status,omitempty" db:"stopped_job_status"`
+}
+
+// Stopped reports whether the agent's run is known to have ended.
+func (a Agent) Stopped() bool {
+	return a.StoppedAt != nil
 }
 
 // CreateAgent represents the request to create a new agent.

@@ -1642,8 +1642,9 @@ paths:
       summary: Signal that an agent run stopped without a usable profile
       description: |
         Accepts a best-effort signal from the agent action when a run stops and no usable profile can be produced.
-        This endpoint is idempotent by `(agent, runID, runAttempt, job)`.
-        The current implementation acknowledges the payload and defers business handling.
+        This endpoint is idempotent by `(agent, runID, runAttempt, job)`; the first reported stop wins.
+        The stop is recorded on the agent and resolves the run's pending GitHub pull-request comment,
+        which would otherwise keep waiting for a profile that is never coming.
       operationId: agentStopped
       requestBody:
         required: true
@@ -1666,6 +1667,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnauthorizedAgent"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "422":
           description: Validation error
           content:
@@ -3260,6 +3267,13 @@ paths:
         - `installation`: `created`, `deleted`, `suspend`, `unsuspend`
         - `installation_repositories`: `added`, `removed`
         - `repository`: `renamed`, `publicized`, `privatized`, `transferred`, `deleted`
+        - `workflow_run`: `completed`
+
+        Deliveries are queued and processed asynchronously.
+
+        A completed `workflow_run` stops every agent of that run that never
+        reported a stop of its own, and refreshes the pull-request comment so it
+        no longer waits for an Execution Profile that will never arrive.
       operationId: githubWebhook
       parameters:
         - name: X-GitHub-Event
@@ -6066,10 +6080,13 @@ components:
 
     AgentStopped:
       type: object
+      description: |
+        What an agent reports when its run ends. It carries only what the agent
+        alone knows; the run, attempt and job it belongs to are already known
+        from the authenticated agent itself.
       required:
         - reason
         - profileState
-        - runID
       properties:
         reason:
           type: string
@@ -6080,25 +6097,10 @@ components:
         detail:
           type: string
           nullable: true
-        runID:
-          type: string
-          description: GitHub run id
-        runAttempt:
-          type: string
-          nullable: true
-          description: GitHub run attempt
-        job:
-          type: string
-          nullable: true
-          description: GitHub job name
         jobStatus:
           type: string
           nullable: true
           enum: [cancelled, failure]
-        jobStatusSource:
-          type: string
-          nullable: true
-          enum: [github_api]
         jibril:
           $ref: "#/components/schemas/AgentStoppedJibril"
 
@@ -6863,6 +6865,38 @@ components:
           type: string
           format: date-time
           description: When the agent was last updated
+        stopped_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            When the agent's run stopped, as reported by the agent itself or, when
+            it never got to, by GitHub. Null while the run is still believed to be
+            recording.
+        stopped_source:
+          type: string
+          nullable: true
+          enum: [agent, github_webhook]
+          description: Who reported the stop
+        stopped_reason:
+          type: string
+          nullable: true
+          enum: [run_cancelled, crashed, flush_timeout, stopped_cleanly]
+          description: Why the run stopped
+        stopped_profile_state:
+          type: string
+          nullable: true
+          enum: [present, missing, empty, invalid]
+          description: State of the profile the agent held when it stopped
+        stopped_detail:
+          type: string
+          nullable: true
+          description: Free-form detail about the stop
+        stopped_job_status:
+          type: string
+          nullable: true
+          enum: [cancelled, failure]
+          description: Status of the workflow job when the agent stopped
 
     CreateAgent:
       type: object

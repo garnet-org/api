@@ -107,6 +107,12 @@ func (c *Client) AgentHeartbeat(ctx context.Context) error {
 	return c.do(ctx, nil, http.MethodPost, "/api/v1/agent_heartbeat", nil)
 }
 
+// AgentStopped reports that the agent's run ended without a usable profile.
+// Must be called with an agent token.
+func (c *Client) AgentStopped(ctx context.Context, in types.AgentStopped) error {
+	return c.do(ctx, nil, http.MethodPost, "/api/v1/agent/stopped", in)
+}
+
 // LegacyAgents retrieves a list of agents with optional filters and pagination.
 func (c *Client) LegacyAgents(ctx context.Context, in types.LegacyListAgents) (types.Paginator[types.Agent], error) {
 	var out types.Paginator[types.Agent]
