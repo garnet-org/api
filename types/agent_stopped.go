@@ -13,11 +13,12 @@ const (
 	AgentStoppedReasonCrashed        AgentStoppedReason = "crashed"
 	AgentStoppedReasonFlushTimeout   AgentStoppedReason = "flush_timeout"
 	AgentStoppedReasonStoppedCleanly AgentStoppedReason = "stopped_cleanly"
+	AgentStoppedReasonStartFailed    AgentStoppedReason = "start_failed"
 )
 
 func (r AgentStoppedReason) IsValid() bool {
 	switch r {
-	case AgentStoppedReasonRunCancelled, AgentStoppedReasonCrashed, AgentStoppedReasonFlushTimeout, AgentStoppedReasonStoppedCleanly:
+	case AgentStoppedReasonRunCancelled, AgentStoppedReasonCrashed, AgentStoppedReasonFlushTimeout, AgentStoppedReasonStoppedCleanly, AgentStoppedReasonStartFailed:
 		return true
 	default:
 		return false
@@ -107,7 +108,7 @@ func (in *AgentStopped) Validate() error {
 	v := validator.New()
 
 	if !in.Reason.IsValid() {
-		v.Add("reason", "reason must be one of run_cancelled, crashed, flush_timeout, stopped_cleanly")
+		v.Add("reason", "reason must be one of run_cancelled, crashed, flush_timeout, stopped_cleanly, start_failed")
 	}
 
 	if !in.ProfileState.IsValid() {
