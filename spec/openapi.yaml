@@ -6090,7 +6090,7 @@ components:
       properties:
         reason:
           type: string
-          enum: [run_cancelled, crashed, flush_timeout, stopped_cleanly]
+          enum: [run_cancelled, crashed, flush_timeout, stopped_cleanly, start_failed]
         profileState:
           type: string
           enum: [present, missing, empty, invalid]
