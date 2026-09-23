@@ -1,6 +1,11 @@
 // Package validator provides a simple validation mechanism to collect and report validation errors.
 package validator
 
+import (
+	"slices"
+	"strings"
+)
+
 type Validator struct {
 	Message string              `json:"message"`
 	Errors  map[string][]string `json:"errors"`
@@ -36,7 +41,29 @@ func (v *Validator) OK() bool {
 }
 
 func (v *Validator) Error() string {
-	return v.Message
+	if len(v.Errors) == 0 {
+		return v.Message
+	}
+
+	fields := make([]string, 0, len(v.Errors))
+	for field := range v.Errors {
+		fields = append(fields, field)
+	}
+	slices.Sort(fields)
+
+	var sb strings.Builder
+	sb.WriteString(v.Message)
+	sb.WriteString(": ")
+	for i, field := range fields {
+		if i > 0 {
+			sb.WriteString("; ")
+		}
+		sb.WriteString(field)
+		sb.WriteString(": ")
+		sb.WriteString(strings.Join(v.Errors[field], ", "))
+	}
+
+	return sb.String()
 }
 
 func (v *Validator) AsError() error {
