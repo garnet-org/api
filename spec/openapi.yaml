@@ -6881,7 +6881,7 @@ components:
         stopped_reason:
           type: string
           nullable: true
-          enum: [run_cancelled, crashed, flush_timeout, stopped_cleanly]
+          enum: [run_cancelled, crashed, flush_timeout, stopped_cleanly, start_failed]
           description: Why the run stopped
         stopped_profile_state:
           type: string
