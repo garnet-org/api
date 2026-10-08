@@ -178,10 +178,25 @@ func (c *AgentKubernetesContext) Validate() error {
 	return c.Validator().AsError()
 }
 
+// AgentSource names who created an agent. It is never part of a request: an
+// agent registering itself speaks for itself, and the control plane speaks for
+// the runs that could not authenticate at all.
+type AgentSource string
+
+const (
+	// AgentSourceAgent is an agent that registered itself from the runner.
+	AgentSourceAgent AgentSource = "agent"
+
+	// AgentSourceArtifactRelay is an agent the control plane reconstructed
+	// from a workflow run's artifact, after the run finished without one.
+	AgentSourceArtifactRelay AgentSource = "artifact_relay"
+)
+
 // Agent represents the stored agent model.
 type Agent struct {
 	ID                      string                  `json:"id"`
 	ProjectID               *string                 `json:"project_id,omitempty"`
+	Source                  AgentSource             `json:"source"`
 	GitHubDetailsVerified   bool                    `json:"github_details_verified" db:"github_details_verified"`
 	GitHubRepositoryID      *int64                  `json:"github_repository_id,omitempty"`
 	GitHubRepositoryOwnerID *int64                  `json:"github_repository_owner_id,omitempty"`

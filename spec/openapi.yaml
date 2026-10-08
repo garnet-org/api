@@ -6805,6 +6805,17 @@ components:
           type: string
           nullable: true
           description: Project the agent belongs to. Null for unbound GitHub OIDC agents.
+        source:
+          type: string
+          enum:
+            - agent
+            - artifact_relay
+          description: |
+            Who created the agent. `agent` means it registered itself from the
+            runner. `artifact_relay` means the control plane reconstructed it
+            from the workflow run's artifact, which is how a pull request
+            opened from a fork is recorded: GitHub withholds OIDC tokens from
+            such a run, so nothing in it can register an agent itself.
         github_details_verified:
           type: boolean
           description: Whether the GitHub details on this agent were verified via GitHub OIDC.
