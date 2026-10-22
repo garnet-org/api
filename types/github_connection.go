@@ -29,11 +29,11 @@ func (in CreateProjectGitHubLink) Validate() error {
 	if !id.Valid(in.ProjectID) {
 		v.Add("projectID", "invalid projectID")
 	}
-	if in.GitHubOwnerID == nil || *in.GitHubOwnerID <= 0 {
-		v.Add("githubOwnerID", "githubOwnerID is required")
-	}
 	switch in.Scope {
 	case GitHubLinkScopeOwner:
+		if in.GitHubOwnerID == nil || *in.GitHubOwnerID <= 0 {
+			v.Add("githubOwnerID", "githubOwnerID is required for owner scope")
+		}
 		if in.GitHubRepositoryID != nil {
 			v.Add("githubRepositoryID", "githubRepositoryID must not be set for owner scope")
 		}
