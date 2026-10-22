@@ -485,8 +485,8 @@ func ExtractDomainFromV2Event(event Event) string {
 		// We want the last non-IP entry (the original requested domain)
 		if len(flow.Remote.Names) > 0 {
 			// Iterate backwards to find the last non-IP entry
-			for i := len(flow.Remote.Names) - 1; i >= 0; i-- {
-				name := flow.Remote.Names[i]
+			for _, name := range slices.Backward(flow.Remote.Names) {
+
 				if name != "" && !isIPAddress(name) {
 					return name
 				}
