@@ -54,11 +54,12 @@ type AgentPendingOutboxPayload struct {
 // ProfileOutboxPayload is stored when a profile arrives, to trigger the final
 // pull-request comment with the recorded behaviour.
 type ProfileOutboxPayload struct {
-	ProfileID  string `json:"profileID"`
-	Owner      string `json:"owner"`
-	Repo       string `json:"repo"`
-	PRNumber   int    `json:"prNumber"`
-	ProfileSHA string `json:"profileSHA"`
+	ProfileID  string  `json:"profileID"`
+	ProjectID  *string `json:"projectID,omitempty"`
+	Owner      string  `json:"owner"`
+	Repo       string  `json:"repo"`
+	PRNumber   int     `json:"prNumber"`
+	ProfileSHA string  `json:"profileSHA"`
 }
 
 // AgentStoppedOutboxPayload is stored when an agent's run ends without a
