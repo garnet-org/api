@@ -17,19 +17,19 @@ import (
 var ErrPublicProfileNotFound = errs.NotFoundError("public profile not found")
 
 type Profile struct {
-	ID                    string          `json:"id"`
-	AgentID               string          `json:"agentID" db:"agent_id"`
-	GithubOrg             string          `json:"githubOrg" db:"github_org"`
-	Repo                  string          `json:"repo"`
-	GitHubRepositoryID    *int64          `json:"githubRepositoryID,omitempty" db:"github_repository_id"`
-	GitHubDetailsVerified bool            `json:"github_details_verified" db:"github_details_verified"`
-	Job                   string          `json:"job"`
-	RunID                 string          `json:"runID" db:"run_id"`
-	RunAttempt            int64           `json:"runAttempt" db:"run_attempt"`
-	JobIndex              *uint32         `json:"jobIndex,omitempty" db:"job_index"`
-	Data                  ongoing.Profile `json:"data"`
-	CreatedAt             time.Time       `json:"createdAt" db:"created_at"`
-	UpdatedAt             time.Time       `json:"updatedAt" db:"updated_at"`
+	ID                    string          `json:"id" desc:"Unique profile identifier"`
+	AgentID               string          `json:"agentID" db:"agent_id" desc:"Identifier of the agent that generated the profile"`
+	GithubOrg             string          `json:"githubOrg" db:"github_org" desc:"GitHub organization or owner"`
+	Repo                  string          `json:"repo" desc:"GitHub repository name"`
+	GitHubRepositoryID    *int64          `json:"githubRepositoryID,omitempty" db:"github_repository_id" desc:"GitHub repository numeric ID"`
+	GitHubDetailsVerified bool            `json:"github_details_verified" db:"github_details_verified" desc:"Whether GitHub context was verified"`
+	Job                   string          `json:"job" desc:"GitHub Actions job name"`
+	RunID                 string          `json:"runID" db:"run_id" desc:"GitHub Actions workflow run ID"`
+	RunAttempt            int64           `json:"runAttempt" db:"run_attempt" desc:"GitHub Actions workflow run attempt number"`
+	JobIndex              *uint32         `json:"jobIndex,omitempty" db:"job_index" desc:"Matrix job index within the workflow run"`
+	Data                  ongoing.Profile `json:"data" desc:"Garnet runtime review profile payload"`
+	CreatedAt             time.Time       `json:"createdAt" db:"created_at" desc:"Creation timestamp"`
+	UpdatedAt             time.Time       `json:"updatedAt" db:"updated_at" desc:"Last update timestamp"`
 }
 
 type CreateProfile struct {
@@ -115,17 +115,17 @@ func (in *CreateProfile) Validate() error {
 }
 
 type ListProfiles struct {
-	AgentID    *string
-	ProjectID  *string
-	GitHubOrg  *string
-	Repo       *string
-	Job        *string
-	RunID      *string
-	RunAttempt *int64
-	JobIndex   *uint32
-	TimeStart  *time.Time
-	TimeEnd    *time.Time
-	PageArgs   CursorPageArgs
+	AgentID    *string        `json:"agentID,omitempty" desc:"Filter by agent ID (required unless projectID or both githubOrg and repo are provided)"`
+	ProjectID  *string        `json:"projectID,omitempty" desc:"Filter by project ID (required unless agentID or both githubOrg and repo are provided)"`
+	GitHubOrg  *string        `json:"githubOrg,omitempty" desc:"Filter by GitHub organization"`
+	Repo       *string        `json:"repo,omitempty" desc:"Filter by GitHub repository name"`
+	Job        *string        `json:"job,omitempty" desc:"Filter by GitHub Actions job name"`
+	RunID      *string        `json:"runID,omitempty" desc:"Filter by GitHub Actions workflow run ID"`
+	RunAttempt *int64         `json:"runAttempt,omitempty" desc:"Filter by GitHub Actions workflow run attempt"`
+	JobIndex   *uint32        `json:"jobIndex,omitempty" desc:"Filter by matrix job index"`
+	TimeStart  *time.Time     `json:"timeStart,omitempty" desc:"Filter profiles created at or after this RFC3339 timestamp"`
+	TimeEnd    *time.Time     `json:"timeEnd,omitempty" desc:"Filter profiles created at or before this RFC3339 timestamp"`
+	PageArgs   CursorPageArgs `json:"pageArgs,omitzero" desc:"Cursor pagination arguments"`
 }
 
 func (in *ListProfiles) Validate() error {
@@ -137,11 +137,6 @@ func (in *ListProfiles) Validate() error {
 
 	if in.ProjectID != nil && !id.Valid(*in.ProjectID) {
 		v.Add("project_id", "invalid project ID format")
-	}
-
-	if in.AgentID == nil && in.ProjectID == nil {
-		v.Add("agent_id", "agent_id or project_id is required")
-		v.Add("project_id", "agent_id or project_id is required")
 	}
 
 	if in.GitHubOrg != nil {
@@ -156,6 +151,11 @@ func (in *ListProfiles) Validate() error {
 		if *in.Repo == "" {
 			v.Add("repo", "repo cannot be empty if provided")
 		}
+	}
+
+	if in.AgentID == nil && in.ProjectID == nil && (in.GitHubOrg == nil || in.Repo == nil) {
+		v.Add("agent_id", "agent_id, project_id, or github_org and repo is required")
+		v.Add("project_id", "agent_id, project_id, or github_org and repo is required")
 	}
 
 	if in.Job != nil {

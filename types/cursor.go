@@ -9,24 +9,23 @@ import (
 const maxPageSize = 200
 
 type CursorPage[T any] struct {
-	Items    []T            `json:"items"`
-	PageInfo CursorPageInfo `json:"pageInfo"`
+	Items    []T            `json:"items" desc:"Items in the current page"`
+	PageInfo CursorPageInfo `json:"pageInfo" desc:"Pagination metadata"`
 }
 
 type CursorPageInfo struct {
-	TotalCount      uint    `json:"totalCount"`
-	EndCursor       *string `json:"endCursor"`
-	HasNextPage     bool    `json:"hasNextPage"`
-	StartCursor     *string `json:"startCursor"`
-	HasPreviousPage bool    `json:"hasPreviousPage"`
+	TotalCount      uint    `json:"totalCount" desc:"Total number of items matching the query"`
+	EndCursor       *string `json:"endCursor" desc:"Cursor of the last item in the page"`
+	HasNextPage     bool    `json:"hasNextPage" desc:"Whether there are more items after this page"`
+	StartCursor     *string `json:"startCursor" desc:"Cursor of the first item in the page"`
+	HasPreviousPage bool    `json:"hasPreviousPage" desc:"Whether there are more items before this page"`
 }
 
 type CursorPageArgs struct {
-	First *uint
-	After *string
-
-	Last   *uint
-	Before *string
+	First  *uint   `json:"first,omitempty" desc:"Number of items to return from the beginning (1-200)"`
+	After  *string `json:"after,omitempty" desc:"Cursor to fetch items after"`
+	Last   *uint   `json:"last,omitempty" desc:"Number of items to return from the end (1-200)"`
+	Before *string `json:"before,omitempty" desc:"Cursor to fetch items before"`
 }
 
 func (args CursorPageArgs) IsBackwards() bool {
