@@ -10,9 +10,11 @@ type GitHubCommentOutboxPayloadKind string
 type GitHubCommentOutboxSourceEntityKind string
 
 const (
-	GitHubCommentOutboxPayloadKindPending GitHubCommentOutboxPayloadKind = "pending_pr_commit_comment"
-	GitHubCommentOutboxPayloadKindProfile GitHubCommentOutboxPayloadKind = "pr_commit_comment"
-	GitHubCommentOutboxPayloadKindStopped GitHubCommentOutboxPayloadKind = "stopped_pr_commit_comment"
+	GitHubCommentOutboxPayloadKindPending           GitHubCommentOutboxPayloadKind = "pending_pr_commit_comment"
+	GitHubCommentOutboxPayloadKindProfile           GitHubCommentOutboxPayloadKind = "pr_commit_comment"
+	GitHubCommentOutboxPayloadKindStopped           GitHubCommentOutboxPayloadKind = "stopped_pr_commit_comment"
+	GitHubCommentOutboxPayloadKindFinalizeTimeout   GitHubCommentOutboxPayloadKind = "finalize_timeout_pr_commit_comment"
+	GitHubCommentOutboxPayloadKindBaseBranchProfile GitHubCommentOutboxPayloadKind = "base_branch_profile_comment"
 
 	GitHubCommentOutboxSourceEntityKindAgent   GitHubCommentOutboxSourceEntityKind = "agent"
 	GitHubCommentOutboxSourceEntityKindProfile GitHubCommentOutboxSourceEntityKind = "profile"
@@ -39,6 +41,7 @@ type CreateGitHubCommentOutboxItem struct {
 	SourceEntityKind GitHubCommentOutboxSourceEntityKind
 	SourceEntityID   string
 	Payload          any
+	NextAttemptAt    time.Time
 }
 
 // AgentPendingOutboxPayload is stored when an agent checks in, to trigger the
@@ -62,9 +65,28 @@ type ProfileOutboxPayload struct {
 	ProfileSHA string  `json:"profileSHA"`
 }
 
+// BaseBranchProfileOutboxPayload is stored to refresh PRs after a verified base profile arrives.
+type BaseBranchProfileOutboxPayload struct {
+	ProfileID  string  `json:"profileID"`
+	ProjectID  *string `json:"projectID,omitempty"`
+	Owner      string  `json:"owner"`
+	Repo       string  `json:"repo"`
+	Branch     string  `json:"branch"`
+	ProfileSHA string  `json:"profileSHA"`
+	RunID      string  `json:"runID"`
+}
+
 // AgentStoppedOutboxPayload is stored when an agent's run ends without a
 // profile, to refresh the pull-request comment so it no longer waits forever.
 type AgentStoppedOutboxPayload struct {
+	AgentID   string `json:"agentID"`
+	Owner     string `json:"owner"`
+	Repo      string `json:"repo"`
+	PRNumber  int    `json:"prNumber"`
+	CommitSHA string `json:"commitSHA"`
+}
+
+type AgentFinalizeTimeoutOutboxPayload struct {
 	AgentID   string `json:"agentID"`
 	Owner     string `json:"owner"`
 	Repo      string `json:"repo"`

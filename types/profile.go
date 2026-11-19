@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -17,23 +18,106 @@ import (
 var ErrPublicProfileNotFound = errs.NotFoundError("public profile not found")
 
 type Profile struct {
-	ID                    string          `json:"id" desc:"Unique profile identifier"`
-	AgentID               string          `json:"agentID" db:"agent_id" desc:"Identifier of the agent that generated the profile"`
-	GithubOrg             string          `json:"githubOrg" db:"github_org" desc:"GitHub organization or owner"`
-	Repo                  string          `json:"repo" desc:"GitHub repository name"`
-	GitHubRepositoryID    *int64          `json:"githubRepositoryID,omitempty" db:"github_repository_id" desc:"GitHub repository numeric ID"`
-	GitHubDetailsVerified bool            `json:"github_details_verified" db:"github_details_verified" desc:"Whether GitHub context was verified"`
-	Job                   string          `json:"job" desc:"GitHub Actions job name"`
-	RunID                 string          `json:"runID" db:"run_id" desc:"GitHub Actions workflow run ID"`
-	RunAttempt            int64           `json:"runAttempt" db:"run_attempt" desc:"GitHub Actions workflow run attempt number"`
-	JobIndex              *uint32         `json:"jobIndex,omitempty" db:"job_index" desc:"Matrix job index within the workflow run"`
-	Data                  ongoing.Profile `json:"data" desc:"Garnet runtime review profile payload"`
-	CreatedAt             time.Time       `json:"createdAt" db:"created_at" desc:"Creation timestamp"`
-	UpdatedAt             time.Time       `json:"updatedAt" db:"updated_at" desc:"Last update timestamp"`
+	ID                    string      `json:"id" desc:"Unique profile identifier"`
+	AgentID               string      `json:"agentID" db:"agent_id" desc:"Identifier of the agent that generated the profile"`
+	GithubOrg             string      `json:"githubOrg" db:"github_org" desc:"GitHub organization or owner"`
+	Repo                  string      `json:"repo" desc:"GitHub repository name"`
+	GitHubRepositoryID    *int64      `json:"githubRepositoryID,omitempty" db:"github_repository_id" desc:"GitHub repository numeric ID"`
+	GitHubDetailsVerified bool        `json:"github_details_verified" db:"github_details_verified" desc:"Whether GitHub context was verified"`
+	Job                   string      `json:"job" desc:"GitHub Actions job name"`
+	RunID                 string      `json:"runID" db:"run_id" desc:"GitHub Actions workflow run ID"`
+	RunAttempt            int64       `json:"runAttempt" db:"run_attempt" desc:"GitHub Actions workflow run attempt number"`
+	JobIndex              *uint32     `json:"jobIndex,omitempty" db:"job_index" desc:"Matrix job index within the workflow run"`
+	Data                  ProfileData `json:"data" desc:"Garnet runtime review profile payload"`
+	CreatedAt             time.Time   `json:"createdAt" db:"created_at" desc:"Creation timestamp"`
+	UpdatedAt             time.Time   `json:"updatedAt" db:"updated_at" desc:"Last update timestamp"`
+}
+
+// ProfileData is a stored profile document: the profile, plus each egress
+// peer's queried_name decoded from the same document. It encodes as the
+// profile alone.
+type ProfileData struct {
+	ongoing.Profile
+	EgressQueriedNames EgressQueriedNames `json:"-"`
+}
+
+// MarshalYAML keeps YAML output the profile alone, as before.
+func (data ProfileData) MarshalYAML() (any, error) {
+	return data.Profile, nil
+}
+
+func (data ProfileData) MarshalJSON() ([]byte, error) {
+	return json.Marshal(data.Profile)
+}
+
+func (data *ProfileData) UnmarshalJSON(raw []byte) error {
+	if err := json.Unmarshal(raw, &data.Profile); err != nil {
+		return err
+	}
+	return json.Unmarshal(raw, &data.EgressQueriedNames)
 }
 
 type CreateProfile struct {
 	ongoing.Profile
+	// Ashkaal does not carry queried_name yet, so the names are the only
+	// part of the request body kept beside the decoded profile.
+	EgressQueriedNames EgressQueriedNames `json:"-"`
+}
+
+// EgressQueriedNames holds each egress peer's queried_name, by peer index. It
+// decodes from a whole profile document, and is empty when no peer has a
+// name.
+type EgressQueriedNames []string
+
+// maxQueriedNameLength is the longest DNS name.
+const maxQueriedNameLength = 253
+
+func (names *EgressQueriedNames) UnmarshalJSON(data []byte) error {
+	*names = nil
+	var profile struct {
+		Network struct {
+			Egress struct {
+				Peers []struct {
+					QueriedName string `json:"queried_name"`
+				} `json:"peers"`
+			} `json:"egress"`
+		} `json:"network"`
+	}
+	// A malformed queried_name only costs the names, not the profile.
+	if err := json.Unmarshal(data, &profile); err != nil {
+		return nil
+	}
+	peers := profile.Network.Egress.Peers
+	queriedNames := make(EgressQueriedNames, len(peers))
+	found := false
+	for index, peer := range peers {
+		name := strings.TrimSpace(peer.QueriedName)
+		if name == "" || len(name) > maxQueriedNameLength {
+			continue
+		}
+		queriedNames[index] = name
+		found = true
+	}
+	if found {
+		*names = queriedNames
+	}
+	return nil
+}
+
+func (in *CreateProfile) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &in.Profile); err != nil {
+		return err
+	}
+
+	in.EgressQueriedNames = nil
+	var names EgressQueriedNames
+	if err := json.Unmarshal(data, &names); err != nil {
+		return err
+	}
+	if len(names) == len(in.Network.Egress.Peers) {
+		in.EgressQueriedNames = names
+	}
+	return nil
 }
 
 func (in CreateProfile) GitHubOrg() string {

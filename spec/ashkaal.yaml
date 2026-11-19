@@ -738,6 +738,9 @@ components:
           type: array
         protocol:
           type: string
+        queried_name:
+          description: DNS name the workload queried before connecting to remote_address.
+          type: string
         remote_address:
           type: string
         remote_geo_info:
@@ -1042,7 +1045,7 @@ components:
         head_sha:
           type: string
           pattern: '^[0-9a-fA-F]{40}$'
-          description: PR head commit SHA, supplied by the producer or resolved from the GitHub workflow run when absent.
+          description: PR head commit SHA with verified linkage to the executed commit; absent when linkage is unknown.
         triggering_actor:
           type: string
         updated_at:
