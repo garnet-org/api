@@ -64,6 +64,7 @@ type VerifiedGitHubRun struct {
 	// CommitSHA is the commit the run's work belongs to: either the head of
 	// the pull request or the merge commit GitHub built from it.
 	CommitSHA string
+	HeadSHA   string
 }
 
 // IngestGitHubRunArtifact is one job's artifact together with the verified run
