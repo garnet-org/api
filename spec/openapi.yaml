@@ -4,6 +4,11 @@ info:
   description: |
     API for managing events, issues, agents, and network policies associated with the Jibril agent.
 
+    Request bodies are limited to 64 MiB (67108864 bytes), including event and
+    profile uploads. Reading a body beyond this limit returns HTTP 413 with
+    an Error response. Event ingest parses and validates the request before
+    agent-token authorization.
+
     ## Authentication
 
     The API supports multiple authentication methods:
@@ -906,6 +911,12 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateOrUpdateEventV2"
       responses:
+        "413":
+          description: Request body exceeds 64 MiB
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "201":
           description: V2 Event created successfully
           content:
@@ -949,6 +960,12 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateProfile"
       responses:
+        "413":
+          description: Request body exceeds 64 MiB
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "201":
           description: Profile created or updated
           content:
@@ -1095,9 +1112,14 @@ paths:
         - BearerAuth: []
         - UserTokenAuth: []
         - ProjectTokenAuth: []
+        - AgentTokenAuth: []
+        - WorkflowTokenAuth: []
       summary: List profiles by agent
       description: |
         Returns cursor-paginated profiles for an agent.
+        A workflow token may read agents and profiles with verified GitHub repository,
+        repository owner, run ID, and run attempt matching its claims. It needs
+        the agents:create scope and grants no write or project-wide access.
       operationId: agentProfiles
       parameters:
         - name: github_org
@@ -1279,6 +1301,7 @@ paths:
       summary: List profile links
       description: |
         Returns an offset-paginated list of links for the specified profile.
+        Workflow tokens cannot access sharing-link metadata.
       operationId: listProfileLinks
       parameters:
         - $ref: "#/components/parameters/Page"
@@ -1311,6 +1334,7 @@ paths:
       summary: Get a profile link by ID
       description: |
         Returns a single profile link by its ID.
+        Workflow tokens cannot access sharing-link metadata.
       operationId: getProfileLink
       responses:
         "200":
