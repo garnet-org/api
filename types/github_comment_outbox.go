@@ -47,11 +47,12 @@ type CreateGitHubCommentOutboxItem struct {
 // AgentPendingOutboxPayload is stored when an agent checks in, to trigger the
 // initial "still recording" pull-request comment.
 type AgentPendingOutboxPayload struct {
-	AgentID   string `json:"agentID"`
-	Owner     string `json:"owner"`
-	Repo      string `json:"repo"`
-	PRNumber  int    `json:"prNumber"`
-	CommitSHA string `json:"commitSHA"`
+	AgentID                 string `json:"agentID"`
+	Owner                   string `json:"owner"`
+	Repo                    string `json:"repo"`
+	PRNumber                int    `json:"prNumber"`
+	CommitSHA               string `json:"commitSHA"`
+	GitHubRecordingVerified bool   `json:"githubRecordingVerified,omitempty"`
 }
 
 // ProfileOutboxPayload is stored when a profile arrives, to trigger the final
@@ -87,9 +88,10 @@ type AgentStoppedOutboxPayload struct {
 }
 
 type AgentFinalizeTimeoutOutboxPayload struct {
-	AgentID   string `json:"agentID"`
-	Owner     string `json:"owner"`
-	Repo      string `json:"repo"`
-	PRNumber  int    `json:"prNumber"`
-	CommitSHA string `json:"commitSHA"`
+	AgentID      string `json:"agentID"`
+	Owner        string `json:"owner"`
+	Repo         string `json:"repo"`
+	PRNumber     int    `json:"prNumber"`
+	CommitSHA    string `json:"commitSHA"`
+	CheckHeadSHA string `json:"checkHeadSHA,omitempty"`
 }
