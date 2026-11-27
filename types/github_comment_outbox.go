@@ -53,6 +53,7 @@ type AgentPendingOutboxPayload struct {
 	PRNumber                int    `json:"prNumber"`
 	CommitSHA               string `json:"commitSHA"`
 	GitHubRecordingVerified bool   `json:"githubRecordingVerified,omitempty"`
+	GitHubRecordingMergeSHA string `json:"githubRecordingMergeSHA,omitempty"`
 }
 
 // ProfileOutboxPayload is stored when a profile arrives, to trigger the final
